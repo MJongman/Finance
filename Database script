@@ -1,20 +1,20 @@
 USE [TestDWH]
 GO
-/****** Object:  User [NT AUTHORITY\SYSTEM]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  User [NT AUTHORITY\SYSTEM]    Script Date: 26-8-2025 21:15:35 ******/
 CREATE USER [NT AUTHORITY\SYSTEM] FOR LOGIN [NT AUTHORITY\SYSTEM] WITH DEFAULT_SCHEMA=[dbo]
 GO
-/****** Object:  DatabaseRole [SQLArcExtensionUserRole]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  DatabaseRole [SQLArcExtensionUserRole]    Script Date: 26-8-2025 21:15:35 ******/
 CREATE ROLE [SQLArcExtensionUserRole]
 GO
 ALTER ROLE [SQLArcExtensionUserRole] ADD MEMBER [NT AUTHORITY\SYSTEM]
 GO
-/****** Object:  Schema [exe]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  Schema [exe]    Script Date: 26-8-2025 21:15:35 ******/
 CREATE SCHEMA [exe]
 GO
-/****** Object:  Schema [Test_Suite]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  Schema [Test_Suite]    Script Date: 26-8-2025 21:15:35 ******/
 CREATE SCHEMA [Test_Suite]
 GO
-/****** Object:  Table [exe].[Table_List]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  Table [exe].[Table_List]    Script Date: 26-8-2025 21:15:35 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -30,6 +30,7 @@ CREATE TABLE [exe].[Table_List](
 	[Load_Type] [char](1) NOT NULL,
 	[Run_Group] [nvarchar](50) NULL,
 	[Is_Active] [bit] NOT NULL,
+	[Load_Pattern] [nvarchar](50) NULL,
 	[Retry_Count] [int] NOT NULL,
 	[Max_Retries] [int] NOT NULL,
 	[Timeout_Seconds] [int] NULL,
@@ -44,7 +45,6 @@ CREATE TABLE [exe].[Table_List](
 	[Created_Date] [datetime2](7) NOT NULL,
 	[Modified_Date] [datetime2](7) NOT NULL,
 	[Modified_By] [nvarchar](128) NOT NULL,
-	[Load_Pattern] [nvarchar](50) NULL,
  CONSTRAINT [PK_Table_List] PRIMARY KEY CLUSTERED 
 (
 	[ID] ASC
@@ -56,7 +56,7 @@ CREATE TABLE [exe].[Table_List](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [exe].[Lineage]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  Table [exe].[Lineage]    Script Date: 26-8-2025 21:15:35 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -87,7 +87,7 @@ CREATE TABLE [exe].[Lineage](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  View [exe].[v_Table_Status]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  View [exe].[v_Table_Status]    Script Date: 26-8-2025 21:15:35 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -135,7 +135,7 @@ LEFT JOIN (
 ) AS l ON tl.[System] = l.[System] AND tl.[Table_Name] = l.[Table_Name];
 
 GO
-/****** Object:  View [exe].[v_Load_Pattern_Reference]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  View [exe].[v_Load_Pattern_Reference]    Script Date: 26-8-2025 21:15:35 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -183,7 +183,7 @@ FROM (VALUES
      'Period-based fact tables')
 ) AS Patterns(Pattern, Description, Characteristics, Use_Case);
 GO
-/****** Object:  Table [dbo].[Calender]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  Table [dbo].[Calender]    Script Date: 26-8-2025 21:15:35 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -232,7 +232,7 @@ CREATE TABLE [dbo].[Calender](
 	[Lineage_Key] [bigint] NOT NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Cognos Accounts]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  Table [dbo].[Cognos Accounts]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -251,7 +251,7 @@ CREATE TABLE [dbo].[Cognos Accounts](
 	[Lineage_Key] [bigint] NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Entity]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  Table [dbo].[Entity]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -268,7 +268,7 @@ CREATE TABLE [dbo].[Entity](
 	[Lineage_Key] [bigint] NOT NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Entity Adjustments]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  Table [dbo].[Entity Adjustments]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -288,7 +288,7 @@ CREATE TABLE [dbo].[Entity Adjustments](
 	[ID] [bigint] IDENTITY(1,1) NOT NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[GL_Table]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  Table [dbo].[GL_Table]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -311,7 +311,7 @@ CREATE TABLE [dbo].[GL_Table](
 	[Entity Code] [nvarchar](250) NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[GL_Transactions]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  Table [dbo].[GL_Transactions]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -353,7 +353,7 @@ CREATE TABLE [dbo].[GL_Transactions](
 	[F_ID] [bigint] NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Ledgerbudget]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  Table [dbo].[Ledgerbudget]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -375,7 +375,7 @@ CREATE TABLE [dbo].[Ledgerbudget](
 	[Site_Table_Key] [bigint] NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Sites]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  Table [dbo].[Sites]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -390,7 +390,7 @@ CREATE TABLE [dbo].[Sites](
 	[Lineage_Key] [int] NOT NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Uploadfile]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  Table [dbo].[Uploadfile]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -426,7 +426,7 @@ CREATE TABLE [dbo].[Uploadfile](
 	[Entity_Table_Key] [bigint] NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [Test_Suite].[Test_Suite_Results]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  Table [Test_Suite].[Test_Suite_Results]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -478,257 +478,7 @@ ALTER TABLE [exe].[Table_List]  WITH CHECK ADD  CONSTRAINT [CK__Table_Lis__Load_
 GO
 ALTER TABLE [exe].[Table_List] CHECK CONSTRAINT [CK__Table_Lis__Load___628FA481]
 GO
-/****** Object:  StoredProcedure [dbo].[Load_Cognos_Accounts]    Script Date: 26-8-2025 12:27:30 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE   PROCEDURE [dbo].[Load_Cognos_Accounts]
-    @LineageKey INT,
-    @LoadType CHAR(1) = 'F',  -- F=Full, I=Incremental
-    @LastLoadDate DATETIME2(7) = NULL
-AS
-BEGIN
-    SET NOCOUNT ON;
-    SET XACT_ABORT ON;
-    
-    -- Declare variables
-    DECLARE @RowCount BIGINT = 0;
-    DECLARE @RowsInserted BIGINT = 0;
-    DECLARE @RowsUpdated BIGINT = 0;
-    DECLARE @RowsDeleted BIGINT = 0;
-    DECLARE @OutputMessage NVARCHAR(MAX);
-    DECLARE @ErrorNumber INT;
-    DECLARE @ErrorSeverity INT;
-    DECLARE @ErrorState INT;
-    DECLARE @StartTime DATETIME2(7) = SYSDATETIME();
-    DECLARE @EndTime DATETIME2(7);
-    
-    BEGIN TRY
-        BEGIN TRANSACTION;
-        
-        -- Validate LineageKey
-        IF NOT EXISTS (SELECT 1 FROM [exe].[Lineage] WHERE [Lineage_Key] = @LineageKey)
-        BEGIN
-            RAISERROR('Invalid LineageKey: %d', 16, 1, @LineageKey);
-            RETURN -1;
-        END
-        
-        -- For incremental loads, get last load date if not provided
-        IF @LoadType = 'I' AND @LastLoadDate IS NULL
-        BEGIN
-            SELECT @LastLoadDate = [Last_Loaded_Date]
-            FROM [exe].[Lineage]
-            WHERE [Lineage_Key] = @LineageKey;
-        END
-        
-        -- FULL LOAD LOGIC (your existing logic)
-        IF @LoadType = 'F'
-        BEGIN
-            -- Truncate target table
-            TRUNCATE TABLE [dbo].[Cognos Accounts];
-            
-            -- Insert all data from MDS
-            INSERT INTO [dbo].[Cognos Accounts] (
-                [Description Cognos accts],
-                [GL Account],
-                [Entity System Code],
-                [Entity Code],
-                [Balance/Cost Group],
-                [Cognos_Account],
-                [System],
-                [Counterparty Code],
-                [Counterparty Name],
-                [Lineage_Key]
-            )
-            SELECT 
-                [Description Cognos accts],
-                [GL Account],
-                [Entity System Code],
-                [Entity Code],
-                [Balance/Cost Group],
-                [Cognos Account],
-                [System],	  
-                [Counterparty Code],
-                [Counterparty Name],
-                @LineageKey
-            FROM [SCH1SQL1V16].[STAGING_MDS].[dbo].[Cognos Accounts];
-            
-            SET @RowsInserted = @@ROWCOUNT;
-            SET @RowCount = @RowsInserted;
-        END
-        
-        -- INCREMENTAL LOAD LOGIC
-        ELSE IF @LoadType = 'I'
-        BEGIN
-            -- Create temp table for merge output tracking
-            DECLARE @MergeOutput TABLE (
-                [Action] NVARCHAR(10),
-                [RowCount] INT
-            );
-            
-            -- Use MERGE for incremental updates
-            -- Assuming the key is: System, GL Account, Entity System Code, Balance/Cost Group
-            MERGE [dbo].[Cognos Accounts] AS tgt
-            USING (
-                SELECT 
-                    [Description Cognos accts],
-                    [GL Account],
-                    [Entity System Code],
-                    [Entity Code],
-                    [Balance/Cost Group],
-                    [Cognos Account],
-                    [System],	  
-                    [Counterparty Code],
-                    [Counterparty Name],
-                    @LineageKey AS [Lineage_Key]
-                FROM [SCH1SQL1V16].[STAGING_MDS].[dbo].[Cognos Accounts]
-                -- Add WHERE clause here if MDS has a modified date column
-                -- WHERE ModifiedDate > @LastLoadDate
-            ) AS src 
-            ON tgt.[System] = src.[System]
-                AND tgt.[GL Account] = src.[GL Account]
-                AND tgt.[Entity System Code] = src.[Entity System Code]
-                AND tgt.[Balance/Cost Group] = src.[Balance/Cost Group]
-            
-            -- Update existing records if any column has changed
-            WHEN MATCHED AND (
-                ISNULL(tgt.[Description Cognos accts], '') != ISNULL(src.[Description Cognos accts], '') OR
-                ISNULL(tgt.[Entity Code], '') != ISNULL(src.[Entity Code], '') OR
-                ISNULL(tgt.[Cognos_Account], '') != ISNULL(src.[Cognos Account], '') OR
-                ISNULL(tgt.[Counterparty Code], '') != ISNULL(src.[Counterparty Code], '') OR
-                ISNULL(tgt.[Counterparty Name], '') != ISNULL(src.[Counterparty Name], '')
-            )
-            THEN UPDATE SET
-                tgt.[Description Cognos accts] = src.[Description Cognos accts],
-                tgt.[Entity Code] = src.[Entity Code],
-                tgt.[Cognos_Account] = src.[Cognos Account],
-                tgt.[Counterparty Code] = src.[Counterparty Code],
-                tgt.[Counterparty Name] = src.[Counterparty Name],
-                tgt.[Lineage_Key] = src.[Lineage_Key]
-            
-            -- Insert new records
-            WHEN NOT MATCHED BY TARGET THEN
-                INSERT (
-                    [Description Cognos accts],
-                    [GL Account],
-                    [Entity System Code],
-                    [Entity Code],
-                    [Balance/Cost Group],
-                    [Cognos_Account],
-                    [System],
-                    [Counterparty Code],
-                    [Counterparty Name],
-                    [Lineage_Key]
-                )
-                VALUES (
-                    src.[Description Cognos accts],
-                    src.[GL Account],
-                    src.[Entity System Code],
-                    src.[Entity Code],
-                    src.[Balance/Cost Group],
-                    src.[Cognos Account],
-                    src.[System],
-                    src.[Counterparty Code],
-                    src.[Counterparty Name],
-                    src.[Lineage_Key]
-                )
-            
-            -- Delete records not in source
-            WHEN NOT MATCHED BY SOURCE THEN DELETE
-            
-            OUTPUT 
-                $action AS [Action],
-                1 AS [RowCount]
-            INTO @MergeOutput;
-            
-            -- Count the operations
-            SELECT 
-                @RowsInserted = SUM(CASE WHEN [Action] = 'INSERT' THEN [RowCount] ELSE 0 END),
-                @RowsUpdated = SUM(CASE WHEN [Action] = 'UPDATE' THEN [RowCount] ELSE 0 END),
-                @RowsDeleted = SUM(CASE WHEN [Action] = 'DELETE' THEN [RowCount] ELSE 0 END)
-            FROM @MergeOutput;
-            
-            SET @RowCount = ISNULL(@RowsInserted, 0) + ISNULL(@RowsUpdated, 0) + ISNULL(@RowsDeleted, 0);
-        END
-        
-        SET @EndTime = SYSDATETIME();
-        
-        -- Build success message
-        SET @OutputMessage = CONCAT(
-            'Load completed successfully. ',
-            'Rows: ', @RowCount, ' ',
-            '(Inserted: ', @RowsInserted, ', ',
-            'Updated: ', @RowsUpdated, ', ',
-            'Deleted: ', @RowsDeleted, '). ',
-            'Duration: ', DATEDIFF(SECOND, @StartTime, @EndTime), ' seconds.'
-        );
-        
-        COMMIT TRANSACTION;
-        
-        -- Update the lineage table with row counts
-        UPDATE [exe].[Lineage]
-        SET 
-            [Row_Count] = @RowCount,
-            [Rows_Inserted] = @RowsInserted,
-            [Rows_Updated] = @RowsUpdated,
-            [Rows_Deleted] = @RowsDeleted
-        WHERE [Lineage_Key] = @LineageKey;
-        
-        -- Return results for the calling process
-        SELECT 
-            @RowCount AS [RowCount],
-            @RowsInserted AS [RowsInserted],
-            @RowsUpdated AS [RowsUpdated],
-            @RowsDeleted AS [RowsDeleted],
-            @OutputMessage AS [OutputMessage],
-            'Success' AS [Status];
-        
-        RETURN 0;
-    END TRY
-    BEGIN CATCH
-        IF @@TRANCOUNT > 0
-            ROLLBACK TRANSACTION;
-        
-        -- Capture error details
-        SET @ErrorNumber = ERROR_NUMBER();
-        SET @ErrorSeverity = ERROR_SEVERITY();
-        SET @ErrorState = ERROR_STATE();
-        SET @OutputMessage = CONCAT(
-            'Error ', @ErrorNumber, ': ',
-            ERROR_MESSAGE(),
-            ' (Line: ', ERROR_LINE(), ')'
-        );
-        
-        -- Update the lineage table with error info
-        UPDATE [exe].[Lineage]
-        SET 
-            [Row_Count] = 0,
-            [Rows_Inserted] = 0,
-            [Rows_Updated] = 0,
-            [Rows_Deleted] = 0
-        WHERE [Lineage_Key] = @LineageKey;
-        
-        -- Return error information
-        SELECT 
-            0 AS [RowCount],
-            0 AS [RowsInserted],
-            0 AS [RowsUpdated],
-            0 AS [RowsDeleted],
-            @OutputMessage AS [OutputMessage],
-            'Error' AS [Status],
-            @ErrorNumber AS [ErrorNumber],
-            @ErrorSeverity AS [ErrorSeverity],
-            @ErrorState AS [ErrorState];
-        
-        -- Re-throw the error
-        THROW;
-        
-        RETURN -1;
-    END CATCH
-END;
-GO
-/****** Object:  StoredProcedure [dbo].[Load_Entity_AXBE_DATAAREA]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [dbo].[Load_Entity_AXBE_DATAAREA]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -905,7 +655,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_Entity_AXNL_DATAAREA]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [dbo].[Load_Entity_AXNL_DATAAREA]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1081,7 +831,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_Entity_FINACC_TFIRMA]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [dbo].[Load_Entity_FINACC_TFIRMA]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1257,7 +1007,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Table_AXBE_LEDGERTABLE]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Table_AXBE_LEDGERTABLE]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1396,7 +1146,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Table_AXNL_LEDGERTABLE]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Table_AXNL_LEDGERTABLE]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1535,7 +1285,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Table_FINACC_TALGREK]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Table_FINACC_TALGREK]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1692,7 +1442,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_AXBE_LEDGERTRANS]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_AXBE_LEDGERTRANS]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1972,7 +1722,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_AXNL_LEDGERTRANS]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_AXNL_LEDGERTRANS]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2251,7 +2001,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TAANDAGD]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TAANDAGD]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2558,7 +2308,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TALGDAGB]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TALGDAGB]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2817,7 +2567,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TFINDAGB]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TFINDAGB]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3074,7 +2824,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TVERDAGD]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TVERDAGD]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3331,7 +3081,257 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_MDS_Entity Adjustments]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [dbo].[Load_MDS_Cognos_Accounts]    Script Date: 26-8-2025 21:15:36 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE   PROCEDURE [dbo].[Load_MDS_Cognos_Accounts]
+    @LineageKey INT,
+    @LoadType CHAR(1) = 'F',  -- F=Full, I=Incremental
+    @LastLoadDate DATETIME2(7) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+    
+    -- Declare variables
+    DECLARE @RowCount BIGINT = 0;
+    DECLARE @RowsInserted BIGINT = 0;
+    DECLARE @RowsUpdated BIGINT = 0;
+    DECLARE @RowsDeleted BIGINT = 0;
+    DECLARE @OutputMessage NVARCHAR(MAX);
+    DECLARE @ErrorNumber INT;
+    DECLARE @ErrorSeverity INT;
+    DECLARE @ErrorState INT;
+    DECLARE @StartTime DATETIME2(7) = SYSDATETIME();
+    DECLARE @EndTime DATETIME2(7);
+    
+    BEGIN TRY
+        BEGIN TRANSACTION;
+        
+        -- Validate LineageKey
+        IF NOT EXISTS (SELECT 1 FROM [exe].[Lineage] WHERE [Lineage_Key] = @LineageKey)
+        BEGIN
+            RAISERROR('Invalid LineageKey: %d', 16, 1, @LineageKey);
+            RETURN -1;
+        END
+        
+        -- For incremental loads, get last load date if not provided
+        IF @LoadType = 'I' AND @LastLoadDate IS NULL
+        BEGIN
+            SELECT @LastLoadDate = [Last_Loaded_Date]
+            FROM [exe].[Lineage]
+            WHERE [Lineage_Key] = @LineageKey;
+        END
+        
+        -- FULL LOAD LOGIC (your existing logic)
+        IF @LoadType = 'F'
+        BEGIN
+            -- Truncate target table
+            TRUNCATE TABLE [dbo].[Cognos Accounts];
+            
+            -- Insert all data from MDS
+            INSERT INTO [dbo].[Cognos Accounts] (
+                [Description Cognos accts],
+                [GL Account],
+                [Entity System Code],
+                [Entity Code],
+                [Balance/Cost Group],
+                [Cognos_Account],
+                [System],
+                [Counterparty Code],
+                [Counterparty Name],
+                [Lineage_Key]
+            )
+            SELECT 
+                [Description Cognos accts],
+                [GL Account],
+                [Entity System Code],
+                [Entity Code],
+                [Balance/Cost Group],
+                [Cognos Account],
+                [System],	  
+                [Counterparty Code],
+                [Counterparty Name],
+                @LineageKey
+            FROM [SCH1SQL1V16].[STAGING_MDS].[dbo].[Cognos Accounts];
+            
+            SET @RowsInserted = @@ROWCOUNT;
+            SET @RowCount = @RowsInserted;
+        END
+        
+        -- INCREMENTAL LOAD LOGIC
+        ELSE IF @LoadType = 'I'
+        BEGIN
+            -- Create temp table for merge output tracking
+            DECLARE @MergeOutput TABLE (
+                [Action] NVARCHAR(10),
+                [RowCount] INT
+            );
+            
+            -- Use MERGE for incremental updates
+            -- Assuming the key is: System, GL Account, Entity System Code, Balance/Cost Group
+            MERGE [dbo].[Cognos Accounts] AS tgt
+            USING (
+                SELECT 
+                    [Description Cognos accts],
+                    [GL Account],
+                    [Entity System Code],
+                    [Entity Code],
+                    [Balance/Cost Group],
+                    [Cognos Account],
+                    [System],	  
+                    [Counterparty Code],
+                    [Counterparty Name],
+                    @LineageKey AS [Lineage_Key]
+                FROM [SCH1SQL1V16].[STAGING_MDS].[dbo].[Cognos Accounts]
+                -- Add WHERE clause here if MDS has a modified date column
+                -- WHERE ModifiedDate > @LastLoadDate
+            ) AS src 
+            ON tgt.[System] = src.[System]
+                AND tgt.[GL Account] = src.[GL Account]
+                AND tgt.[Entity System Code] = src.[Entity System Code]
+                AND tgt.[Balance/Cost Group] = src.[Balance/Cost Group]
+            
+            -- Update existing records if any column has changed
+            WHEN MATCHED AND (
+                ISNULL(tgt.[Description Cognos accts], '') != ISNULL(src.[Description Cognos accts], '') OR
+                ISNULL(tgt.[Entity Code], '') != ISNULL(src.[Entity Code], '') OR
+                ISNULL(tgt.[Cognos_Account], '') != ISNULL(src.[Cognos Account], '') OR
+                ISNULL(tgt.[Counterparty Code], '') != ISNULL(src.[Counterparty Code], '') OR
+                ISNULL(tgt.[Counterparty Name], '') != ISNULL(src.[Counterparty Name], '')
+            )
+            THEN UPDATE SET
+                tgt.[Description Cognos accts] = src.[Description Cognos accts],
+                tgt.[Entity Code] = src.[Entity Code],
+                tgt.[Cognos_Account] = src.[Cognos Account],
+                tgt.[Counterparty Code] = src.[Counterparty Code],
+                tgt.[Counterparty Name] = src.[Counterparty Name],
+                tgt.[Lineage_Key] = src.[Lineage_Key]
+            
+            -- Insert new records
+            WHEN NOT MATCHED BY TARGET THEN
+                INSERT (
+                    [Description Cognos accts],
+                    [GL Account],
+                    [Entity System Code],
+                    [Entity Code],
+                    [Balance/Cost Group],
+                    [Cognos_Account],
+                    [System],
+                    [Counterparty Code],
+                    [Counterparty Name],
+                    [Lineage_Key]
+                )
+                VALUES (
+                    src.[Description Cognos accts],
+                    src.[GL Account],
+                    src.[Entity System Code],
+                    src.[Entity Code],
+                    src.[Balance/Cost Group],
+                    src.[Cognos Account],
+                    src.[System],
+                    src.[Counterparty Code],
+                    src.[Counterparty Name],
+                    src.[Lineage_Key]
+                )
+            
+            -- Delete records not in source
+            WHEN NOT MATCHED BY SOURCE THEN DELETE
+            
+            OUTPUT 
+                $action AS [Action],
+                1 AS [RowCount]
+            INTO @MergeOutput;
+            
+            -- Count the operations
+            SELECT 
+                @RowsInserted = SUM(CASE WHEN [Action] = 'INSERT' THEN [RowCount] ELSE 0 END),
+                @RowsUpdated = SUM(CASE WHEN [Action] = 'UPDATE' THEN [RowCount] ELSE 0 END),
+                @RowsDeleted = SUM(CASE WHEN [Action] = 'DELETE' THEN [RowCount] ELSE 0 END)
+            FROM @MergeOutput;
+            
+            SET @RowCount = ISNULL(@RowsInserted, 0) + ISNULL(@RowsUpdated, 0) + ISNULL(@RowsDeleted, 0);
+        END
+        
+        SET @EndTime = SYSDATETIME();
+        
+        -- Build success message
+        SET @OutputMessage = CONCAT(
+            'Load completed successfully. ',
+            'Rows: ', @RowCount, ' ',
+            '(Inserted: ', @RowsInserted, ', ',
+            'Updated: ', @RowsUpdated, ', ',
+            'Deleted: ', @RowsDeleted, '). ',
+            'Duration: ', DATEDIFF(SECOND, @StartTime, @EndTime), ' seconds.'
+        );
+        
+        COMMIT TRANSACTION;
+        
+        -- Update the lineage table with row counts
+        UPDATE [exe].[Lineage]
+        SET 
+            [Row_Count] = @RowCount,
+            [Rows_Inserted] = @RowsInserted,
+            [Rows_Updated] = @RowsUpdated,
+            [Rows_Deleted] = @RowsDeleted
+        WHERE [Lineage_Key] = @LineageKey;
+        
+        -- Return results for the calling process
+        SELECT 
+            @RowCount AS [RowCount],
+            @RowsInserted AS [RowsInserted],
+            @RowsUpdated AS [RowsUpdated],
+            @RowsDeleted AS [RowsDeleted],
+            @OutputMessage AS [OutputMessage],
+            'Success' AS [Status];
+        
+        RETURN 0;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        
+        -- Capture error details
+        SET @ErrorNumber = ERROR_NUMBER();
+        SET @ErrorSeverity = ERROR_SEVERITY();
+        SET @ErrorState = ERROR_STATE();
+        SET @OutputMessage = CONCAT(
+            'Error ', @ErrorNumber, ': ',
+            ERROR_MESSAGE(),
+            ' (Line: ', ERROR_LINE(), ')'
+        );
+        
+        -- Update the lineage table with error info
+        UPDATE [exe].[Lineage]
+        SET 
+            [Row_Count] = 0,
+            [Rows_Inserted] = 0,
+            [Rows_Updated] = 0,
+            [Rows_Deleted] = 0
+        WHERE [Lineage_Key] = @LineageKey;
+        
+        -- Return error information
+        SELECT 
+            0 AS [RowCount],
+            0 AS [RowsInserted],
+            0 AS [RowsUpdated],
+            0 AS [RowsDeleted],
+            @OutputMessage AS [OutputMessage],
+            'Error' AS [Status],
+            @ErrorNumber AS [ErrorNumber],
+            @ErrorSeverity AS [ErrorSeverity],
+            @ErrorState AS [ErrorState];
+        
+        -- Re-throw the error
+        THROW;
+        
+        RETURN -1;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_MDS_Entity Adjustments]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3517,7 +3517,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_MDS_UploadFile]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [dbo].[Load_MDS_UploadFile]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3554,14 +3554,14 @@ BEGIN
         BEGIN TRANSACTION;
         
         -- Truncate destination table (full refresh approach)
-        TRUNCATE TABLE [mds].[UploadFile];
+        TRUNCATE TABLE [dbo].[UploadFile];
         
         -- Get the maximum period from staging
         SELECT @MaxPeriod = MAX(Period) 
         FROM [SCH1SQL1V16].[STAGING_MDS].[dbo].[UploadFile];
         
         -- Insert data from staging
-        INSERT INTO [mds].[UploadFile] (
+        INSERT INTO [dbo].[UploadFile] (
             [LKQ BNF (SB0100)],
             [Key],
             [Entity System Code],
@@ -3695,7 +3695,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_Sites]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [dbo].[Load_Sites]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3818,7 +3818,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_Table_Template]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [dbo].[Load_Table_Template]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4029,7 +4029,7 @@ BEGIN
 END;
 
 GO
-/****** Object:  StoredProcedure [exe].[Get_Next_Table_To_Process]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [exe].[Get_Next_Table_To_Process]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4078,13 +4078,12 @@ BEGIN
 END;
 
 GO
-/****** Object:  StoredProcedure [exe].[Master_ETL_Orchestration]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [exe].[Master_ETL_Orchestration]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-
-CREATE   PROCEDURE [exe].[Master_ETL_Orchestration]
+CREATE PROCEDURE [exe].[Master_ETL_Orchestration]
     @System NVARCHAR(25),
     @RunGroup NVARCHAR(250) = NULL,
     @LoadType CHAR(1) = NULL,
@@ -4098,7 +4097,7 @@ BEGIN
     DECLARE @StartTime DATETIME2(7) = SYSDATETIME();
     DECLARE @TableName NVARCHAR(100);
     DECLARE @StoredProcedureName NVARCHAR(200);
-    DECLARE @TableSystem NVARCHAR(25);  -- ADD THIS: Store the actual system from the table
+    DECLARE @TableSystem NVARCHAR(25);
     DECLARE @LineageKey INT;
     DECLARE @LastLoadDate DATETIME2(7);
     DECLARE @LoadTypeActual CHAR(1);
@@ -4111,6 +4110,7 @@ BEGIN
     DECLARE @ProcessedCount INT = 0;
     DECLARE @ErrorCount INT = 0;
     DECLARE @SuccessCount INT = 0;
+    DECLARE @SkippedCount INT = 0;  -- Add counter for skipped tables
     DECLARE @SQL NVARCHAR(MAX);
     DECLARE @CurrentExecutionOrder INT = 0;
     DECLARE @MaxExecutionOrder INT = 0;
@@ -4120,16 +4120,17 @@ BEGIN
     
     -- Start main logic
     IF @DebugMode = 1
-        PRINT CONCAT('Starting orchestration for System: ', ISNULL(@System, 'ALL'), ' at ', CONVERT(NVARCHAR(30), @StartTime, 120));
+        PRINT CONCAT('Starting orchestration for System: ', ISNULL(@System, 'ALL'), ', RunGroup: ', ISNULL(@RunGroup, 'ALL'), ' at ', CONVERT(NVARCHAR(30), @StartTime, 120));
     
-    -- Create temp table (ADD System column)
+    -- Create temp table
     CREATE TABLE #CurrentBatch (
         ID INT,
-        System NVARCHAR(25),  -- ADD THIS
+        System NVARCHAR(25),
         Table_Name NVARCHAR(100),
         Stored_Procedure_Name NVARCHAR(200),
         Load_Type CHAR(1),
         Execution_Order INT,
+        Dependencies NVARCHAR(500),
         Processing_Status CHAR(1) DEFAULT 'P',
         LineageKey INT NULL,
         Start_Time DATETIME2(7) NULL,
@@ -4137,17 +4138,18 @@ BEGIN
         Error_Message NVARCHAR(MAX) NULL
     );
     
-    -- Populate temp table (include System)
-    INSERT INTO #CurrentBatch (ID, System, Table_Name, Stored_Procedure_Name, Load_Type, Execution_Order)
+    -- Populate temp table
+    INSERT INTO #CurrentBatch (ID, System, Table_Name, Stored_Procedure_Name, Load_Type, Execution_Order, Dependencies)
     SELECT 
         ID,
-        System,  -- ADD THIS
+        System,
         Table_Name,
         Stored_Procedure_Name,
         Load_Type,
-        Execution_Order
+        Execution_Order,
+        Dependencies
     FROM [exe].[Table_List]
-    WHERE (@System IS NULL OR System = @System)  -- CHANGE THIS
+    WHERE (@System IS NULL OR System = @System)
         AND Is_Active = 1
         AND (@RunGroup IS NULL OR Run_Group = @RunGroup)
         AND (@LoadType IS NULL OR Load_Type = @LoadType)
@@ -4155,47 +4157,79 @@ BEGIN
         AND Retry_Count < Max_Retries
     ORDER BY Execution_Order, Table_Name;
     
+    -- Debug: Show what tables we're processing
+    IF @DebugMode = 1
+    BEGIN
+        PRINT 'Tables to process:';
+        SELECT System, Table_Name, Stored_Procedure_Name, Load_Type, Execution_Order, Dependencies
+        FROM #CurrentBatch
+        ORDER BY Execution_Order, Table_Name;
+    END
+    
     -- Get max execution order
     SELECT @MaxExecutionOrder = ISNULL(MAX(Execution_Order), 0) FROM #CurrentBatch;
     
-    -- Process tables
+    IF @DebugMode = 1
+        PRINT CONCAT('Processing execution orders from 0 to ', @MaxExecutionOrder);
+    
+    -- Process tables by execution order
     WHILE @CurrentExecutionOrder <= @MaxExecutionOrder
     BEGIN
-        -- Get first table (include System)
+        -- Get first table at this execution order
         SELECT TOP 1
             @TableName = Table_Name,
-            @TableSystem = System,  -- ADD THIS
+            @TableSystem = System,
             @StoredProcedureName = Stored_Procedure_Name,
-            @LoadTypeActual = Load_Type
+            @LoadTypeActual = Load_Type,
+            @Dependencies = Dependencies
         FROM #CurrentBatch
         WHERE Execution_Order = @CurrentExecutionOrder
             AND Processing_Status = 'P'
         ORDER BY Table_Name;
         
-        -- Process while we have tables
+        -- Process while we have tables at this execution order
         WHILE @TableName IS NOT NULL
         BEGIN
             SET @LineageKey = NULL;
             SET @LastLoadDate = NULL;
             SET @DependenciesMet = 1;
             
-            -- Check dependencies (use actual system)
-            SELECT @Dependencies = Dependencies
-            FROM [exe].[Table_List]
-            WHERE Table_Name = @TableName AND System = @TableSystem;  -- CHANGE THIS
+            IF @DebugMode = 1
+                PRINT CONCAT('Checking table: ', @TableName, ' (System: ', @TableSystem, ', Dependencies: ', ISNULL(@Dependencies, 'None'), ')');
             
+            -- Check dependencies (FIXED: Check against Table_List, not #CurrentBatch)
             IF @Dependencies IS NOT NULL AND @Dependencies != ''
             BEGIN
-                IF EXISTS (
-                    SELECT 1
-                    FROM STRING_SPLIT(@Dependencies, ',') AS dep
-                    LEFT JOIN #CurrentBatch cb ON LTRIM(RTRIM(dep.value)) = cb.Table_Name
-                    WHERE cb.Processing_Status != 'C' OR cb.Processing_Status IS NULL
-                )
+                DECLARE @UnmetDeps NVARCHAR(500) = '';
+                
+                -- Check each dependency against the actual Table_List table
+                SELECT @UnmetDeps = STRING_AGG(dep.value, ', ')
+                FROM STRING_SPLIT(@Dependencies, ',') dep
+                LEFT JOIN [exe].[Table_List] tl 
+                    ON tl.Table_Name = LTRIM(RTRIM(dep.value))
+                    AND tl.System = @TableSystem  -- Dependencies should be in same system
+                WHERE tl.Load_Status IS NULL 
+                   OR tl.Load_Status != 'S';
+                
+                IF @UnmetDeps IS NOT NULL AND @UnmetDeps != ''
                 BEGIN
                     SET @DependenciesMet = 0;
                     IF @DebugMode = 1
-                        PRINT CONCAT('Skipping ', @TableName, ' - dependencies not met');
+                        PRINT CONCAT('  Skipping ', @TableName, ' - unmet dependencies: ', @UnmetDeps);
+                    
+                    -- IMPORTANT: Mark as skipped to avoid infinite loop
+                    UPDATE #CurrentBatch 
+                    SET Processing_Status = 'D',  -- D for Dependencies not met
+                        End_Time = SYSDATETIME(),
+                        Error_Message = CONCAT('Dependencies not met: ', @UnmetDeps)
+                    WHERE Table_Name = @TableName AND System = @TableSystem;
+                    
+                    SET @SkippedCount = @SkippedCount + 1;
+                END
+                ELSE
+                BEGIN
+                    IF @DebugMode = 1
+                        PRINT CONCAT('  All dependencies met for ', @TableName);
                 END
             END
             
@@ -4204,47 +4238,48 @@ BEGIN
                 -- Update status to running
                 UPDATE #CurrentBatch 
                 SET Processing_Status = 'R', Start_Time = SYSDATETIME()
-                WHERE Table_Name = @TableName AND System = @TableSystem;  -- CHANGE THIS
+                WHERE Table_Name = @TableName AND System = @TableSystem;
                 
-                -- Start lineage (use actual table system, not parameter)
-                EXEC @ReturnCode = [exe].[Update_Lineage_Start]
-                    @LoadType = @LoadTypeActual,
-                    @TableName = @TableName,
-                    @System = @TableSystem,  -- CHANGE THIS: Use actual system from table
-                    @RunGroup = @RunGroup,
-                    @ForceStart = 0,
-                    @LineageKey = @LineageKey OUTPUT,
-                    @LastLoadDate = @LastLoadDate OUTPUT;
-                
-                IF @ReturnCode = 0  -- Success
-                BEGIN
-                    -- Update lineage key
-                    UPDATE #CurrentBatch 
-                    SET LineageKey = @LineageKey 
-                    WHERE Table_Name = @TableName AND System = @TableSystem;  -- CHANGE THIS
-                    
+                BEGIN TRY
+                    -- Start lineage with actual table system
                     IF @DebugMode = 1
-                        PRINT CONCAT('Processing: ', @TableName, ' (System: ', @TableSystem, ', LineageKey: ', @LineageKey, ')');
+                        PRINT CONCAT('  Starting lineage for: ', @TableName, ' (System: ', @TableSystem, ')');
                     
-                    -- Build SQL
-                    SET @SQL = CONCAT('EXEC ', @StoredProcedureName, ' @LineageKey = ', @LineageKey);
+                    EXEC @ReturnCode = [exe].[Update_Lineage_Start]
+                        @LoadType = @LoadTypeActual,
+                        @TableName = @TableName,
+                        @System = @TableSystem,
+                        @RunGroup = @RunGroup,
+                        @ForceStart = 0,
+                        @LineageKey = @LineageKey OUTPUT,
+                        @LastLoadDate = @LastLoadDate OUTPUT;
                     
-                    IF @LoadTypeActual IS NOT NULL
-                        SET @SQL = CONCAT(@SQL, ', @LoadType = ''', @LoadTypeActual, '''');
-                    
-                    IF @LastLoadDate IS NOT NULL
-                        SET @SQL = CONCAT(@SQL, ', @LastLoadDate = ''', CONVERT(NVARCHAR(30), @LastLoadDate, 126), '''');
-                    
-                    IF @DebugMode = 1
-                        PRINT CONCAT('Executing: ', @SQL);
-                    
-                    -- Execute
-                    EXEC(@SQL);
-                    
-                    -- Check for error using @@ERROR
-                    IF @@ERROR = 0
+                    IF @ReturnCode = 0 AND @LineageKey IS NOT NULL
                     BEGIN
-                        -- Get row counts
+                        -- Update lineage key
+                        UPDATE #CurrentBatch 
+                        SET LineageKey = @LineageKey 
+                        WHERE Table_Name = @TableName AND System = @TableSystem;
+                        
+                        IF @DebugMode = 1
+                            PRINT CONCAT('  Processing: ', @TableName, ' (System: ', @TableSystem, ', LineageKey: ', @LineageKey, ')');
+                        
+                        -- Build and execute the stored procedure
+                        SET @SQL = CONCAT('EXEC ', @StoredProcedureName, ' @LineageKey = ', @LineageKey);
+                        
+                        IF @LoadTypeActual IS NOT NULL
+                            SET @SQL = CONCAT(@SQL, ', @LoadType = ''', @LoadTypeActual, '''');
+                        
+                        IF @LastLoadDate IS NOT NULL
+                            SET @SQL = CONCAT(@SQL, ', @LastLoadDate = ''', CONVERT(NVARCHAR(30), @LastLoadDate, 126), '''');
+                        
+                        IF @DebugMode = 1
+                            PRINT CONCAT('  Executing: ', @SQL);
+                        
+                        -- Execute the stored procedure
+                        EXEC sp_executesql @SQL;
+                        
+                        -- Get row counts from lineage
                         SELECT 
                             @RowCount = ISNULL(Row_Count, 0),
                             @RowsInserted = ISNULL(Rows_Inserted, 0),
@@ -4253,7 +4288,7 @@ BEGIN
                         FROM [exe].[Lineage]
                         WHERE Lineage_Key = @LineageKey;
                         
-                        -- Update lineage success (use actual table system)
+                        -- Update lineage success
                         SET @OutputMessage = CONCAT('Successfully loaded ', @TableName, ' - Rows: ', @RowCount);
                         
                         EXEC [exe].[Update_Lineage_Success]
@@ -4264,48 +4299,80 @@ BEGIN
                             @RowsUpdated = @RowsUpdated,
                             @RowsDeleted = @RowsDeleted,
                             @OutputMessage = @OutputMessage,
-                            @System = @TableSystem;  -- CHANGE THIS
+                            @System = @TableSystem;
                         
                         -- Mark success
                         UPDATE #CurrentBatch 
                         SET Processing_Status = 'C', End_Time = SYSDATETIME()
-                        WHERE Table_Name = @TableName AND System = @TableSystem;  -- CHANGE THIS
+                        WHERE Table_Name = @TableName AND System = @TableSystem;
                         
                         SET @SuccessCount = @SuccessCount + 1;
+                        
+                        IF @DebugMode = 1
+                            PRINT CONCAT('  SUCCESS: ', @TableName, ' - Rows: ', @RowCount);
                     END
                     ELSE
                     BEGIN
-                        -- Mark error
+                        -- Lineage start failed
                         UPDATE #CurrentBatch 
-                        SET Processing_Status = 'E', End_Time = SYSDATETIME()
-                        WHERE Table_Name = @TableName AND System = @TableSystem;  -- CHANGE THIS
+                        SET Processing_Status = 'E', 
+                            End_Time = SYSDATETIME(),
+                            Error_Message = 'Failed to start lineage'
+                        WHERE Table_Name = @TableName AND System = @TableSystem;
                         
                         SET @ErrorCount = @ErrorCount + 1;
+                        
+                        IF @DebugMode = 1
+                            PRINT CONCAT('  FAILED to start lineage for ', @TableName, ' (System: ', @TableSystem, ')');
                     END
-                END
-                ELSE
-                BEGIN
-                    -- Lineage start failed
-                    UPDATE #CurrentBatch 
-                    SET Processing_Status = 'E', End_Time = SYSDATETIME()
-                    WHERE Table_Name = @TableName AND System = @TableSystem;  -- CHANGE THIS
+                END TRY
+                BEGIN CATCH
+                    -- Handle errors - capture error info into variables
+                    DECLARE @CatchErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+                    DECLARE @CatchErrorNumber INT = ERROR_NUMBER();
+                    DECLARE @CatchErrorSeverity INT = ERROR_SEVERITY();
+                    DECLARE @CatchErrorState INT = ERROR_STATE();
                     
-                    SET @ErrorCount = @ErrorCount + 1;
+                    SET @ErrorMessage = @CatchErrorMessage;
                     
                     IF @DebugMode = 1
-                        PRINT CONCAT('Failed to start lineage for ', @TableName, ' (System: ', @TableSystem, ')');
-                END
+                        PRINT CONCAT('  ERROR processing ', @TableName, ': ', @ErrorMessage);
+                    
+                    -- Update lineage error if we have a lineage key
+                    IF @LineageKey IS NOT NULL
+                    BEGIN
+                        EXEC [exe].[Update_Lineage_Error]
+                            @LineageKey = @LineageKey,
+                            @OutputMessage = @ErrorMessage,
+                            @ErrorNumber = @CatchErrorNumber,
+                            @ErrorSeverity = @CatchErrorSeverity,
+                            @ErrorState = @CatchErrorState,
+                            @TableName = @TableName,
+                            @System = @TableSystem;
+                    END
+                    
+                    -- Mark error
+                    UPDATE #CurrentBatch 
+                    SET Processing_Status = 'E', 
+                        End_Time = SYSDATETIME(),
+                        Error_Message = @ErrorMessage
+                    WHERE Table_Name = @TableName AND System = @TableSystem;
+                    
+                    SET @ErrorCount = @ErrorCount + 1;
+                END CATCH
             END
             
-            -- Get next table
+            -- Get next table at this execution order
             SET @TableName = NULL;
-            SET @TableSystem = NULL;  -- ADD THIS
+            SET @TableSystem = NULL;
+            SET @Dependencies = NULL;
             
             SELECT TOP 1
                 @TableName = Table_Name,
-                @TableSystem = System,  -- ADD THIS
+                @TableSystem = System,
                 @StoredProcedureName = Stored_Procedure_Name,
-                @LoadTypeActual = Load_Type
+                @LoadTypeActual = Load_Type,
+                @Dependencies = Dependencies
             FROM #CurrentBatch
             WHERE Execution_Order = @CurrentExecutionOrder
                 AND Processing_Status = 'P'
@@ -4318,19 +4385,51 @@ BEGIN
     -- Summary
     SET @OutputMessage = CONCAT(
         'Completed for ', ISNULL(@System, 'ALL SYSTEMS'),
+        ', RunGroup: ', ISNULL(@RunGroup, 'ALL'),
         '. Success: ', @SuccessCount,
         ', Errors: ', @ErrorCount,
+        ', Skipped: ', @SkippedCount,
         ', Duration: ', DATEDIFF(SECOND, @StartTime, SYSDATETIME()), ' seconds'
     );
     
-    IF @DebugMode = 1
+    PRINT '';
+    PRINT @OutputMessage;
+    
+    IF @DebugMode = 1 OR @ErrorCount > 0 OR @SkippedCount > 0
     BEGIN
-        PRINT @OutputMessage;
-        SELECT * FROM #CurrentBatch ORDER BY Execution_Order, Table_Name;
+        -- Show detailed results
+        SELECT 
+            System,
+            Table_Name,
+            Stored_Procedure_Name,
+            Processing_Status,
+            CASE Processing_Status
+                WHEN 'C' THEN 'Completed'
+                WHEN 'E' THEN 'Error'
+                WHEN 'D' THEN 'Skipped - Dependencies'
+                WHEN 'R' THEN 'Running'
+                WHEN 'P' THEN 'Pending'
+                ELSE Processing_Status
+            END AS Status_Description,
+            LineageKey,
+            Start_Time,
+            End_Time,
+            DATEDIFF(SECOND, Start_Time, End_Time) AS Duration_Seconds,
+            Error_Message
+        FROM #CurrentBatch 
+        ORDER BY Execution_Order, Table_Name;
     END
     
     -- Cleanup
     DROP TABLE #CurrentBatch;
+    
+    -- Return summary
+    SELECT 
+        @SuccessCount AS Tables_Succeeded,
+        @ErrorCount AS Tables_Failed,
+        @SkippedCount AS Tables_Skipped,
+        DATEDIFF(SECOND, @StartTime, SYSDATETIME()) AS Total_Duration_Seconds,
+        @OutputMessage AS Summary;
     
     IF @ErrorCount > 0
         RETURN 1;
@@ -4338,7 +4437,7 @@ BEGIN
         RETURN 0;
 END;
 GO
-/****** Object:  StoredProcedure [exe].[Monitor_ETL_Health]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [exe].[Monitor_ETL_Health]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4449,7 +4548,7 @@ BEGIN
 END;
 
 GO
-/****** Object:  StoredProcedure [exe].[Select_Table_For_Execute]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [exe].[Select_Table_For_Execute]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4511,7 +4610,7 @@ BEGIN
 END;
 
 GO
-/****** Object:  StoredProcedure [exe].[Update_Lineage_Error]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [exe].[Update_Lineage_Error]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4592,7 +4691,7 @@ BEGIN
 END;
 
 GO
-/****** Object:  StoredProcedure [exe].[Update_Lineage_Start]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [exe].[Update_Lineage_Start]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4915,7 +5014,7 @@ BEGIN
 END;
 
 GO
-/****** Object:  StoredProcedure [exe].[Update_Lineage_Success]    Script Date: 26-8-2025 12:27:30 ******/
+/****** Object:  StoredProcedure [exe].[Update_Lineage_Success]    Script Date: 26-8-2025 21:15:36 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
