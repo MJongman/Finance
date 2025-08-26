@@ -1,0 +1,4936 @@
+USE [STAGING_FINACC]
+GO
+/****** Object:  User [KS\sa_sch1sql1v16]    Script Date: 26-8-2025 21:37:15 ******/
+CREATE USER [KS\sa_sch1sql1v16] FOR LOGIN [KS\sa_sch1sql1v16] WITH DEFAULT_SCHEMA=[dbo]
+GO
+/****** Object:  User [KS\SCS-ICT-BI-Developpers]    Script Date: 26-8-2025 21:37:15 ******/
+CREATE USER [KS\SCS-ICT-BI-Developpers] FOR LOGIN [KS\SCS-ICT-BI-Developpers]
+GO
+/****** Object:  User [NT AUTHORITY\SYSTEM]    Script Date: 26-8-2025 21:37:15 ******/
+CREATE USER [NT AUTHORITY\SYSTEM] FOR LOGIN [NT AUTHORITY\SYSTEM] WITH DEFAULT_SCHEMA=[dbo]
+GO
+/****** Object:  User [sa_bi_etl_ssis]    Script Date: 26-8-2025 21:37:15 ******/
+CREATE USER [sa_bi_etl_ssis] FOR LOGIN [sa_bi_etl_ssis] WITH DEFAULT_SCHEMA=[dbo]
+GO
+/****** Object:  User [sa_linkedservers]    Script Date: 26-8-2025 21:37:15 ******/
+CREATE USER [sa_linkedservers] FOR LOGIN [sa_linkedservers] WITH DEFAULT_SCHEMA=[dbo]
+GO
+/****** Object:  User [sa_schema_compare]    Script Date: 26-8-2025 21:37:15 ******/
+CREATE USER [sa_schema_compare] FOR LOGIN [sa_schema_compare] WITH DEFAULT_SCHEMA=[dbo]
+GO
+/****** Object:  DatabaseRole [SQLArcExtensionUserRole]    Script Date: 26-8-2025 21:37:15 ******/
+CREATE ROLE [SQLArcExtensionUserRole]
+GO
+ALTER ROLE [db_datareader] ADD MEMBER [KS\sa_sch1sql1v16]
+GO
+ALTER ROLE [db_owner] ADD MEMBER [KS\SCS-ICT-BI-Developpers]
+GO
+ALTER ROLE [SQLArcExtensionUserRole] ADD MEMBER [NT AUTHORITY\SYSTEM]
+GO
+ALTER ROLE [db_owner] ADD MEMBER [sa_bi_etl_ssis]
+GO
+ALTER ROLE [db_datareader] ADD MEMBER [sa_linkedservers]
+GO
+ALTER ROLE [db_datawriter] ADD MEMBER [sa_linkedservers]
+GO
+ALTER ROLE [db_owner] ADD MEMBER [sa_schema_compare]
+GO
+/****** Object:  Schema [exe]    Script Date: 26-8-2025 21:37:15 ******/
+CREATE SCHEMA [exe]
+GO
+/****** Object:  Schema [Incr]    Script Date: 26-8-2025 21:37:15 ******/
+CREATE SCHEMA [Incr]
+GO
+/****** Object:  Table [dbo].[BM_USERS]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[BM_USERS](
+	[USID] [nvarchar](35) NULL,
+	[Lineage_Key] [int] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[DBA_AUDIT_TRAIL]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[DBA_AUDIT_TRAIL](
+	[ID] [bigint] IDENTITY(1,1) NOT NULL,
+	[USERNAME] [nvarchar](30) NULL,
+	[USERHOST] [nvarchar](128) NULL,
+	[TIMESTAMP] [datetime2](7) NULL,
+	[SESSIONID] [bigint] NULL,
+	[ENTRYID] [bigint] NULL,
+	[Lineage_Key] [bigint] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[DBA_ROLE_PRIVS]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[DBA_ROLE_PRIVS](
+	[GRANTEE] [nvarchar](30) NULL,
+	[GRANTED_ROLE] [nvarchar](30) NULL,
+	[ADMIN_OPTION] [nvarchar](3) NULL,
+	[Lineage_Key] [int] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[DBA_SYS_PRIVS]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[DBA_SYS_PRIVS](
+	[GRANTEE] [nvarchar](30) NULL,
+	[PRIVILEGE] [nvarchar](40) NULL,
+	[ADMIN_OPTION] [nvarchar](3) NULL,
+	[Lineage_Key] [int] NOT NULL,
+	[Row_Counter] [int] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[DBA_TAB_PRIVS]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[DBA_TAB_PRIVS](
+	[GRANTEE] [nvarchar](30) NULL,
+	[TABLE_NAME] [nvarchar](30) NULL,
+	[GRANTOR] [nvarchar](30) NULL,
+	[PRIVILEGE] [nvarchar](40) NULL,
+	[OWNER] [nvarchar](30) NULL,
+	[GRANTABLE] [nvarchar](3) NULL,
+	[HIERARCHY] [nvarchar](3) NULL,
+	[Lineage_Key] [int] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[DBA_USERS]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[DBA_USERS](
+	[USER_ID] [bigint] NULL,
+	[USERNAME] [nvarchar](30) NULL,
+	[ACCOUNT_STATUS] [nvarchar](32) NULL,
+	[PROFILE] [nvarchar](30) NULL,
+	[Lineage_Key] [int] NOT NULL,
+	[Row_Counter] [int] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ISAV_APPLICATIE_OMSCHRIJVINGEN]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ISAV_APPLICATIE_OMSCHRIJVINGEN](
+	[ID] [decimal](7, 0) NULL,
+	[APE_ID] [decimal](7, 0) NULL,
+	[TAL_ID] [decimal](7, 0) NULL,
+	[OMSCHRIJVING] [nvarchar](60) NULL,
+	[TAL_CODE] [nvarchar](2) NULL,
+	[EXPORT_JN] [decimal](1, 0) NULL,
+	[CREATIEDATUM] [datetime2](7) NULL,
+	[CREATOR] [nvarchar](30) NULL,
+	[WIJZIGINGSDATUM] [datetime2](7) NULL,
+	[WIJZIGER] [nvarchar](30) NULL,
+	[Lineage_Key] [int] NOT NULL,
+	[Row_Counter] [int] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ISAV_APPLICATIES]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ISAV_APPLICATIES](
+	[ID] [decimal](7, 0) NULL,
+	[CODE] [nvarchar](20) NULL,
+	[LOG_ANNUL_JN] [decimal](1, 0) NULL,
+	[OMSCHRIJVING] [nvarchar](4000) NULL,
+	[PREFIX] [nvarchar](5) NULL,
+	[CONID] [decimal](12, 0) NULL,
+	[DBOWNER] [nvarchar](30) NULL,
+	[STATUS] [decimal](1, 0) NULL,
+	[REG_VERSIE] [nvarchar](15) NULL,
+	[REG_DATUM] [datetime2](7) NULL,
+	[EXPORT_JN] [decimal](1, 0) NULL,
+	[CREATIEDATUM] [datetime2](7) NULL,
+	[CREATOR] [nvarchar](30) NULL,
+	[WIJZIGINGSDATUM] [datetime2](7) NULL,
+	[WIJZIGER] [nvarchar](30) NULL,
+	[Lineage_Key] [int] NOT NULL,
+	[Row_Counter] [int] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ISAV_FUNCTIES]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ISAV_FUNCTIES](
+	[ID] [decimal](7, 0) NULL,
+	[APE_ID] [decimal](7, 0) NULL,
+	[CODE] [nvarchar](6) NULL,
+	[OMSCHRIJVING] [nvarchar](35) NULL,
+	[EXPORT_JN] [decimal](1, 0) NULL,
+	[CREATIEDATUM] [datetime2](7) NULL,
+	[CREATOR] [nvarchar](30) NULL,
+	[WIJZIGINGSDATUM] [datetime2](7) NULL,
+	[WIJZIGER] [nvarchar](30) NULL,
+	[Lineage_Key] [int] NOT NULL,
+	[Row_Counter] [int] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ISAV_GEBRUIKER_ACCOUNTS]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ISAV_GEBRUIKER_ACCOUNTS](
+	[ID] [decimal](7, 0) NULL,
+	[GBR_ID] [decimal](7, 0) NULL,
+	[GBR_CODE] [nvarchar](4000) NULL,
+	[GBR_NAAM] [nvarchar](4000) NULL,
+	[ACCOUNT_TYPE] [decimal](1, 0) NULL,
+	[ACCOUNT_CODE] [nvarchar](200) NULL,
+	[ACCOUNT_DOMAIN] [nvarchar](50) NULL,
+	[CREATIEDATUM] [datetime2](7) NULL,
+	[CREATOR] [nvarchar](30) NULL,
+	[WIJZIGINGSDATUM] [datetime2](7) NULL,
+	[WIJZIGER] [nvarchar](30) NULL,
+	[Lineage_Key] [int] NOT NULL,
+	[Row_Counter] [int] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ISAV_GEBRUIKER_FUNCTIES]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ISAV_GEBRUIKER_FUNCTIES](
+	[ID] [decimal](7, 0) NULL,
+	[GBR_ID] [decimal](7, 0) NULL,
+	[GBR_CODE] [nvarchar](4000) NULL,
+	[GBR_NAAM] [nvarchar](4000) NULL,
+	[FNC_ID] [decimal](7, 0) NULL,
+	[FNC_CODE] [nvarchar](4000) NULL,
+	[FNC_OMSCHR] [nvarchar](4000) NULL,
+	[APE_CODE] [nvarchar](4000) NULL,
+	[EXPORT_JN] [decimal](1, 0) NULL,
+	[CREATIEDATUM] [datetime2](7) NULL,
+	[CREATOR] [nvarchar](240) NULL,
+	[WIJZIGINGSDATUM] [datetime2](7) NULL,
+	[WIJZIGER] [nvarchar](30) NULL,
+	[Lineage_Key] [int] NOT NULL,
+	[Row_Counter] [int] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ISAV_GEBRUIKER_GROEPEN]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ISAV_GEBRUIKER_GROEPEN](
+	[ID] [decimal](7, 0) NULL,
+	[GBR_ID] [decimal](7, 0) NULL,
+	[GBR_CODE] [nvarchar](4000) NULL,
+	[GBR_NAAM] [nvarchar](4000) NULL,
+	[GRP_ID] [decimal](7, 0) NULL,
+	[GRP_CODE] [nvarchar](4000) NULL,
+	[GRP_NAAM] [nvarchar](4000) NULL,
+	[APE_CODE] [nvarchar](4000) NULL,
+	[APE_ID] [bigint] NULL,
+	[EXPORT_JN] [decimal](1, 0) NULL,
+	[CREATIEDATUM] [datetime2](7) NULL,
+	[CREATOR] [nvarchar](240) NULL,
+	[WIJZIGINGSDATUM] [datetime2](7) NULL,
+	[WIJZIGER] [nvarchar](30) NULL,
+	[Lineage_Key] [int] NOT NULL,
+	[Row_Counter] [int] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ISAV_GEBRUIKER_PERMISSIES]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ISAV_GEBRUIKER_PERMISSIES](
+	[ID] [decimal](7, 0) NULL,
+	[GBR_ID] [decimal](7, 0) NULL,
+	[GBR_CODE] [nvarchar](30) NULL,
+	[APE_ID] [decimal](7, 0) NULL,
+	[APE_CODE] [nvarchar](20) NULL,
+	[PGM_ID] [decimal](7, 0) NULL,
+	[PGM_NAAM] [nvarchar](10) NULL,
+	[KODUPD] [decimal](1, 0) NULL,
+	[EXPORT_JN] [decimal](1, 0) NULL,
+	[CREATIEDATUM] [datetime2](7) NULL,
+	[WIJZIGINGSDATUM] [datetime2](7) NULL,
+	[CREATOR] [nvarchar](30) NULL,
+	[WIJZIGER] [nvarchar](30) NULL,
+	[Lineage_Key] [int] NOT NULL,
+	[Row_Counter] [int] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ISAV_GEBRUIKERS]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ISAV_GEBRUIKERS](
+	[ID] [decimal](7, 0) NULL,
+	[CODE] [nvarchar](30) NULL,
+	[NAAM] [nvarchar](35) NULL,
+	[TAL_ID] [decimal](7, 0) NULL,
+	[LOG_ANNUL_JN] [decimal](1, 0) NULL,
+	[PINCODE] [decimal](5, 0) NULL,
+	[E_MAIL] [nvarchar](250) NULL,
+	[HOME_PAGE] [nvarchar](240) NULL,
+	[TEL_PRIVE] [nvarchar](30) NULL,
+	[TEL_WERK] [nvarchar](30) NULL,
+	[TEL_MOBIEL] [nvarchar](30) NULL,
+	[TAL_CODE] [nvarchar](4000) NULL,
+	[EXPORT_JN] [decimal](1, 0) NULL,
+	[CREATIEDATUM] [datetime2](7) NULL,
+	[CREATOR] [nvarchar](30) NULL,
+	[WIJZIGINGSDATUM] [datetime2](7) NULL,
+	[WIJZIGER] [nvarchar](30) NULL,
+	[DOMAIN] [nvarchar](50) NULL,
+	[WINDOWS_USER] [nvarchar](256) NULL,
+	[NAMED_USER_JN] [decimal](38, 20) NULL,
+	[API_USER_JN] [decimal](1, 0) NULL,
+	[API_PASSWORD] [nvarchar](256) NULL,
+	[PROFILE] [nvarchar](30) NULL,
+	[Lineage_Key] [int] NOT NULL,
+	[Row_Counter] [int] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ISAV_GROEP_PERMISSIES]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ISAV_GROEP_PERMISSIES](
+	[ID] [decimal](7, 0) NULL,
+	[APE_ID] [bigint] NULL,
+	[GRP_ID] [decimal](7, 0) NULL,
+	[GRP_CODE] [nvarchar](4000) NULL,
+	[PGM_ID] [decimal](7, 0) NULL,
+	[PGM_NAAM] [nvarchar](4000) NULL,
+	[KODUPD] [decimal](1, 0) NULL,
+	[EXPORT_JN] [decimal](1, 0) NULL,
+	[CREATIEDATUM] [datetime2](7) NULL,
+	[CREATOR] [nvarchar](30) NULL,
+	[WIJZIGINGSDATUM] [datetime2](7) NULL,
+	[WIJZIGER] [nvarchar](30) NULL,
+	[Lineage_Key] [int] NOT NULL,
+	[Row_Counter] [int] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ISAV_GROEPEN]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ISAV_GROEPEN](
+	[ID] [decimal](7, 0) NULL,
+	[CODE] [nvarchar](8) NULL,
+	[LOG_ANNUL_JN] [decimal](1, 0) NULL,
+	[NAAM] [nvarchar](30) NULL,
+	[APE_ID] [decimal](7, 0) NULL,
+	[EXPORT_JN] [decimal](1, 0) NULL,
+	[DEFAULT_JN] [decimal](1, 0) NULL,
+	[CREATIEDATUM] [datetime2](7) NULL,
+	[WIJZIGINGSDATUM] [datetime2](7) NULL,
+	[CREATOR] [nvarchar](30) NULL,
+	[WIJZIGER] [nvarchar](30) NULL,
+	[Lineage_Key] [int] NOT NULL,
+	[Row_Counter] [int] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ISAV_PROGRAMMA_OMSCHRIJVINGEN]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ISAV_PROGRAMMA_OMSCHRIJVINGEN](
+	[ID] [decimal](7, 0) NULL,
+	[APE_ID] [bigint] NULL,
+	[PGM_ID] [decimal](7, 0) NULL,
+	[PGM_NAAM] [nvarchar](4000) NULL,
+	[TAL_ID] [decimal](7, 0) NULL,
+	[TITEL] [nvarchar](100) NULL,
+	[OMSCHRIJVING] [nvarchar](40) NULL,
+	[TAL_CODE] [nvarchar](4000) NULL,
+	[EXPORT_JN] [decimal](1, 0) NULL,
+	[CREATIEDATUM] [datetime2](7) NULL,
+	[CREATOR] [nvarchar](30) NULL,
+	[WIJZIGINGSDATUM] [datetime2](7) NULL,
+	[WIJZIGER] [nvarchar](30) NULL,
+	[HOMEPAGE_TITEL] [nvarchar](100) NULL,
+	[Lineage_Key] [int] NOT NULL,
+	[Row_Counter] [int] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ISAV_PROGRAMMAS]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ISAV_PROGRAMMAS](
+	[ID] [decimal](7, 0) NULL,
+	[NAAM] [nvarchar](10) NULL,
+	[PROGRAMMA_TYPE] [nvarchar](1) NULL,
+	[LOG_ANNUL_JN] [decimal](1, 0) NULL,
+	[CHANGE_TOOLB_CMT_JN] [decimal](1, 0) NULL,
+	[PASWOORD] [nvarchar](8) NULL,
+	[APE_ID] [decimal](7, 0) NULL,
+	[CONID] [decimal](12, 0) NULL,
+	[OMSCHRIJVING] [nvarchar](4000) NULL,
+	[EXPORT_JN] [decimal](1, 0) NULL,
+	[INFO_HOOGTE] [decimal](4, 0) NULL,
+	[INFO_BREEDTE] [decimal](4, 0) NULL,
+	[INFO_COORD_X] [decimal](4, 0) NULL,
+	[INFO_COORD_Y] [decimal](4, 0) NULL,
+	[INFO_VELD_BREEDTE] [decimal](3, 0) NULL,
+	[INFO_LABEL_BREEDTE] [decimal](3, 0) NULL,
+	[INFO_OMS_BREEDTE] [decimal](3, 0) NULL,
+	[SESSIE_INITIALISATIE] [nvarchar](2000) NULL,
+	[CREATIEDATUM] [datetime2](7) NULL,
+	[CREATOR] [nvarchar](30) NULL,
+	[WIJZIGINGSDATUM] [datetime2](7) NULL,
+	[WIJZIGER] [nvarchar](30) NULL,
+	[BATCH_EXIT_FORM_KLANT_JN] [decimal](1, 0) NULL,
+	[BATCH_EXIT_FORM_SYSTEM_JN] [decimal](1, 0) NULL,
+	[MCS_ID] [decimal](7, 0) NULL,
+	[MODULE] [nvarchar](4000) NULL,
+	[MODULE_COLOR] [nvarchar](4000) NULL,
+	[FAVORITE_ALLOWED_JN] [decimal](1, 0) NULL,
+	[DYN_COL_CANVAS_WIDTH] [decimal](5, 0) NULL,
+	[Lineage_Key] [int] NOT NULL,
+	[Row_Counter] [int] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TAANDAGD]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TAANDAGD](
+	[ALGREK] [numeric](18, 0) NULL,
+	[BEDRAG] [numeric](13, 2) NULL,
+	[BOEKJR] [int] NULL,
+	[CREA] [datetime] NULL,
+	[WYZ] [datetime] NULL,
+	[DAGBOEK] [nvarchar](10) NULL,
+	[FIRKODE] [nvarchar](10) NULL,
+	[OPMERK] [nvarchar](250) NULL,
+	[PERIODE] [decimal](2, 0) NULL,
+	[PK] [numeric](22, 10) NOT NULL,
+	[TYPE_DAGB] [numeric](1, 0) NULL,
+	[US] [nvarchar](50) NULL,
+	[USCREA] [nvarchar](50) NULL,
+	[VERRNR] [numeric](8, 0) NULL,
+	[DATUM] [date] NULL,
+	[VOLGNR] [numeric](18, 0) NULL,
+	[FAKTNR] [numeric](38, 20) NULL,
+	[REL_LEVERNR] [numeric](38, 20) NULL,
+	[Lineage_Key] [bigint] NOT NULL,
+	[ID] [int] IDENTITY(1,1) NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TALGDAGB]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TALGDAGB](
+	[ALGREK] [numeric](18, 0) NULL,
+	[BEDR] [numeric](13, 2) NULL,
+	[BOEKJR] [int] NULL,
+	[CREA] [datetime] NULL,
+	[WYZ] [datetime] NULL,
+	[DAGBOEK] [nvarchar](10) NULL,
+	[FIRKODE] [nvarchar](10) NULL,
+	[OPM] [nvarchar](250) NULL,
+	[PERIODE] [decimal](2, 0) NULL,
+	[PK] [numeric](22, 10) NOT NULL,
+	[TYPE] [numeric](1, 0) NULL,
+	[US] [nvarchar](50) NULL,
+	[USCREA] [nvarchar](50) NULL,
+	[VERRNR] [numeric](8, 0) NULL,
+	[VERRDAT] [date] NULL,
+	[VOLGNR] [numeric](18, 0) NULL,
+	[LEVFAKTNR] [numeric](38, 20) NULL,
+	[LEVERNR] [numeric](38, 20) NULL,
+	[Lineage_Key] [bigint] NOT NULL,
+	[ID] [int] IDENTITY(1,1) NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TALGREK]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TALGREK](
+	[ALGREK] [decimal](9, 0) NULL,
+	[BALGRPAKT] [nvarchar](3) NULL,
+	[BALGRPPAS] [nvarchar](3) NULL,
+	[BOEKJR] [decimal](4, 0) NULL,
+	[FIRKODE] [nvarchar](5) NULL,
+	[KOSTPL_2] [nvarchar](9) NULL,
+	[KOSTSRT] [nvarchar](9) NULL,
+	[MUNT] [nvarchar](3) NULL,
+	[OMSCHR] [nvarchar](30) NULL,
+	[RUBRIEK] [decimal](3, 0) NULL,
+	[TYPE] [decimal](1, 0) NULL,
+	[Lineage_Key] [int] NOT NULL,
+	[Row_Counter] [int] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TAN_BUDGET]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TAN_BUDGET](
+	[ALGREK] [decimal](9, 0) NULL,
+	[ANALPER] [decimal](2, 0) NULL,
+	[BOEKJR] [decimal](4, 0) NULL,
+	[BUDGET] [decimal](13, 2) NULL,
+	[CREA] [datetime2](7) NULL,
+	[WYZ] [datetime2](7) NULL,
+	[FIRKODE] [nvarchar](5) NULL,
+	[KOSTSRT] [nvarchar](10) NULL,
+	[SEQ] [nvarchar](10) NULL,
+	[US] [nvarchar](30) NULL,
+	[USCREA] [nvarchar](30) NULL,
+	[Lineage_Key] [int] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TAN_COMBH]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TAN_COMBH](
+	[ID] [bigint] IDENTITY(1,1) NOT NULL,
+	[FIRKODE] [nvarchar](5) NULL,
+	[SEQ] [int] NULL,
+	[KOSTPL1] [nvarchar](9) NULL,
+	[KOSTPL2] [nvarchar](9) NULL,
+	[CREA] [datetime] NULL,
+	[WYZ] [datetime] NULL,
+	[US] [nvarchar](30) NULL,
+	[USCREA] [nvarchar](30) NULL,
+	[Lineage_Key] [bigint] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TAN_DET]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TAN_DET](
+	[ID] [bigint] IDENTITY(1,1) NOT NULL,
+	[PK] [bigint] NULL,
+	[FIRKODE] [nvarchar](5) NULL,
+	[BEDRAG] [numeric](13, 2) NULL,
+	[BOEKJR] [int] NULL,
+	[DATUM] [datetime] NULL,
+	[PERIODE] [int] NULL,
+	[TYPE_DAGB] [int] NULL,
+	[DAGBOEK] [nvarchar](5) NULL,
+	[KLANTNR] [int] NULL,
+	[LEVERNR] [int] NULL,
+	[OPMERK] [nvarchar](250) NULL,
+	[VERRNR] [int] NULL,
+	[VERRVOLGNR] [int] NULL,
+	[VNALGREK] [int] NULL,
+	[NRSEQ] [int] NULL,
+	[CREA] [datetime] NULL,
+	[USCREA] [nvarchar](30) NULL,
+	[Valid_From] [datetime] NULL,
+	[Valid_To] [datetime] NULL,
+	[Lineage_Key] [bigint] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TAN_KOSTPL]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TAN_KOSTPL](
+	[FIRKODE] [nvarchar](5) NULL,
+	[OMSCHR] [nvarchar](30) NULL,
+	[SYSTEEM] [int] NULL,
+	[DIMENSIE] [int] NULL,
+	[KOSTPL] [nvarchar](9) NULL,
+	[CREA] [datetime] NULL,
+	[WYZ] [datetime] NULL,
+	[US] [nvarchar](30) NULL,
+	[USCREA] [nvarchar](30) NULL,
+	[Lineage_Key] [int] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TAN_KOSTSRT]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TAN_KOSTSRT](
+	[FIRKODE] [nvarchar](5) NULL,
+	[OMSCHR] [nvarchar](30) NULL,
+	[KOSTSRT] [nvarchar](9) NULL,
+	[CREA] [datetime2](7) NULL,
+	[WYZ] [datetime2](7) NULL,
+	[US] [nvarchar](30) NULL,
+	[USCREA] [nvarchar](30) NULL,
+	[Lineage_Key] [int] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TBOEKJR]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TBOEKJR](
+	[BOEKJR] [int] NULL,
+	[FIRKODE] [nvarchar](5) NULL,
+	[CREA] [datetime] NULL,
+	[WYZ] [datetime] NULL,
+	[US] [nvarchar](30) NULL,
+	[USCREA] [nvarchar](30) NULL,
+	[Lineage_Key] [int] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TFINDAGB]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TFINDAGB](
+	[ALGREK] [numeric](18, 0) NULL,
+	[BEDRAG_MNTBKH] [numeric](13, 2) NULL,
+	[BOEKJR] [int] NULL,
+	[CREA] [datetime] NULL,
+	[WYZ] [datetime] NULL,
+	[DAGBOEK] [nvarchar](10) NULL,
+	[FIRKODE] [nvarchar](10) NULL,
+	[OPMERK] [nvarchar](250) NULL,
+	[PERIODE] [decimal](2, 0) NULL,
+	[PK] [numeric](22, 10) NOT NULL,
+	[TYPE_DAGB] [numeric](1, 0) NULL,
+	[US] [nvarchar](50) NULL,
+	[USCREA] [nvarchar](50) NULL,
+	[VERRNR] [numeric](8, 0) NULL,
+	[DATUM] [date] NULL,
+	[VOLGNR] [numeric](18, 0) NULL,
+	[LEVERNR] [numeric](38, 20) NULL,
+	[Lineage_Key] [bigint] NOT NULL,
+	[ID] [int] IDENTITY(1,1) NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TFIRMA]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TFIRMA](
+	[BTW_LAND] [nvarchar](2) NULL,
+	[BTWNR] [nvarchar](15) NULL,
+	[CREA] [datetime] NULL,
+	[WYZ] [datetime] NULL,
+	[FIRKODE] [nvarchar](5) NULL,
+	[FIRNR] [decimal](3, 0) NULL,
+	[LOK] [nvarchar](35) NULL,
+	[NAAM] [nvarchar](30) NULL,
+	[POSTKOD] [nvarchar](10) NULL,
+	[STRAAT] [nvarchar](30) NULL,
+	[LOPBKJR] [int] NULL,
+	[US] [nvarchar](30) NULL,
+	[USCREA] [nvarchar](30) NULL,
+	[Lineage_Key] [int] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TLEVER]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TLEVER](
+	[FIRKODE] [nvarchar](5) NULL,
+	[LEVERNR] [decimal](7, 0) NULL,
+	[NAAM] [nvarchar](35) NULL,
+	[CREA] [datetime] NULL,
+	[WYZ] [datetime] NULL,
+	[US] [nvarchar](30) NULL,
+	[USCREA] [nvarchar](30) NULL,
+	[Lineage_Key] [int] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TOMSCHR_BTA]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TOMSCHR_BTA](
+	[FIRKODE] [nvarchar](5) NULL,
+	[TYPE] [int] NULL,
+	[ALTERNAT] [int] NULL,
+	[BOEKJR] [int] NULL,
+	[BASISNR] [nvarchar](9) NULL,
+	[TAAL] [nvarchar](2) NULL,
+	[OMSCHR] [nvarchar](30) NULL,
+	[GEBRUIK] [int] NULL,
+	[CREA] [datetime] NULL,
+	[WYZ] [datetime] NULL,
+	[US] [nvarchar](30) NULL,
+	[USCREA] [nvarchar](30) NULL,
+	[VIO_ID] [int] NULL,
+	[Lineage_Key] [int] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TUSFIRM]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TUSFIRM](
+	[USID] [varchar](30) NOT NULL,
+	[FIRKODE] [varchar](5) NOT NULL,
+	[CREA] [datetime] NULL,
+	[WYZ] [datetime] NULL,
+	[US] [nvarchar](30) NULL,
+	[USCREA] [nvarchar](30) NULL,
+	[Lineage_Key] [bigint] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TVERDAGD]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TVERDAGD](
+	[ALGREK] [numeric](18, 0) NULL,
+	[BEDRAG] [numeric](13, 2) NULL,
+	[BOEKJR] [int] NULL,
+	[CREA] [datetime] NULL,
+	[WYZ] [datetime] NULL,
+	[DAGBOEK] [nvarchar](10) NULL,
+	[FIRKODE] [nvarchar](10) NULL,
+	[OPMERK] [nvarchar](250) NULL,
+	[PERIODE] [decimal](2, 0) NULL,
+	[PK] [numeric](22, 10) NOT NULL,
+	[TYPE_DAGB] [numeric](1, 0) NULL,
+	[US] [nvarchar](50) NULL,
+	[USCREA] [nvarchar](50) NULL,
+	[DATUM] [date] NULL,
+	[VOLGNR] [numeric](18, 0) NULL,
+	[FAKTNR] [numeric](38, 20) NULL,
+	[REL_LEVERNR] [numeric](38, 20) NULL,
+	[Lineage_Key] [bigint] NOT NULL,
+	[ID] [int] IDENTITY(1,1) NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [exe].[Lineage]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [exe].[Lineage](
+	[Lineage_Key] [int] IDENTITY(1,1) NOT NULL,
+	[Table_Name] [nvarchar](200) NOT NULL,
+	[Start_Load] [datetime] NOT NULL,
+	[Finish_Load] [datetime] NULL,
+	[Last_Loaded_Date] [datetime] NULL,
+	[Type] [nvarchar](1) NOT NULL,
+	[Load_Status] [nvarchar](1) NOT NULL,
+	[Row_Count] [int] NULL,
+	[Output_Message] [nvarchar](250) NULL,
+	[GUID] [nvarchar](250) NULL,
+ CONSTRAINT [PK_Integration_Lineage] PRIMARY KEY CLUSTERED 
+(
+	[Lineage_Key] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [exe].[Table_List]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [exe].[Table_List](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[Table_Name] [nvarchar](100) NOT NULL,
+	[Load_Type] [nvarchar](1) NOT NULL,
+	[Run] [nvarchar](50) NULL,
+	[Last_Loaded_Date] [datetime2](7) NULL,
+	[Load_Status] [nvarchar](1) NULL,
+	[Output_Message] [nvarchar](max) NULL,
+ CONSTRAINT [PK_Table List] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC,
+	[Table_Name] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  StoredProcedure [dbo].[Load_BM_USERS]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_BM_USERS]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since BM_USERS appears to be a reference table without date filters,
+    -- we'll use a simpler approach
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for BM_USERS';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for BM_USERS';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[BM_USERS] AS target
+    USING (
+        SELECT 
+            [USID]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM FINACC.BM_USERS'')
+    ) AS source ON target.USID = source.USID COLLATE Czech_CI_AS
+    WHEN MATCHED 
+    THEN UPDATE SET
+        target.[USID] = source.[USID],
+        target.[Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [USID],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[USID],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_DBA_AUDIT_TRAIL]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_DBA_AUDIT_TRAIL]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+-- Dynamic variables for date filtering
+DECLARE @StartCurrentMonthTimeStamp datetime;
+DECLARE @sql NVARCHAR(MAX);
+DECLARE @whereClause NVARCHAR(500);
+
+BEGIN TRY
+    -- Build WHERE clause based on @FullLoad parameter
+    IF @FullLoad = 1
+    BEGIN
+        -- Full load: last 3 months of data
+        SET @StartCurrentMonthTimeStamp = DATEFROMPARTS(YEAR(DATEADD(MONTH, -3, GETDATE())), 
+                                                        MONTH(DATEADD(MONTH, -3, GETDATE())), 
+                                                        1);
+        SET @whereClause = 'WHERE TIMESTAMP > TO_DATE(''''' + CONVERT(VARCHAR, @StartCurrentMonthTimeStamp, 120) + ''''', ''''YYYY-MM-DD HH24:MI:SS'''')';
+        SET @OutputMessage = 'Full Load successful for DBA_AUDIT_TRAIL from ' + CONVERT(VARCHAR, @StartCurrentMonthTimeStamp, 120);
+    END
+    ELSE
+    BEGIN
+        -- Incremental load: last 2 months of data
+        SET @StartCurrentMonthTimeStamp = DATEFROMPARTS(YEAR(DATEADD(MONTH, -1, GETDATE())), 
+                                                        MONTH(DATEADD(MONTH, -1, GETDATE())), 
+                                                        1);
+        SET @whereClause = 'WHERE TIMESTAMP > TO_DATE(''''' + CONVERT(VARCHAR, @StartCurrentMonthTimeStamp, 120) + ''''', ''''YYYY-MM-DD HH24:MI:SS'''')';
+        SET @OutputMessage = 'Incremental Load successful for DBA_AUDIT_TRAIL from ' + CONVERT(VARCHAR, @StartCurrentMonthTimeStamp, 120);
+    END
+
+    -- Build dynamic SQL for MERGE statement
+    SET @sql = '
+    MERGE [dbo].[DBA_AUDIT_TRAIL] AS target
+    USING (
+        SELECT 
+            [USERNAME],
+            [USERHOST],
+            [TIMESTAMP],
+            [SESSIONID],
+            [ENTRYID]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT USERNAME, USERHOST, TIMESTAMP, SESSIONID, ENTRYID 
+              FROM DBA_AUDIT_TRAIL ' + @whereClause + ''')
+    ) AS source ON target.SESSIONID = source.SESSIONID 
+    AND target.ENTRYID = source.ENTRYID
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [USERNAME] = source.[USERNAME],
+        [USERHOST] = source.[USERHOST],
+        [TIMESTAMP] = source.[TIMESTAMP],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [USERNAME],
+            [USERHOST],
+            [TIMESTAMP],
+            [SESSIONID],
+            [ENTRYID],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[USERNAME],
+            source.[USERHOST],
+            source.[TIMESTAMP],
+            source.[SESSIONID],
+            source.[ENTRYID],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE 
+        AND target.[TIMESTAMP] <= ''' + CONVERT(VARCHAR, @StartCurrentMonthTimeStamp, 120) + ''' 
+    THEN DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_DBA_ROLE_PRIVS]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_DBA_ROLE_PRIVS]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since DBA_ROLE_PRIVS is a system/security table without date filters,
+    -- we'll use a simpler approach similar to BM_USERS
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for DBA_ROLE_PRIVS';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for DBA_ROLE_PRIVS';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[DBA_ROLE_PRIVS] AS target
+    USING (
+        SELECT 
+            [GRANTEE],
+            [GRANTED_ROLE],
+            [ADMIN_OPTION]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM SYS.DBA_ROLE_PRIVS'')
+    ) AS source ON target.GRANTEE = source.GRANTEE COLLATE Czech_CI_AS
+    AND target.GRANTED_ROLE = source.GRANTED_ROLE COLLATE Czech_CI_AS
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [ADMIN_OPTION] = source.[ADMIN_OPTION],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [GRANTEE],
+            [GRANTED_ROLE],
+            [ADMIN_OPTION],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[GRANTEE],
+            source.[GRANTED_ROLE],
+            source.[ADMIN_OPTION],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_DBA_SYS_PRIVS]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_DBA_SYS_PRIVS]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since DBA_SYS_PRIVS is a system/security table without date filters,
+    -- we'll use a simpler approach
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for DBA_SYS_PRIVS';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for DBA_SYS_PRIVS';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[DBA_SYS_PRIVS] AS target
+    USING (
+        SELECT 
+            [GRANTEE],
+            [PRIVILEGE],
+            [ADMIN_OPTION]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM SYS.DBA_SYS_PRIVS'')
+    ) AS source ON target.GRANTEE = source.GRANTEE COLLATE Czech_CI_AS
+    AND target.PRIVILEGE = source.PRIVILEGE COLLATE Czech_CI_AS
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [ADMIN_OPTION] = source.[ADMIN_OPTION],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [GRANTEE],
+            [PRIVILEGE],
+            [ADMIN_OPTION],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[GRANTEE],
+            source.[PRIVILEGE],
+            source.[ADMIN_OPTION],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_DBA_TAB_PRIVS]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_DBA_TAB_PRIVS]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since DBA_TAB_PRIVS is a system/security table without date filters,
+    -- we'll use a simpler approach
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for DBA_TAB_PRIVS';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for DBA_TAB_PRIVS';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[DBA_TAB_PRIVS] AS target
+    USING (
+        SELECT 
+            [GRANTEE],
+            [TABLE_NAME],
+            [GRANTOR],
+            [PRIVILEGE],
+            [OWNER],
+            [GRANTABLE],
+            [HIERARCHY]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM SYS.DBA_TAB_PRIVS'')
+    ) AS source ON target.GRANTEE = source.GRANTEE COLLATE Czech_CI_AS
+    AND target.TABLE_NAME = source.TABLE_NAME COLLATE Czech_CI_AS
+    AND target.PRIVILEGE = source.PRIVILEGE COLLATE Czech_CI_AS
+    AND target.OWNER = source.OWNER COLLATE Czech_CI_AS
+    AND target.GRANTOR = source.GRANTOR COLLATE Czech_CI_AS
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [GRANTABLE] = source.[GRANTABLE],
+        [HIERARCHY] = source.[HIERARCHY],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [GRANTEE],
+            [TABLE_NAME],
+            [GRANTOR],
+            [PRIVILEGE],
+            [OWNER],
+            [GRANTABLE],
+            [HIERARCHY],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[GRANTEE],
+            source.[TABLE_NAME],
+            source.[GRANTOR],
+            source.[PRIVILEGE],
+            source.[OWNER],
+            source.[GRANTABLE],
+            source.[HIERARCHY],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_DBA_USERS]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_DBA_USERS]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since DBA_USERS is a system table without date filters,
+    -- we'll use a simpler approach
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for DBA_USERS';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for DBA_USERS';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[DBA_USERS] AS target
+    USING (
+        SELECT 
+            [USER_ID],
+            [USERNAME],
+            [ACCOUNT_STATUS],
+            [PROFILE]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM SYS.DBA_USERS'')
+    ) AS source ON target.USER_ID = source.USER_ID
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [USERNAME] = source.[USERNAME],
+        [ACCOUNT_STATUS] = source.[ACCOUNT_STATUS],
+        [PROFILE] = source.[PROFILE],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [USER_ID],
+            [USERNAME],
+            [ACCOUNT_STATUS],
+            [PROFILE],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[USER_ID],
+            source.[USERNAME],
+            source.[ACCOUNT_STATUS],
+            source.[PROFILE],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_ISAV_APPLICATIE_OMSCHRIJVINGEN]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_ISAV_APPLICATIE_OMSCHRIJVINGEN]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since ISAV_APPLICATIE_OMSCHRIJVINGEN is a reference table,
+    -- we'll use a simpler approach without date filtering
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for ISAV_APPLICATIE_OMSCHRIJVINGEN';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for ISAV_APPLICATIE_OMSCHRIJVINGEN';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[ISAV_APPLICATIE_OMSCHRIJVINGEN] AS target
+    USING (
+        SELECT 
+            [ID],
+            [APE_ID],
+            [TAL_ID],
+            [OMSCHRIJVING],
+            [TAL_CODE],
+            [EXPORT_JN],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM FINACC.ISAV_APPLICATIE_OMSCHRIJVINGEN'')
+    ) AS source ON target.ID = source.ID
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [APE_ID] = source.[APE_ID],
+        [TAL_ID] = source.[TAL_ID],
+        [OMSCHRIJVING] = source.[OMSCHRIJVING],
+        [TAL_CODE] = source.[TAL_CODE],
+        [EXPORT_JN] = source.[EXPORT_JN],
+        [CREATIEDATUM] = source.[CREATIEDATUM],
+        [CREATOR] = source.[CREATOR],
+        [WIJZIGINGSDATUM] = source.[WIJZIGINGSDATUM],
+        [WIJZIGER] = source.[WIJZIGER],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [ID],
+            [APE_ID],
+            [TAL_ID],
+            [OMSCHRIJVING],
+            [TAL_CODE],
+            [EXPORT_JN],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[ID],
+            source.[APE_ID],
+            source.[TAL_ID],
+            source.[OMSCHRIJVING],
+            source.[TAL_CODE],
+            source.[EXPORT_JN],
+            source.[CREATIEDATUM],
+            source.[CREATOR],
+            source.[WIJZIGINGSDATUM],
+            source.[WIJZIGER],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_ISAV_APPLICATIES]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_ISAV_APPLICATIES]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for ISAV_APPLICATIES';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for ISAV_APPLICATIES';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[ISAV_APPLICATIES] AS target
+    USING (
+        SELECT 
+            [ID],
+            [CODE],
+            [LOG_ANNUL_JN],
+            [OMSCHRIJVING],
+            [PREFIX],
+            [CONID],
+            [DBOWNER],
+            [STATUS],
+            [REG_VERSIE],
+            [REG_DATUM],
+            [EXPORT_JN],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM FINACC.ISAV_APPLICATIES'')
+    ) AS source ON target.ID = source.ID
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [CODE] = source.[CODE],
+        [LOG_ANNUL_JN] = source.[LOG_ANNUL_JN],
+        [OMSCHRIJVING] = source.[OMSCHRIJVING],
+        [PREFIX] = source.[PREFIX],
+        [CONID] = source.[CONID],
+        [DBOWNER] = source.[DBOWNER],
+        [STATUS] = source.[STATUS],
+        [REG_VERSIE] = source.[REG_VERSIE],
+        [REG_DATUM] = source.[REG_DATUM],
+        [EXPORT_JN] = source.[EXPORT_JN],
+        [CREATIEDATUM] = source.[CREATIEDATUM],
+        [CREATOR] = source.[CREATOR],
+        [WIJZIGINGSDATUM] = source.[WIJZIGINGSDATUM],
+        [WIJZIGER] = source.[WIJZIGER],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [ID],
+            [CODE],
+            [LOG_ANNUL_JN],
+            [OMSCHRIJVING],
+            [PREFIX],
+            [CONID],
+            [DBOWNER],
+            [STATUS],
+            [REG_VERSIE],
+            [REG_DATUM],
+            [EXPORT_JN],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[ID],
+            source.[CODE],
+            source.[LOG_ANNUL_JN],
+            source.[OMSCHRIJVING],
+            source.[PREFIX],
+            source.[CONID],
+            source.[DBOWNER],
+            source.[STATUS],
+            source.[REG_VERSIE],
+            source.[REG_DATUM],
+            source.[EXPORT_JN],
+            source.[CREATIEDATUM],
+            source.[CREATOR],
+            source.[WIJZIGINGSDATUM],
+            source.[WIJZIGER],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_ISAV_FUNCTIES]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_ISAV_FUNCTIES]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since ISAV_FUNCTIES is a reference table,
+    -- we'll use a simpler approach without date filtering
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for ISAV_FUNCTIES';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for ISAV_FUNCTIES';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[ISAV_FUNCTIES] AS target
+    USING (
+        SELECT 
+            [ID],
+            [APE_ID],
+            [CODE],
+            [OMSCHRIJVING],
+            [EXPORT_JN],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM "ISAR1"."ISAV_FUNCTIES"'')
+    ) AS source ON target.ID = source.ID
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [APE_ID] = source.[APE_ID],
+        [CODE] = source.[CODE],
+        [OMSCHRIJVING] = source.[OMSCHRIJVING],
+        [EXPORT_JN] = source.[EXPORT_JN],
+        [CREATIEDATUM] = source.[CREATIEDATUM],
+        [CREATOR] = source.[CREATOR],
+        [WIJZIGINGSDATUM] = source.[WIJZIGINGSDATUM],
+        [WIJZIGER] = source.[WIJZIGER],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [ID],
+            [APE_ID],
+            [CODE],
+            [OMSCHRIJVING],
+            [EXPORT_JN],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[ID],
+            source.[APE_ID],
+            source.[CODE],
+            source.[OMSCHRIJVING],
+            source.[EXPORT_JN],
+            source.[CREATIEDATUM],
+            source.[CREATOR],
+            source.[WIJZIGINGSDATUM],
+            source.[WIJZIGER],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_ISAV_GEBRUIKER_ACCOUNTS]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_ISAV_GEBRUIKER_ACCOUNTS]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since ISAV_GEBRUIKER_ACCOUNTS is a reference table,
+    -- we'll use a simpler approach without date filtering
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for ISAV_GEBRUIKER_ACCOUNTS';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for ISAV_GEBRUIKER_ACCOUNTS';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[ISAV_GEBRUIKER_ACCOUNTS] AS target
+    USING (
+        SELECT 
+            [ID],
+            [GBR_ID],
+            [GBR_CODE],
+            [GBR_NAAM],
+            [ACCOUNT_TYPE],
+            [ACCOUNT_CODE],
+            [ACCOUNT_DOMAIN],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM "ISAR1"."ISAV_GEBRUIKER_ACCOUNTS"'')
+    ) AS source ON target.ID = source.ID
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [GBR_ID] = source.[GBR_ID],
+        [GBR_CODE] = source.[GBR_CODE],
+        [GBR_NAAM] = source.[GBR_NAAM],
+        [ACCOUNT_TYPE] = source.[ACCOUNT_TYPE],
+        [ACCOUNT_CODE] = source.[ACCOUNT_CODE],
+        [ACCOUNT_DOMAIN] = source.[ACCOUNT_DOMAIN],
+        [CREATIEDATUM] = source.[CREATIEDATUM],
+        [CREATOR] = source.[CREATOR],
+        [WIJZIGINGSDATUM] = source.[WIJZIGINGSDATUM],
+        [WIJZIGER] = source.[WIJZIGER],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [ID],
+            [GBR_ID],
+            [GBR_CODE],
+            [GBR_NAAM],
+            [ACCOUNT_TYPE],
+            [ACCOUNT_CODE],
+            [ACCOUNT_DOMAIN],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[ID],
+            source.[GBR_ID],
+            source.[GBR_CODE],
+            source.[GBR_NAAM],
+            source.[ACCOUNT_TYPE],
+            source.[ACCOUNT_CODE],
+            source.[ACCOUNT_DOMAIN],
+            source.[CREATIEDATUM],
+            source.[CREATOR],
+            source.[WIJZIGINGSDATUM],
+            source.[WIJZIGER],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_ISAV_GEBRUIKER_FUNCTIES]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_ISAV_GEBRUIKER_FUNCTIES]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since ISAV_GEBRUIKER_FUNCTIES is a reference table,
+    -- we'll use a simpler approach without date filtering
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for ISAV_GEBRUIKER_FUNCTIES';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for ISAV_GEBRUIKER_FUNCTIES';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[ISAV_GEBRUIKER_FUNCTIES] AS target
+    USING (
+        SELECT 
+            [ID],
+            [GBR_ID],
+            [GBR_CODE],
+            [GBR_NAAM],
+            [FNC_ID],
+            [FNC_CODE],
+            [FNC_OMSCHR],
+            [APE_CODE],
+            [EXPORT_JN],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM "ISAR1"."ISAV_GEBRUIKER_FUNCTIES"'')
+    ) AS source ON target.ID = source.ID
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [GBR_ID] = source.[GBR_ID],
+        [GBR_CODE] = source.[GBR_CODE],
+        [GBR_NAAM] = source.[GBR_NAAM],
+        [FNC_ID] = source.[FNC_ID],
+        [FNC_CODE] = source.[FNC_CODE],
+        [FNC_OMSCHR] = source.[FNC_OMSCHR],
+        [APE_CODE] = source.[APE_CODE],
+        [EXPORT_JN] = source.[EXPORT_JN],
+        [CREATIEDATUM] = source.[CREATIEDATUM],
+        [CREATOR] = source.[CREATOR],
+        [WIJZIGINGSDATUM] = source.[WIJZIGINGSDATUM],
+        [WIJZIGER] = source.[WIJZIGER],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [ID],
+            [GBR_ID],
+            [GBR_CODE],
+            [GBR_NAAM],
+            [FNC_ID],
+            [FNC_CODE],
+            [FNC_OMSCHR],
+            [APE_CODE],
+            [EXPORT_JN],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[ID],
+            source.[GBR_ID],
+            source.[GBR_CODE],
+            source.[GBR_NAAM],
+            source.[FNC_ID],
+            source.[FNC_CODE],
+            source.[FNC_OMSCHR],
+            source.[APE_CODE],
+            source.[EXPORT_JN],
+            source.[CREATIEDATUM],
+            source.[CREATOR],
+            source.[WIJZIGINGSDATUM],
+            source.[WIJZIGER],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_ISAV_GEBRUIKER_GROEPEN]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_ISAV_GEBRUIKER_GROEPEN]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since ISAV_GEBRUIKER_GROEPEN is a reference table,
+    -- we'll use a simpler approach without date filtering
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for ISAV_GEBRUIKER_GROEPEN';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for ISAV_GEBRUIKER_GROEPEN';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[ISAV_GEBRUIKER_GROEPEN] AS target
+    USING (
+        SELECT 
+            [ID],
+            [GBR_ID],
+            [GBR_CODE],
+            [GBR_NAAM],
+            [GRP_ID],
+            [GRP_CODE],
+            [GRP_NAAM],
+            [APE_CODE],
+            [APE_ID],
+            [EXPORT_JN],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM "ISAR1"."ISAV_GEBRUIKER_GROEPEN"'')
+    ) AS source ON target.ID = source.ID
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [GBR_ID] = source.[GBR_ID],
+        [GBR_CODE] = source.[GBR_CODE],
+        [GBR_NAAM] = source.[GBR_NAAM],
+        [GRP_ID] = source.[GRP_ID],
+        [GRP_CODE] = source.[GRP_CODE],
+        [GRP_NAAM] = source.[GRP_NAAM],
+        [APE_CODE] = source.[APE_CODE],
+        [APE_ID] = source.[APE_ID],
+        [EXPORT_JN] = source.[EXPORT_JN],
+        [CREATIEDATUM] = source.[CREATIEDATUM],
+        [CREATOR] = source.[CREATOR],
+        [WIJZIGINGSDATUM] = source.[WIJZIGINGSDATUM],
+        [WIJZIGER] = source.[WIJZIGER],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [ID],
+            [GBR_ID],
+            [GBR_CODE],
+            [GBR_NAAM],
+            [GRP_ID],
+            [GRP_CODE],
+            [GRP_NAAM],
+            [APE_CODE],
+            [APE_ID],
+            [EXPORT_JN],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[ID],
+            source.[GBR_ID],
+            source.[GBR_CODE],
+            source.[GBR_NAAM],
+            source.[GRP_ID],
+            source.[GRP_CODE],
+            source.[GRP_NAAM],
+            source.[APE_CODE],
+            source.[APE_ID],
+            source.[EXPORT_JN],
+            source.[CREATIEDATUM],
+            source.[CREATOR],
+            source.[WIJZIGINGSDATUM],
+            source.[WIJZIGER],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_ISAV_GEBRUIKER_PERMISSIES]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_ISAV_GEBRUIKER_PERMISSIES]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since ISAV_GEBRUIKER_PERMISSIES is a reference table,
+    -- we'll use a simpler approach without date filtering
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for ISAV_GEBRUIKER_PERMISSIES';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for ISAV_GEBRUIKER_PERMISSIES';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[ISAV_GEBRUIKER_PERMISSIES] AS target
+    USING (
+        SELECT 
+            [ID],
+            [GBR_ID],
+            [GBR_CODE],
+            [APE_ID],
+            [APE_CODE],
+            [PGM_ID],
+            [PGM_NAAM],
+            [KODUPD],
+            [EXPORT_JN],
+            [CREATIEDATUM],
+            [WIJZIGINGSDATUM],
+            [CREATOR],
+            [WIJZIGER]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM "ISAR1"."ISAV_GEBRUIKER_PERMISSIES"'')
+    ) AS source ON target.ID = source.ID
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [GBR_ID] = source.[GBR_ID],
+        [GBR_CODE] = source.[GBR_CODE],
+        [APE_ID] = source.[APE_ID],
+        [APE_CODE] = source.[APE_CODE],
+        [PGM_ID] = source.[PGM_ID],
+        [PGM_NAAM] = source.[PGM_NAAM],
+        [KODUPD] = source.[KODUPD],
+        [EXPORT_JN] = source.[EXPORT_JN],
+        [CREATIEDATUM] = source.[CREATIEDATUM],
+        [WIJZIGINGSDATUM] = source.[WIJZIGINGSDATUM],
+        [CREATOR] = source.[CREATOR],
+        [WIJZIGER] = source.[WIJZIGER],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [ID],
+            [GBR_ID],
+            [GBR_CODE],
+            [APE_ID],
+            [APE_CODE],
+            [PGM_ID],
+            [PGM_NAAM],
+            [KODUPD],
+            [EXPORT_JN],
+            [CREATIEDATUM],
+            [WIJZIGINGSDATUM],
+            [CREATOR],
+            [WIJZIGER],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[ID],
+            source.[GBR_ID],
+            source.[GBR_CODE],
+            source.[APE_ID],
+            source.[APE_CODE],
+            source.[PGM_ID],
+            source.[PGM_NAAM],
+            source.[KODUPD],
+            source.[EXPORT_JN],
+            source.[CREATIEDATUM],
+            source.[WIJZIGINGSDATUM],
+            source.[CREATOR],
+            source.[WIJZIGER],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_ISAV_GEBRUIKERS]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_ISAV_GEBRUIKERS]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since ISAV_GEBRUIKERS is a reference table,
+    -- we'll use a simpler approach without date filtering
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for ISAV_GEBRUIKERS';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for ISAV_GEBRUIKERS';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[ISAV_GEBRUIKERS] AS target
+    USING (
+        SELECT 
+            [ID],
+            [CODE],
+            [NAAM],
+            [TAL_ID],
+            [LOG_ANNUL_JN],
+            [PINCODE],
+            [E_MAIL],
+            [HOME_PAGE],
+            [TEL_PRIVE],
+            [TEL_WERK],
+            [TEL_MOBIEL],
+            [TAL_CODE],
+            [EXPORT_JN],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER],
+            [DOMAIN],
+            [WINDOWS_USER],
+            [NAMED_USER_JN],
+            [API_USER_JN],
+            [API_PASSWORD],
+            [PROFILE]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM "ISAR1"."ISAV_GEBRUIKERS"'')
+    ) AS source ON target.ID = source.ID
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [CODE] = source.[CODE],
+        [NAAM] = source.[NAAM],
+        [TAL_ID] = source.[TAL_ID],
+        [LOG_ANNUL_JN] = source.[LOG_ANNUL_JN],
+        [PINCODE] = source.[PINCODE],
+        [E_MAIL] = source.[E_MAIL],
+        [HOME_PAGE] = source.[HOME_PAGE],
+        [TEL_PRIVE] = source.[TEL_PRIVE],
+        [TEL_WERK] = source.[TEL_WERK],
+        [TEL_MOBIEL] = source.[TEL_MOBIEL],
+        [TAL_CODE] = source.[TAL_CODE],
+        [EXPORT_JN] = source.[EXPORT_JN],
+        [CREATIEDATUM] = source.[CREATIEDATUM],
+        [CREATOR] = source.[CREATOR],
+        [WIJZIGINGSDATUM] = source.[WIJZIGINGSDATUM],
+        [WIJZIGER] = source.[WIJZIGER],
+        [DOMAIN] = source.[DOMAIN],
+        [WINDOWS_USER] = source.[WINDOWS_USER],
+        [NAMED_USER_JN] = source.[NAMED_USER_JN],
+        [API_USER_JN] = source.[API_USER_JN],
+        [API_PASSWORD] = source.[API_PASSWORD],
+        [PROFILE] = source.[PROFILE],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [ID],
+            [CODE],
+            [NAAM],
+            [TAL_ID],
+            [LOG_ANNUL_JN],
+            [PINCODE],
+            [E_MAIL],
+            [HOME_PAGE],
+            [TEL_PRIVE],
+            [TEL_WERK],
+            [TEL_MOBIEL],
+            [TAL_CODE],
+            [EXPORT_JN],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER],
+            [DOMAIN],
+            [WINDOWS_USER],
+            [NAMED_USER_JN],
+            [API_USER_JN],
+            [API_PASSWORD],
+            [PROFILE],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[ID],
+            source.[CODE],
+            source.[NAAM],
+            source.[TAL_ID],
+            source.[LOG_ANNUL_JN],
+            source.[PINCODE],
+            source.[E_MAIL],
+            source.[HOME_PAGE],
+            source.[TEL_PRIVE],
+            source.[TEL_WERK],
+            source.[TEL_MOBIEL],
+            source.[TAL_CODE],
+            source.[EXPORT_JN],
+            source.[CREATIEDATUM],
+            source.[CREATOR],
+            source.[WIJZIGINGSDATUM],
+            source.[WIJZIGER],
+            source.[DOMAIN],
+            source.[WINDOWS_USER],
+            source.[NAMED_USER_JN],
+            source.[API_USER_JN],
+            source.[API_PASSWORD],
+            source.[PROFILE],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_ISAV_GROEP_PERMISSIES]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_ISAV_GROEP_PERMISSIES]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since ISAV_GROEP_PERMISSIES is a reference table,
+    -- we'll use a simpler approach without date filtering
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for ISAV_GROEP_PERMISSIES';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for ISAV_GROEP_PERMISSIES';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[ISAV_GROEP_PERMISSIES] AS target
+    USING (
+        SELECT 
+            [ID],
+            [APE_ID],
+            [GRP_ID],
+            [GRP_CODE],
+            [PGM_ID],
+            [PGM_NAAM],
+            [KODUPD],
+            [EXPORT_JN],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM "ISAR1"."ISAV_GROEP_PERMISSIES"'')
+    ) AS source ON target.ID = source.ID
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [APE_ID] = source.[APE_ID],
+        [GRP_ID] = source.[GRP_ID],
+        [GRP_CODE] = source.[GRP_CODE],
+        [PGM_ID] = source.[PGM_ID],
+        [PGM_NAAM] = source.[PGM_NAAM],
+        [KODUPD] = source.[KODUPD],
+        [EXPORT_JN] = source.[EXPORT_JN],
+        [CREATIEDATUM] = source.[CREATIEDATUM],
+        [CREATOR] = source.[CREATOR],
+        [WIJZIGINGSDATUM] = source.[WIJZIGINGSDATUM],
+        [WIJZIGER] = source.[WIJZIGER],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [ID],
+            [APE_ID],
+            [GRP_ID],
+            [GRP_CODE],
+            [PGM_ID],
+            [PGM_NAAM],
+            [KODUPD],
+            [EXPORT_JN],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[ID],
+            source.[APE_ID],
+            source.[GRP_ID],
+            source.[GRP_CODE],
+            source.[PGM_ID],
+            source.[PGM_NAAM],
+            source.[KODUPD],
+            source.[EXPORT_JN],
+            source.[CREATIEDATUM],
+            source.[CREATOR],
+            source.[WIJZIGINGSDATUM],
+            source.[WIJZIGER],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_ISAV_GROEPEN]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_ISAV_GROEPEN]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since ISAV_GROEPEN is a reference table,
+    -- we'll use a simpler approach without date filtering
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for ISAV_GROEPEN';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for ISAV_GROEPEN';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[ISAV_GROEPEN] AS target
+    USING (
+        SELECT 
+            [ID],
+            [CODE],
+            [LOG_ANNUL_JN],
+            [NAAM],
+            [APE_ID],
+            [EXPORT_JN],
+            [DEFAULT_JN],
+            [CREATIEDATUM],
+            [WIJZIGINGSDATUM],
+            [CREATOR],
+            [WIJZIGER]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM "ISAR1"."ISAV_GROEPEN"'')
+    ) AS source ON target.ID = source.ID
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [CODE] = source.[CODE],
+        [LOG_ANNUL_JN] = source.[LOG_ANNUL_JN],
+        [NAAM] = source.[NAAM],
+        [APE_ID] = source.[APE_ID],
+        [EXPORT_JN] = source.[EXPORT_JN],
+        [DEFAULT_JN] = source.[DEFAULT_JN],
+        [CREATIEDATUM] = source.[CREATIEDATUM],
+        [WIJZIGINGSDATUM] = source.[WIJZIGINGSDATUM],
+        [CREATOR] = source.[CREATOR],
+        [WIJZIGER] = source.[WIJZIGER],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [ID],
+            [CODE],
+            [LOG_ANNUL_JN],
+            [NAAM],
+            [APE_ID],
+            [EXPORT_JN],
+            [DEFAULT_JN],
+            [CREATIEDATUM],
+            [WIJZIGINGSDATUM],
+            [CREATOR],
+            [WIJZIGER],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[ID],
+            source.[CODE],
+            source.[LOG_ANNUL_JN],
+            source.[NAAM],
+            source.[APE_ID],
+            source.[EXPORT_JN],
+            source.[DEFAULT_JN],
+            source.[CREATIEDATUM],
+            source.[WIJZIGINGSDATUM],
+            source.[CREATOR],
+            source.[WIJZIGER],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_ISAV_PROGRAMMA_OMSCHRIJVINGEN]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_ISAV_PROGRAMMA_OMSCHRIJVINGEN]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since ISAV_PROGRAMMA_OMSCHRIJVINGEN is a reference table,
+    -- we'll use a simpler approach without date filtering
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for ISAV_PROGRAMMA_OMSCHRIJVINGEN';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for ISAV_PROGRAMMA_OMSCHRIJVINGEN';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[ISAV_PROGRAMMA_OMSCHRIJVINGEN] AS target
+    USING (
+        SELECT 
+            [ID],
+            [APE_ID],
+            [PGM_ID],
+            [PGM_NAAM],
+            [TAL_ID],
+            [TITEL],
+            [OMSCHRIJVING],
+            [TAL_CODE],
+            [EXPORT_JN],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER],
+            [HOMEPAGE_TITEL]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM "ISAR1"."ISAV_PROGRAMMA_OMSCHRIJVINGEN"'')
+    ) AS source ON target.ID = source.ID
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [APE_ID] = source.[APE_ID],
+        [PGM_ID] = source.[PGM_ID],
+        [PGM_NAAM] = source.[PGM_NAAM],
+        [TAL_ID] = source.[TAL_ID],
+        [TITEL] = source.[TITEL],
+        [OMSCHRIJVING] = source.[OMSCHRIJVING],
+        [TAL_CODE] = source.[TAL_CODE],
+        [EXPORT_JN] = source.[EXPORT_JN],
+        [CREATIEDATUM] = source.[CREATIEDATUM],
+        [CREATOR] = source.[CREATOR],
+        [WIJZIGINGSDATUM] = source.[WIJZIGINGSDATUM],
+        [WIJZIGER] = source.[WIJZIGER],
+        [HOMEPAGE_TITEL] = source.[HOMEPAGE_TITEL],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [ID],
+            [APE_ID],
+            [PGM_ID],
+            [PGM_NAAM],
+            [TAL_ID],
+            [TITEL],
+            [OMSCHRIJVING],
+            [TAL_CODE],
+            [EXPORT_JN],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER],
+            [HOMEPAGE_TITEL],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[ID],
+            source.[APE_ID],
+            source.[PGM_ID],
+            source.[PGM_NAAM],
+            source.[TAL_ID],
+            source.[TITEL],
+            source.[OMSCHRIJVING],
+            source.[TAL_CODE],
+            source.[EXPORT_JN],
+            source.[CREATIEDATUM],
+            source.[CREATOR],
+            source.[WIJZIGINGSDATUM],
+            source.[WIJZIGER],
+            source.[HOMEPAGE_TITEL],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_ISAV_PROGRAMMAS]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_ISAV_PROGRAMMAS]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since ISAV_PROGRAMMAS is a reference table,
+    -- we'll use a simpler approach without date filtering
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for ISAV_PROGRAMMAS';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for ISAV_PROGRAMMAS';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[ISAV_PROGRAMMAS] AS target
+    USING (
+        SELECT 
+            [ID],
+            [NAAM],
+            [PROGRAMMA_TYPE],
+            [LOG_ANNUL_JN],
+            [CHANGE_TOOLB_CMT_JN],
+            [PASWOORD],
+            [APE_ID],
+            [CONID],
+            [OMSCHRIJVING],
+            [EXPORT_JN],
+            [INFO_HOOGTE],
+            [INFO_BREEDTE],
+            [INFO_COORD_X],
+            [INFO_COORD_Y],
+            [INFO_VELD_BREEDTE],
+            [INFO_LABEL_BREEDTE],
+            [INFO_OMS_BREEDTE],
+            [SESSIE_INITIALISATIE],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER],
+            [BATCH_EXIT_FORM_KLANT_JN],
+            [BATCH_EXIT_FORM_SYSTEM_JN],
+            [MCS_ID],
+            [MODULE],
+            [MODULE_COLOR],
+            [FAVORITE_ALLOWED_JN],
+            [DYN_COL_CANVAS_WIDTH]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM "ISAR1"."ISAV_PROGRAMMAS"'')
+    ) AS source ON target.ID = source.ID
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [NAAM] = source.[NAAM],
+        [PROGRAMMA_TYPE] = source.[PROGRAMMA_TYPE],
+        [LOG_ANNUL_JN] = source.[LOG_ANNUL_JN],
+        [CHANGE_TOOLB_CMT_JN] = source.[CHANGE_TOOLB_CMT_JN],
+        [PASWOORD] = source.[PASWOORD],
+        [APE_ID] = source.[APE_ID],
+        [CONID] = source.[CONID],
+        [OMSCHRIJVING] = source.[OMSCHRIJVING],
+        [EXPORT_JN] = source.[EXPORT_JN],
+        [INFO_HOOGTE] = source.[INFO_HOOGTE],
+        [INFO_BREEDTE] = source.[INFO_BREEDTE],
+        [INFO_COORD_X] = source.[INFO_COORD_X],
+        [INFO_COORD_Y] = source.[INFO_COORD_Y],
+        [INFO_VELD_BREEDTE] = source.[INFO_VELD_BREEDTE],
+        [INFO_LABEL_BREEDTE] = source.[INFO_LABEL_BREEDTE],
+        [INFO_OMS_BREEDTE] = source.[INFO_OMS_BREEDTE],
+        [SESSIE_INITIALISATIE] = source.[SESSIE_INITIALISATIE],
+        [CREATIEDATUM] = source.[CREATIEDATUM],
+        [CREATOR] = source.[CREATOR],
+        [WIJZIGINGSDATUM] = source.[WIJZIGINGSDATUM],
+        [WIJZIGER] = source.[WIJZIGER],
+        [BATCH_EXIT_FORM_KLANT_JN] = source.[BATCH_EXIT_FORM_KLANT_JN],
+        [BATCH_EXIT_FORM_SYSTEM_JN] = source.[BATCH_EXIT_FORM_SYSTEM_JN],
+        [MCS_ID] = source.[MCS_ID],
+        [MODULE] = source.[MODULE],
+        [MODULE_COLOR] = source.[MODULE_COLOR],
+        [FAVORITE_ALLOWED_JN] = source.[FAVORITE_ALLOWED_JN],
+        [DYN_COL_CANVAS_WIDTH] = source.[DYN_COL_CANVAS_WIDTH],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [ID],
+            [NAAM],
+            [PROGRAMMA_TYPE],
+            [LOG_ANNUL_JN],
+            [CHANGE_TOOLB_CMT_JN],
+            [PASWOORD],
+            [APE_ID],
+            [CONID],
+            [OMSCHRIJVING],
+            [EXPORT_JN],
+            [INFO_HOOGTE],
+            [INFO_BREEDTE],
+            [INFO_COORD_X],
+            [INFO_COORD_Y],
+            [INFO_VELD_BREEDTE],
+            [INFO_LABEL_BREEDTE],
+            [INFO_OMS_BREEDTE],
+            [SESSIE_INITIALISATIE],
+            [CREATIEDATUM],
+            [CREATOR],
+            [WIJZIGINGSDATUM],
+            [WIJZIGER],
+            [BATCH_EXIT_FORM_KLANT_JN],
+            [BATCH_EXIT_FORM_SYSTEM_JN],
+            [MCS_ID],
+            [MODULE],
+            [MODULE_COLOR],
+            [FAVORITE_ALLOWED_JN],
+            [DYN_COL_CANVAS_WIDTH],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[ID],
+            source.[NAAM],
+            source.[PROGRAMMA_TYPE],
+            source.[LOG_ANNUL_JN],
+            source.[CHANGE_TOOLB_CMT_JN],
+            source.[PASWOORD],
+            source.[APE_ID],
+            source.[CONID],
+            source.[OMSCHRIJVING],
+            source.[EXPORT_JN],
+            source.[INFO_HOOGTE],
+            source.[INFO_BREEDTE],
+            source.[INFO_COORD_X],
+            source.[INFO_COORD_Y],
+            source.[INFO_VELD_BREEDTE],
+            source.[INFO_LABEL_BREEDTE],
+            source.[INFO_OMS_BREEDTE],
+            source.[SESSIE_INITIALISATIE],
+            source.[CREATIEDATUM],
+            source.[CREATOR],
+            source.[WIJZIGINGSDATUM],
+            source.[WIJZIGER],
+            source.[BATCH_EXIT_FORM_KLANT_JN],
+            source.[BATCH_EXIT_FORM_SYSTEM_JN],
+            source.[MCS_ID],
+            source.[MODULE],
+            source.[MODULE_COLOR],
+            source.[FAVORITE_ALLOWED_JN],
+            source.[DYN_COL_CANVAS_WIDTH],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_TALGREK]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_TALGREK]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+-- Dynamic variables for BOEKJR
+DECLARE @CurrentYear INT = YEAR(GETDATE());
+DECLARE @PreviousYear INT = YEAR(GETDATE()) - 1;
+DECLARE @TwoYearsAgo INT = YEAR(GETDATE()) - 2;
+
+DECLARE @sql NVARCHAR(MAX);
+DECLARE @whereClause NVARCHAR(500);
+
+BEGIN TRY
+    -- Build WHERE clause based on @FullLoad parameter
+    IF @FullLoad = 1
+    BEGIN
+        -- Full load: current year and two previous years
+        SET @whereClause = 'WHERE BOEKJR IN (' + CAST(@CurrentYear AS VARCHAR) + ', ' + 
+                          CAST(@PreviousYear AS VARCHAR) + ', ' + CAST(@TwoYearsAgo AS VARCHAR) + ')';
+        SET @OutputMessage = 'Full Load successful for Years: ' + CAST(@TwoYearsAgo AS VARCHAR) + 
+                            ', ' + CAST(@PreviousYear AS VARCHAR) + ' and ' + CAST(@CurrentYear AS VARCHAR);
+    END
+    ELSE
+    BEGIN
+        -- Incremental load: current year and previous year only
+        SET @whereClause = 'WHERE BOEKJR IN (' + CAST(@CurrentYear AS VARCHAR) + ', ' + 
+                          CAST(@PreviousYear AS VARCHAR) + ')';
+        SET @OutputMessage = 'Incremental Load successful for Years: ' + CAST(@PreviousYear AS VARCHAR) + 
+                            ' and ' + CAST(@CurrentYear AS VARCHAR);
+    END
+
+    -- Build dynamic SQL for MERGE statement with DELETE clause
+    SET @sql = '
+    MERGE [dbo].[TALGREK] AS target
+    USING (
+        SELECT 
+            [ALGREK],
+            [BALGRPAKT],
+            [BALGRPPAS],
+            [BOEKJR],
+            [FIRKODE]  AS [FIRKODE],
+            [KOSTPL_2]  AS [KOSTPL_2],
+            [KOSTSRT]  AS [KOSTSRT],
+            [MUNT]  AS [MUNT],
+            [OMSCHR]  AS [OMSCHR],
+            [RUBRIEK]  AS [RUBRIEK],
+            [TYPE]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM FINACC.TALGREK ' + @whereClause + ''')
+    ) AS source ON target.ALGREK = source.ALGREK 
+    AND target.BOEKJR = source.BOEKJR 
+    AND target.FIRKODE = source.FIRKODE COLLATE CZECH_CI_AS
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [BALGRPAKT] = source.[BALGRPAKT],
+        [BALGRPPAS] = source.[BALGRPPAS],
+        [KOSTPL_2] = source.[KOSTPL_2],
+        [KOSTSRT] = source.[KOSTSRT],
+        [MUNT] = source.[MUNT],
+        [OMSCHR] = source.[OMSCHR],
+        [RUBRIEK] = source.[RUBRIEK],
+        [TYPE] = source.[TYPE],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [ALGREK],
+            [BALGRPAKT],
+            [BALGRPPAS],
+            [BOEKJR],
+            [FIRKODE],
+            [KOSTPL_2],
+            [KOSTSRT],
+            [MUNT],
+            [OMSCHR],
+            [RUBRIEK],
+            [TYPE],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[ALGREK],
+            source.[BALGRPAKT],
+            source.[BALGRPPAS],
+            source.[BOEKJR],
+            source.[FIRKODE],
+            source.[KOSTPL_2],
+            source.[KOSTSRT],
+            source.[MUNT],
+            source.[OMSCHR],
+            source.[RUBRIEK],
+            source.[TYPE],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_TAN_BUDGET]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_TAN_BUDGET]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+-- Dynamic variables for BOEKJR
+DECLARE @CurrentYear INT = YEAR(GETDATE());
+DECLARE @PreviousYear INT = YEAR(GETDATE()) - 1;
+DECLARE @NextYear INT = YEAR(GETDATE()) + 1;
+
+DECLARE @sql NVARCHAR(MAX);
+DECLARE @whereClause NVARCHAR(500);
+
+BEGIN TRY
+    -- Build WHERE clause based on @FullLoad parameter
+    IF @FullLoad = 1
+    BEGIN
+        -- Full load: previous, current, and next year (for budget planning)
+        SET @whereClause = 'WHERE BOEKJR IN (' + CAST(@PreviousYear AS VARCHAR) + ', ' + 
+                          CAST(@CurrentYear AS VARCHAR) + ', ' + CAST(@NextYear AS VARCHAR) + ')';
+        SET @OutputMessage = 'Full Load successful for Years: ' + CAST(@PreviousYear AS VARCHAR) + 
+                            ', ' + CAST(@CurrentYear AS VARCHAR) + ' and ' + CAST(@NextYear AS VARCHAR);
+    END
+    ELSE
+    BEGIN
+        -- Incremental load: current year only
+        SET @whereClause = 'WHERE BOEKJR = ' + CAST(@CurrentYear AS VARCHAR);
+        SET @OutputMessage = 'Incremental Load successful for Year: ' + CAST(@CurrentYear AS VARCHAR);
+    END
+
+    -- Build dynamic SQL for MERGE statement
+    SET @sql = '
+    MERGE [dbo].[TAN_BUDGET] AS target
+    USING (
+        SELECT 
+            [ALGREK],
+            [ANALPER],
+            [BOEKJR],
+            [BUDGET],
+            [CREA],
+            [WYZ],
+            [FIRKODE],
+            [KOSTSRT],
+            [SEQ],
+            [US],
+            [USCREA]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM FINACC.TAN_BUDGET ' + @whereClause + ''')
+    ) AS source ON target.ALGREK = source.ALGREK 
+    AND target.ANALPER = source.ANALPER
+    AND target.BOEKJR = source.BOEKJR 
+    AND target.FIRKODE = source.FIRKODE COLLATE Czech_CI_AS
+    AND target.KOSTSRT = source.KOSTSRT COLLATE Czech_CI_AS
+    AND target.SEQ = source.SEQ
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [BUDGET] = source.[BUDGET],
+        [CREA] = source.[CREA],
+        [WYZ] = source.[WYZ],
+        [US] = source.[US],
+        [USCREA] = source.[USCREA],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [ALGREK],
+            [ANALPER],
+            [BOEKJR],
+            [BUDGET],
+            [CREA],
+            [WYZ],
+            [FIRKODE],
+            [KOSTSRT],
+            [SEQ],
+            [US],
+            [USCREA],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[ALGREK],
+            source.[ANALPER],
+            source.[BOEKJR],
+            source.[BUDGET],
+            source.[CREA],
+            source.[WYZ],
+            source.[FIRKODE],
+            source.[KOSTSRT],
+            source.[SEQ],
+            source.[US],
+            source.[USCREA],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_TAN_COMBH]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_TAN_COMBH]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since TAN_COMBH appears to be a reference/configuration table without date filters,
+    -- we'll use a simpler approach
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for TAN_COMBH';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for TAN_COMBH';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[TAN_COMBH] AS target
+    USING (
+        SELECT 
+            [FIRKODE],
+            [SEQ],
+            [KOSTPL1],
+            [KOSTPL2],
+            [CREA],
+            [WYZ],
+            [US],
+            [USCREA]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM FINACC.TAN_COMBH'')
+    ) AS source ON target.FIRKODE = source.FIRKODE COLLATE Czech_CI_AS
+    AND target.SEQ = source.SEQ
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [KOSTPL1] = source.[KOSTPL1],
+        [KOSTPL2] = source.[KOSTPL2],
+        [CREA] = source.[CREA],
+        [WYZ] = source.[WYZ],
+        [US] = source.[US],
+        [USCREA] = source.[USCREA],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [FIRKODE],
+            [SEQ],
+            [KOSTPL1],
+            [KOSTPL2],
+            [CREA],
+            [WYZ],
+            [US],
+            [USCREA],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[FIRKODE],
+            source.[SEQ],
+            source.[KOSTPL1],
+            source.[KOSTPL2],
+            source.[CREA],
+            source.[WYZ],
+            source.[US],
+            source.[USCREA],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_TAN_KOSTPL]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_TAN_KOSTPL]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since TAN_KOSTPL appears to be a reference/master table without date filters,
+    -- we'll use a simpler approach
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for TAN_KOSTPL';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for TAN_KOSTPL';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[TAN_KOSTPL] AS target
+    USING (
+        SELECT 
+            [OMSCHR],
+            [FIRKODE],
+            [SYSTEEM],
+            [DIMENSIE],
+            [KOSTPL],
+            [CREA],
+            [WYZ],
+            [US],
+            [USCREA]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM FINACC.TAN_KOSTPL'')
+    ) AS source ON target.FIRKODE = source.FIRKODE COLLATE Czech_CI_AS
+    AND target.KOSTPL = source.KOSTPL COLLATE Czech_CI_AS
+    AND target.DIMENSIE = source.DIMENSIE
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [OMSCHR] = source.[OMSCHR],
+        [SYSTEEM] = source.[SYSTEEM],
+        [CREA] = source.[CREA],
+        [WYZ] = source.[WYZ],
+        [US] = source.[US],
+        [USCREA] = source.[USCREA],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [OMSCHR],
+            [FIRKODE],
+            [SYSTEEM],
+            [DIMENSIE],
+            [KOSTPL],
+            [CREA],
+            [WYZ],
+            [US],
+            [USCREA],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[OMSCHR],
+            source.[FIRKODE],
+            source.[SYSTEEM],
+            source.[DIMENSIE],
+            source.[KOSTPL],
+            source.[CREA],
+            source.[WYZ],
+            source.[US],
+            source.[USCREA],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_TAN_KOSTSRT]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_TAN_KOSTSRT]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since TAN_KOSTSRT appears to be a reference/master table without date filters,
+    -- we'll use a simpler approach
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for TAN_KOSTSRT';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for TAN_KOSTSRT';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[TAN_KOSTSRT] AS target
+    USING (
+        SELECT 
+            [OMSCHR],
+            [FIRKODE],
+            [KOSTSRT],
+            [CREA],
+            [WYZ],
+            [US],
+            [USCREA]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM FINACC.TAN_KOSTSRT'')
+    ) AS source ON target.FIRKODE = source.FIRKODE COLLATE Czech_CI_AS
+    AND target.KOSTSRT = source.KOSTSRT COLLATE Czech_CI_AS
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [OMSCHR] = source.[OMSCHR],
+        [CREA] = source.[CREA],
+        [WYZ] = source.[WYZ],
+        [US] = source.[US],
+        [USCREA] = source.[USCREA],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [OMSCHR],
+            [FIRKODE],
+            [KOSTSRT],
+            [CREA],
+            [WYZ],
+            [US],
+            [USCREA],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[OMSCHR],
+            source.[FIRKODE],
+            source.[KOSTSRT],
+            source.[CREA],
+            source.[WYZ],
+            source.[US],
+            source.[USCREA],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_TBOEKJR]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_TBOEKJR]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since TBOEKJR appears to be a reference table for book years,
+    -- we'll use a simpler approach
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for TBOEKJR';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for TBOEKJR';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[TBOEKJR] AS target
+    USING (
+        SELECT 
+            [BOEKJR],
+            [FIRKODE],
+            [CREA],
+            [WYZ],
+            [US],
+            [USCREA]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM FINACC.TBOEKJR'')
+    ) AS source ON target.BOEKJR = source.BOEKJR 
+    AND target.FIRKODE = source.FIRKODE COLLATE Czech_CI_AS 
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [CREA] = source.[CREA],
+        [WYZ] = source.[WYZ],
+        [US] = source.[US],
+        [USCREA] = source.[USCREA],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [BOEKJR],
+            [FIRKODE],
+            [CREA],
+            [WYZ],
+            [US],
+            [USCREA],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[BOEKJR],
+            source.[FIRKODE],
+            source.[CREA],
+            source.[WYZ],
+            source.[US],
+            source.[USCREA],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_TFIRMA]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_TFIRMA]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since TFIRMA appears to be a company master table,
+    -- we'll use a simpler approach
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for TFIRMA';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for TFIRMA';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[TFIRMA] AS target
+    USING (
+        SELECT 
+            [BTW_LAND],
+            [BTWNR],
+            [CREA],
+            [WYZ],
+            [FIRKODE],
+            [FIRNR],
+            [LOK],
+            [NAAM],
+            [POSTKOD],
+            [STRAAT],
+            [LOPBKJR],
+            [US],
+            [USCREA]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM FINACC.TFIRMA'')
+    ) AS source ON target.FIRKODE = source.FIRKODE COLLATE Czech_CI_AS
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [BTW_LAND] = source.[BTW_LAND],
+        [BTWNR] = source.[BTWNR],
+        [CREA] = source.[CREA],
+        [WYZ] = source.[WYZ],
+        [FIRNR] = source.[FIRNR],
+        [LOK] = source.[LOK],
+        [NAAM] = source.[NAAM],
+        [POSTKOD] = source.[POSTKOD],
+        [STRAAT] = source.[STRAAT],
+        [LOPBKJR] = source.[LOPBKJR],
+        [US] = source.[US],
+        [USCREA] = source.[USCREA],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [BTW_LAND],
+            [BTWNR],
+            [CREA],
+            [WYZ],
+            [FIRKODE],
+            [FIRNR],
+            [LOK],
+            [NAAM],
+            [POSTKOD],
+            [STRAAT],
+            [LOPBKJR],
+            [US],
+            [USCREA],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[BTW_LAND],
+            source.[BTWNR],
+            source.[CREA],
+            source.[WYZ],
+            source.[FIRKODE],
+            source.[FIRNR],
+            source.[LOK],
+            source.[NAAM],
+            source.[POSTKOD],
+            source.[STRAAT],
+            source.[LOPBKJR],
+            source.[US],
+            source.[USCREA],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_TLEVER]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_TLEVER]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since TLEVER appears to be a supplier master table,
+    -- we'll use a simpler approach
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for TLEVER';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for TLEVER';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[TLEVER] AS target
+    USING (
+        SELECT 
+            [FIRKODE],
+            [LEVERNR],
+            [NAAM],
+            [CREA],
+            [WYZ],
+            [US],
+            [USCREA]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM FINACC.TLEVER'')
+    ) AS source ON target.FIRKODE = source.FIRKODE COLLATE Czech_CI_AS
+    AND target.LEVERNR = source.LEVERNR 
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [NAAM] = source.[NAAM],
+        [CREA] = source.[CREA],
+        [WYZ] = source.[WYZ],
+        [US] = source.[US],
+        [USCREA] = source.[USCREA],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [FIRKODE],
+            [LEVERNR],
+            [NAAM],
+            [CREA],
+            [WYZ],
+            [US],
+            [USCREA],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[FIRKODE],
+            source.[LEVERNR],
+            source.[NAAM],
+            source.[CREA],
+            source.[WYZ],
+            source.[US],
+            source.[USCREA],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_TOMSCHR_BTA]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_TOMSCHR_BTA]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+-- Dynamic variables for BOEKJR
+DECLARE @CurrentYear INT = YEAR(GETDATE());
+DECLARE @PreviousYear INT = YEAR(GETDATE()) - 1;
+
+DECLARE @sql NVARCHAR(MAX);
+DECLARE @whereClause NVARCHAR(500);
+
+BEGIN TRY
+    -- Build WHERE clause based on @FullLoad parameter
+    IF @FullLoad = 1
+    BEGIN
+        -- Full load: current year and previous year
+        SET @whereClause = 'WHERE BOEKJR IN (' + CAST(@CurrentYear AS VARCHAR) + ', ' + CAST(@PreviousYear AS VARCHAR) + ')';
+        SET @OutputMessage = 'Full Load successful for Years: ' + CAST(@PreviousYear AS VARCHAR) + ' and ' + CAST(@CurrentYear AS VARCHAR);
+    END
+    ELSE
+    BEGIN
+        -- Incremental load: current year only
+        SET @whereClause = 'WHERE BOEKJR = ' + CAST(@CurrentYear AS VARCHAR);
+        SET @OutputMessage = 'Incremental Load successful for Year: ' + CAST(@CurrentYear AS VARCHAR);
+    END
+
+    -- Build dynamic SQL for MERGE statement with correct primary key columns
+    SET @sql = '
+    MERGE [dbo].[TOMSCHR_BTA] AS target
+    USING (
+        SELECT 
+            [FIRKODE] COLLATE DATABASE_DEFAULT AS [FIRKODE],
+            [TYPE],
+            [ALTERNAT],
+            [BOEKJR],
+            [BASISNR] COLLATE DATABASE_DEFAULT AS [BASISNR],
+            [TAAL] COLLATE DATABASE_DEFAULT AS [TAAL],
+            [OMSCHR] COLLATE DATABASE_DEFAULT AS [OMSCHR],
+            [GEBRUIK],
+            [CREA],
+            [WYZ],
+            [US] COLLATE DATABASE_DEFAULT AS [US],
+            [USCREA] COLLATE DATABASE_DEFAULT AS [USCREA],
+            [VIO_ID]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM FINACC.TOMSCHR_BTA ' + @whereClause + ''')
+    ) AS source ON target.FIRKODE = source.FIRKODE
+    AND target.TYPE = source.TYPE
+    AND target.BOEKJR = source.BOEKJR
+    AND target.ALTERNAT = source.ALTERNAT
+    AND target.BASISNR = source.BASISNR
+    AND target.TAAL = source.TAAL
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [OMSCHR] = source.[OMSCHR],
+        [GEBRUIK] = source.[GEBRUIK],
+        [CREA] = source.[CREA],
+        [WYZ] = source.[WYZ],
+        [US] = source.[US],
+        [USCREA] = source.[USCREA],
+        [VIO_ID] = source.[VIO_ID],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [FIRKODE],
+            [TYPE],
+            [ALTERNAT],
+            [BOEKJR],
+            [BASISNR],
+            [TAAL],
+            [OMSCHR],
+            [GEBRUIK],
+            [CREA],
+            [WYZ],
+            [US],
+            [USCREA],
+            [VIO_ID],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[FIRKODE],
+            source.[TYPE],
+            source.[ALTERNAT],
+            source.[BOEKJR],
+            source.[BASISNR],
+            source.[TAAL],
+            source.[OMSCHR],
+            source.[GEBRUIK],
+            source.[CREA],
+            source.[WYZ],
+            source.[US],
+            source.[USCREA],
+            source.[VIO_ID],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_TUSFIRM]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Load_TUSFIRM]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+DECLARE @sql NVARCHAR(MAX);
+
+BEGIN TRY
+    -- Build dynamic SQL for MERGE statement
+    -- Since TUSFIRM appears to be a user-company relationship table,
+    -- we'll use a simpler approach
+    
+    IF @FullLoad = 1
+    BEGIN
+        SET @OutputMessage = 'Full Load successful for TUSFIRM';
+    END
+    ELSE
+    BEGIN
+        SET @OutputMessage = 'Incremental Load successful for TUSFIRM';
+    END
+
+    SET @sql = '
+    MERGE [dbo].[TUSFIRM] AS target
+    USING (
+        SELECT 
+            [USID],
+            [FIRKODE],
+            [CREA],
+            [WYZ],
+            [US],
+            [USCREA]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM FINACC.TUSFIRM'')
+    ) AS source ON target.USID = source.USID COLLATE CZECH_CI_AS
+    AND target.FIRKODE = source.FIRKODE COLLATE CZECH_CI_AS
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [CREA] = source.[CREA],
+        [WYZ] = source.[WYZ],
+        [US] = source.[US],
+        [USCREA] = source.[USCREA],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [USID],
+            [FIRKODE],
+            [CREA],
+            [WYZ],
+            [US],
+            [USCREA],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[USID],
+            source.[FIRKODE],
+            source.[CREA],
+            source.[WYZ],
+            source.[US],
+            source.[USCREA],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE AND @FullLoad = 1 THEN
+        DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@FullLoad bit', @FullLoad;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[Get_LastLoadedDate]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE   PROCEDURE [exe].[Get_LastLoadedDate]
+@LoadType nvarchar(1),
+@TableName nvarchar(100),
+@Run nvarchar(250)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+	-- If the procedure is executed with a wrong table name, throw an error.
+	IF NOT EXISTS(SELECT 1 FROM sys.tables WHERE name = @TableName AND Type = N'U')
+	BEGIN
+        PRINT N'The table does not exist in the data warehouse.';
+        THROW 51000, N'The table does not exist in the data warehouse.', 1;
+        RETURN -1;
+	END
+	
+    -- If the table exists, but was never loaded before, there won't be a record for it in the table
+	-- A record is created for the @TableName, with the minimum possible date in the LoadDate column
+	IF NOT EXISTS (SELECT 1 FROM [exe].[Table_List] WHERE Table_Name = @TableName)
+		INSERT INTO [exe].[Table_List]
+		SELECT @TableName, @LoadType, @Run, '1753-01-01', NULL, NULL
+
+
+    -- Select the LoadDate for the @TableName
+	SELECT 
+		CASE WHEN [Last_Loaded_Date] IS NULL THEN '1753-01-01' ELSE [Last_Loaded_Date] END AS [LoadDate]
+    FROM [exe].[Table_List]
+    WHERE 
+		Table_Name = @TableName;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[Get_MaxCounter]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE   PROCEDURE [exe].[Get_MaxCounter]
+
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+SELECT MAX(ID) FROM Table_List
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[GetTableColumnDetails]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create PROCEDURE [exe].[GetTableColumnDetails]
+    @TableName NVARCHAR(128)
+AS
+BEGIN
+    DECLARE @SQL NVARCHAR(MAX);
+
+    SET @SQL = N'
+    SELECT 
+        COLUMN_NAME, 
+        DATA_TYPE, 
+        DATA_LENGTH, 
+        DATA_PRECISION, 
+        DATA_SCALE
+    FROM 
+        OPENQUERY(
+            FINACC, 
+            ''SELECT 
+                COLUMN_NAME, 
+                DATA_TYPE, 
+                DATA_LENGTH, 
+                DATA_PRECISION, 
+                DATA_SCALE 
+            FROM 
+                ALL_TAB_COLUMNS 
+            WHERE 
+                TABLE_NAME = ''''' + @TableName + ''''' 
+                AND OWNER = ''''FINACC''''''
+        );
+    ';
+
+    EXEC sp_executesql @SQL;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[GetTablePrimaryKey]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [exe].[GetTablePrimaryKey]
+
+    @TableName NVARCHAR(128)
+AS
+BEGIN
+    DECLARE @SQL NVARCHAR(MAX);
+
+    SET @SQL = N'
+    SELECT 
+        COLUMN_NAME
+    FROM 
+        OPENQUERY(FINACC, 
+        ''SELECT 
+            cols.column_name
+        FROM 
+            all_constraints cons, all_cons_columns cols
+        WHERE 
+            cols.table_name = ''''' + @TableName + '''''
+            AND cons.constraint_type = ''''P''''
+            AND cons.constraint_name = cols.constraint_name
+            AND cons.owner = cols.owner
+        '');
+    ';
+
+    EXEC sp_executesql @SQL;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[Select_Stored_Procedure_Load]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [exe].[Select_Stored_Procedure_Load] 
+	-- Add the parameters for the stored procedure here
+	@TableName nvarchar(100),
+	@LineageKey int,
+	@LoadType nvarchar(1),
+	@FullLoad bit
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+	--Load Full Tables
+	IF @LoadType = 'F' 
+	BEGIN
+	EXEC('dbo.Load_' + @TableName + ' ' + @LineageKey + ',' + @FullLoad)
+	END;
+
+	--Load Incremental tables from temp tables
+	IF @LoadType = 'I' AND @FullLoad = 0
+	BEGIN
+		EXEC('Incr.Load_' + @TableName + ' ' + @LineageKey + ',' + @FullLoad)
+	END;
+
+	--Full Load Incremental tables from temp tables
+	IF @LoadType = 'I' AND @FullLoad = 1
+	BEGIN
+		EXEC('Incr.Load_' + @TableName + ' ' +  @LineageKey + ',' + @FullLoad)
+	END;
+	
+END
+GO
+/****** Object:  StoredProcedure [exe].[Select_Table_For_Execute]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [exe].[Select_Table_For_Execute] 
+	-- Add the parameters for the stored procedure here
+	@CounterNumber Int,
+	@LoadType nvarchar(1),
+	@Run nvarchar(250)
+
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	
+    -- Insert statements for procedure here
+	SELECT Table_Name
+	FROM [exe].[Table_List]
+	WHERE @CounterNumber = ID
+	AND Run LIKE '%' + @Run + '%'
+	AND @LoadType = Load_Type
+END
+GO
+/****** Object:  StoredProcedure [exe].[Update_Lineage_Error]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE   PROCEDURE [exe].[Update_Lineage_Error]
+	-- Add the parameters for the stored procedure here
+	@LineageKey Int,
+	@OutputMessage nvarchar(max)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+
+	-- Update the lineage table for the most current table load with the finish date and 
+	-- 'S' in the Status column, meaning that the load finished successfully
+	UPDATE [exe].Lineage
+        SET 
+			Finish_Load = SYSDATETIME(),
+            Load_Status = 'E',
+			[Output_Message] = @OutputMessage
+    WHERE [Lineage_Key] = @LineageKey;
+
+END;
+GO
+/****** Object:  StoredProcedure [exe].[Update_Lineage_Start]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE   PROCEDURE [exe].[Update_Lineage_Start]
+@LoadType nvarchar(1),
+@TableName nvarchar(100)
+
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+/* 
+A new row is inserted into the Lineage table, with the table name that will be loaded,
+the starting date of the load, load type and load status.
+Possible values for Type:
+- F = Full load
+- I = Incremental load
+
+Possible values for Status:
+- P = In progress
+- E = Error
+- S = Success
+*/
+
+DECLARE @LastLoadDate datetime2(7) = (SELECT MAX([Finish_Load]) FROM [exe].[Lineage] WHERE Table_Name = @TableName);
+DECLARE @StartLoad datetime2(7) = GETDATE();
+DECLARE @GUID uniqueidentifier;
+SET @GUID = NEWID();
+
+INSERT INTO [exe].[Lineage](
+	 [Table_Name]
+	,[Start_Load]
+	,[Finish_Load]
+	,[Load_Status]
+	,[Type]
+	,[Last_Loaded_Date]
+	,[GUID]
+	)
+VALUES (
+	 @TableName
+	,@StartLoad
+	,NULL
+	,'P'
+	,@LoadType
+	,@LastLoadDate
+	,@GUID
+	);
+
+-- Select the key of the previously inserted row
+SELECT MAX([Lineage_Key]) AS LineageKey
+FROM [exe].[Lineage]
+WHERE Table_Name = @TableName  
+
+RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[Update_Lineage_Success]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+
+CREATE   PROCEDURE [exe].[Update_Lineage_Success]
+	-- Add the parameters for the stored procedure here
+	@LineageKey int,
+	@TableName nvarchar(250),
+	@OutputMessage nvarchar(max)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+	DECLARE @LastLoadDate datetime2(7) = (SELECT MAX([Finish_Load]) FROM [exe].[Lineage] WHERE Table_Name = @TableName);
+	DECLARE @RowCount bigint;
+	DECLARE @SQL nvarchar(MAX);
+
+	SET @SQL = N'SELECT @RC_OUT = COUNT(1) FROM ' + QUOTENAME(@TableName) + ' WHERE Lineage_Key = @LineageKey';
+
+	EXEC sp_executesql 
+		@SQL, 
+		N'@LineageKey nvarchar(255), @RC_OUT bigint OUTPUT', 
+		@LineageKey = @LineageKey, 
+		@RC_OUT = @RowCount OUTPUT;
+
+	-- Update the lineage table for the most current table load with the finish date and 
+	-- 'S' in the Status column, meaning that the load finished successfully
+	UPDATE [exe].Lineage
+        SET 
+			Finish_Load = GETDATE(),
+			[Last_Loaded_Date]	= @LastLoadDate,
+            Load_Status			= 'S',
+			[Row_Count]			= @RowCount,
+			Output_Message		= @OutputMessage
+    WHERE [Lineage_Key]			= @LineageKey;
+
+	SET @LastLoadDate =  (SELECT MAX([Finish_Load]) FROM [exe].[Lineage] WHERE Table_Name = @TableName)
+
+	-- Update the table list for the most current table load with the finish date, 
+	-- 'S' in the Status column, meaning that the load finished successfully 
+	UPDATE [exe].[Table_List]
+        SET 
+			[Last_Loaded_Date]	= GETDATE(),
+            [Load_Status]		= 'S',
+			Output_Message		= @OutputMessage
+    WHERE @TableName = Table_Name;
+
+END;
+GO
+/****** Object:  StoredProcedure [Incr].[Load_TAANDAGD]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [Incr].[Load_TAANDAGD]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+-- Dynamic variables for BOEKJR and PERIODE
+DECLARE @CurrentYear INT = YEAR(GETDATE());
+DECLARE @PreviousYear INT = YEAR(GETDATE()) - 1;
+DECLARE @CurrentPeriode INT = MONTH(GETDATE());
+DECLARE @LastPeriodYear INT = CASE WHEN MONTH(GETDATE()) = 1 THEN YEAR(GETDATE()) - 1 ELSE YEAR(GETDATE()) END;
+DECLARE @LastPeriode INT = CASE WHEN MONTH(GETDATE()) = 1 THEN 12 ELSE MONTH(GETDATE()) - 1 END;
+
+DECLARE @sql NVARCHAR(MAX);
+DECLARE @whereClause NVARCHAR(500);
+DECLARE @deleteWhereClause NVARCHAR(500);
+
+BEGIN TRY
+    -- Build WHERE clause based on @FullLoad parameter
+    IF @FullLoad = 1
+    BEGIN
+
+        -- Full load: current year and previous year (all periods)
+        SET @whereClause = 'WHERE BOEKJR IN (' + CAST(@CurrentYear AS VARCHAR) + ', ' + CAST(@PreviousYear AS VARCHAR) + ')';
+
+        -- Delete for all periods in these years
+        SET @deleteWhereClause = 'target.BOEKJR IN (' + CAST(@CurrentYear AS VARCHAR) + ', ' + CAST(@PreviousYear AS VARCHAR) + ')';
+        SET @OutputMessage = 'Full Load successful for Years: ' + CAST(@PreviousYear AS VARCHAR) + ' and ' + CAST(@CurrentYear AS VARCHAR);
+    END
+    ELSE
+    BEGIN
+
+        -- Incremental load: current period and last period only
+        SET @whereClause = 'WHERE (BOEKJR = ' + CAST(@LastPeriodYear AS VARCHAR) + ' AND PERIODE = ' + CAST(@LastPeriode AS VARCHAR) + ')
+                              OR (BOEKJR = ' + CAST(@CurrentYear AS VARCHAR) + ' AND PERIODE = ' + CAST(@CurrentPeriode AS VARCHAR) + ')';
+
+        -- Delete only for the specific periods being loaded
+        SET @deleteWhereClause = '(target.BOEKJR = ' + CAST(@LastPeriodYear AS VARCHAR) + ' AND target.PERIODE = ' + CAST(@LastPeriode AS VARCHAR) + ')
+                                  OR (target.BOEKJR = ' + CAST(@CurrentYear AS VARCHAR) + ' AND target.PERIODE = ' + CAST(@CurrentPeriode AS VARCHAR) + ')';
+
+        SET @OutputMessage = 'Incremental Load successful for Current Period: ' + CAST(@CurrentYear AS VARCHAR) + '-' + CAST(@CurrentPeriode AS VARCHAR) + 
+                            ' and Last Period: ' + CAST(@LastPeriodYear AS VARCHAR) + '-' + CAST(@LastPeriode AS VARCHAR);
+    END
+
+    -- Build dynamic SQL for MERGE statement with conditional DELETE
+    SET @sql = '
+    MERGE [dbo].[TAANDAGD] AS target
+    USING (
+        SELECT 
+            [ALGREK],
+            [BEDRAG],
+            [BOEKJR],
+            [CREA],
+            [WYZ],
+            [DAGBOEK],
+            [FIRKODE],
+            [OPMERK],
+            [PERIODE],
+            [ID] as [PK],
+            [TYPE_DAGB],
+            [US],
+            [USCREA],
+            DATEFROMPARTS(BOEKJR, PERIODE, 1) as [DATUM],
+            [VOLGNR],
+            [FAKTNR],
+            [REL_LEVERNR]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM FINACC.TAANDAGD ' + @whereClause + ''')
+    ) AS source ON target.PK = source.PK 
+    AND target.BOEKJR = source.BOEKJR 
+    AND target.PERIODE = source.PERIODE
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [ALGREK] = source.[ALGREK],
+        [BEDRAG] = source.[BEDRAG],
+        [CREA] = source.[CREA],
+        [WYZ] = source.[WYZ],
+        [DAGBOEK] = source.[DAGBOEK],
+        [FIRKODE] = source.[FIRKODE],
+        [OPMERK] = source.[OPMERK],
+        [TYPE_DAGB] = source.[TYPE_DAGB],
+        [US] = source.[US],
+        [USCREA] = source.[USCREA],
+        [DATUM] = source.[DATUM],
+        [VOLGNR] = source.[VOLGNR],
+        [FAKTNR] = source.[FAKTNR],
+        [REL_LEVERNR] = source.[REL_LEVERNR],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [ALGREK],
+            [BEDRAG],
+            [BOEKJR],
+            [CREA],
+            [WYZ],
+            [DAGBOEK],
+            [FIRKODE],
+            [OPMERK],
+            [PERIODE],
+            [PK],
+            [TYPE_DAGB],
+            [US],
+            [USCREA],
+            [DATUM],
+            [VOLGNR],
+            [FAKTNR],
+            [REL_LEVERNR],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[ALGREK],
+            source.[BEDRAG],
+            source.[BOEKJR],
+            source.[CREA],
+            source.[WYZ],
+            source.[DAGBOEK],
+            source.[FIRKODE],
+            source.[OPMERK],
+            source.[PERIODE],
+            source.[PK],
+            source.[TYPE_DAGB],
+            source.[US],
+            source.[USCREA],
+            source.[DATUM],
+            source.[VOLGNR],
+            source.[FAKTNR],
+            source.[REL_LEVERNR],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE 
+        AND (' + @deleteWhereClause + ') 
+    THEN DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [Incr].[Load_TALGDAGB]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [Incr].[Load_TALGDAGB]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+-- Dynamic variables for BOEKJR and PERIODE
+DECLARE @CurrentYear INT = YEAR(GETDATE());
+DECLARE @PreviousYear INT = YEAR(GETDATE()) - 1;
+DECLARE @CurrentPeriode INT = MONTH(GETDATE());
+DECLARE @LastPeriodYear INT = CASE WHEN MONTH(GETDATE()) = 1 THEN YEAR(GETDATE()) - 1 ELSE YEAR(GETDATE()) END;
+DECLARE @LastPeriode INT = CASE WHEN MONTH(GETDATE()) = 1 THEN 12 ELSE MONTH(GETDATE()) - 1 END;
+
+DECLARE @sql NVARCHAR(MAX);
+DECLARE @whereClause NVARCHAR(500);
+DECLARE @deleteWhereClause NVARCHAR(500);
+
+BEGIN TRY
+    -- Build WHERE clause based on @FullLoad parameter
+    IF @FullLoad = 1
+    BEGIN
+        -- Full load: current year and previous year (all periods)
+        SET @whereClause = 'WHERE BOEKJR IN (' + CAST(@CurrentYear AS VARCHAR) + ', ' + CAST(@PreviousYear AS VARCHAR) + ')';
+        -- Delete for all periods in these years
+        SET @deleteWhereClause = 'target.BOEKJR IN (' + CAST(@CurrentYear AS VARCHAR) + ', ' + CAST(@PreviousYear AS VARCHAR) + ')';
+        SET @OutputMessage = 'Full Load successful for Years: ' + CAST(@PreviousYear AS VARCHAR) + ' and ' + CAST(@CurrentYear AS VARCHAR);
+    END
+    ELSE
+    BEGIN
+        -- Incremental load: current period and last period only
+        SET @whereClause = 'WHERE (BOEKJR = ' + CAST(@LastPeriodYear AS VARCHAR) + ' AND PERIODE = ' + CAST(@LastPeriode AS VARCHAR) + ')
+                              OR (BOEKJR = ' + CAST(@CurrentYear AS VARCHAR) + ' AND PERIODE = ' + CAST(@CurrentPeriode AS VARCHAR) + ')';
+        -- Delete only for the specific periods being loaded
+        SET @deleteWhereClause = '(target.BOEKJR = ' + CAST(@LastPeriodYear AS VARCHAR) + ' AND target.PERIODE = ' + CAST(@LastPeriode AS VARCHAR) + ')
+                                  OR (target.BOEKJR = ' + CAST(@CurrentYear AS VARCHAR) + ' AND target.PERIODE = ' + CAST(@CurrentPeriode AS VARCHAR) + ')';
+        SET @OutputMessage = 'Incremental Load successful for Current Period: ' + CAST(@CurrentYear AS VARCHAR) + '-' + CAST(@CurrentPeriode AS VARCHAR) + 
+                            ' and Last Period: ' + CAST(@LastPeriodYear AS VARCHAR) + '-' + CAST(@LastPeriode AS VARCHAR);
+    END
+
+    -- Build dynamic SQL for MERGE statement with conditional DELETE
+    SET @sql = '
+    MERGE [dbo].[TALGDAGB] AS target
+    USING (
+        SELECT 
+            [ALGREK],
+            [BEDR],
+            [BOEKJR],
+            [CREA],
+            [WYZ],
+            [DAGBOEK],
+            [FIRKODE],
+            [OPM],
+            [PERIODE],
+            [ID] as [PK],
+            [TYPE],
+            [US],
+            [USCREA],
+            [VOLGNR],
+            [LEVFAKTNR],
+            [LEVERNR]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM FINACC.TALGDAGB ' + @whereClause + ''')
+    ) AS source ON target.PK = source.PK 
+    AND target.BOEKJR = source.BOEKJR 
+    AND target.PERIODE = source.PERIODE
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [ALGREK] = source.[ALGREK],
+        [BEDR] = source.[BEDR],
+        [CREA] = source.[CREA],
+        [WYZ] = source.[WYZ],
+        [DAGBOEK] = source.[DAGBOEK],
+        [FIRKODE] = source.[FIRKODE],
+        [OPM] = source.[OPM],
+        [TYPE] = source.[TYPE],
+        [US] = source.[US],
+        [USCREA] = source.[USCREA],
+        [VOLGNR] = source.[VOLGNR],
+        [LEVFAKTNR] = source.[LEVFAKTNR],
+        [LEVERNR] = source.[LEVERNR],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [ALGREK],
+            [BEDR],
+            [BOEKJR],
+            [CREA],
+            [WYZ],
+            [DAGBOEK],
+            [FIRKODE],
+            [OPM],
+            [PERIODE],
+            [PK],
+            [TYPE],
+            [US],
+            [USCREA],
+            [VOLGNR],
+            [LEVFAKTNR],
+            [LEVERNR],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[ALGREK],
+            source.[BEDR],
+            source.[BOEKJR],
+            source.[CREA],
+            source.[WYZ],
+            source.[DAGBOEK],
+            source.[FIRKODE],
+            source.[OPM],
+            source.[PERIODE],
+            source.[PK],
+            source.[TYPE],
+            source.[US],
+            source.[USCREA],
+            source.[VOLGNR],
+            source.[LEVFAKTNR],
+            source.[LEVERNR],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE 
+        AND (' + @deleteWhereClause + ') 
+    THEN DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [Incr].[Load_TAN_DET]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [Incr].[Load_TAN_DET]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+-- Dynamic variables for BOEKJR and PERIODE
+DECLARE @CurrentYear INT = YEAR(GETDATE());
+DECLARE @PreviousYear INT = YEAR(GETDATE()) - 1;
+DECLARE @CurrentPeriode INT = MONTH(GETDATE());
+DECLARE @LastPeriodYear INT = CASE WHEN MONTH(GETDATE()) = 1 THEN YEAR(GETDATE()) - 1 ELSE YEAR(GETDATE()) END;
+DECLARE @LastPeriode INT = CASE WHEN MONTH(GETDATE()) = 1 THEN 12 ELSE MONTH(GETDATE()) - 1 END;
+
+DECLARE @sql NVARCHAR(MAX);
+DECLARE @whereClause NVARCHAR(500);
+DECLARE @deleteWhereClause NVARCHAR(500);
+
+BEGIN TRY
+    -- Build WHERE clause based on @FullLoad parameter
+    -- Note: Including the VNALGREK > 13000 filter from original procedure
+    IF @FullLoad = 1
+    BEGIN
+        -- Full load: current year and previous year (all periods)
+        SET @whereClause = 'WHERE VNALGREK > 13000 AND BOEKJR IN (' + CAST(@CurrentYear AS VARCHAR) + ', ' + CAST(@PreviousYear AS VARCHAR) + ')';
+        -- Delete for all periods in these years (with VNALGREK filter)
+        SET @deleteWhereClause = 'target.VNALGREK > 13000 AND target.BOEKJR IN (' + CAST(@CurrentYear AS VARCHAR) + ', ' + CAST(@PreviousYear AS VARCHAR) + ')';
+        SET @OutputMessage = 'Full Load successful for Years: ' + CAST(@PreviousYear AS VARCHAR) + ' and ' + CAST(@CurrentYear AS VARCHAR);
+    END
+    ELSE
+    BEGIN
+        -- Incremental load: current period and last period only
+        SET @whereClause = 'WHERE VNALGREK > 13000 AND ((BOEKJR = ' + CAST(@LastPeriodYear AS VARCHAR) + ' AND PERIODE = ' + CAST(@LastPeriode AS VARCHAR) + ')
+                              OR (BOEKJR = ' + CAST(@CurrentYear AS VARCHAR) + ' AND PERIODE = ' + CAST(@CurrentPeriode AS VARCHAR) + '))';
+        -- Delete only for the specific periods being loaded (with VNALGREK filter)
+        SET @deleteWhereClause = 'target.VNALGREK > 13000 AND ((target.BOEKJR = ' + CAST(@LastPeriodYear AS VARCHAR) + ' AND target.PERIODE = ' + CAST(@LastPeriode AS VARCHAR) + ')
+                                  OR (target.BOEKJR = ' + CAST(@CurrentYear AS VARCHAR) + ' AND target.PERIODE = ' + CAST(@CurrentPeriode AS VARCHAR) + '))';
+        SET @OutputMessage = 'Incremental Load successful for Current Period: ' + CAST(@CurrentYear AS VARCHAR) + '-' + CAST(@CurrentPeriode AS VARCHAR) + 
+                            ' and Last Period: ' + CAST(@LastPeriodYear AS VARCHAR) + '-' + CAST(@LastPeriode AS VARCHAR);
+    END
+
+    -- Build dynamic SQL for MERGE statement with conditional DELETE
+    SET @sql = '
+    MERGE [dbo].[TAN_DET] AS target
+    USING (
+        SELECT DISTINCT
+            [BEDRAG],
+            [FIRKODE],
+            [BOEKJR],
+            [PERIODE],
+            [VERRNR],
+            [VERRVOLGNR],
+            [VNALGREK],
+            [NRSEQ]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM FINACC.TAN_DET ' + @whereClause + ''')
+    ) AS source ON target.VERRNR = source.VERRNR 
+    AND target.VERRVOLGNR = source.VERRVOLGNR 
+    AND target.NRSEQ = source.NRSEQ
+    AND target.BOEKJR = source.BOEKJR 
+    AND target.PERIODE = source.PERIODE
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [BEDRAG] = source.[BEDRAG],
+        [FIRKODE] = source.[FIRKODE],
+        [VNALGREK] = source.[VNALGREK],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [BEDRAG],
+            [FIRKODE],
+            [BOEKJR],
+            [PERIODE],
+            [VERRNR],
+            [VERRVOLGNR],
+            [VNALGREK],
+            [NRSEQ],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[BEDRAG],
+            source.[FIRKODE],
+            source.[BOEKJR],
+            source.[PERIODE],
+            source.[VERRNR],
+            source.[VERRVOLGNR],
+            source.[VNALGREK],
+            source.[NRSEQ],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE 
+        AND (' + @deleteWhereClause + ') 
+    THEN DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [Incr].[Load_TFINDAGB]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [Incr].[Load_TFINDAGB]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+-- Dynamic variables for BOEKJR and PERIODE
+DECLARE @CurrentYear INT = YEAR(GETDATE());
+DECLARE @PreviousYear INT = YEAR(GETDATE()) - 1;
+DECLARE @CurrentPeriode INT = MONTH(GETDATE());
+DECLARE @LastPeriodYear INT = CASE WHEN MONTH(GETDATE()) = 1 THEN YEAR(GETDATE()) - 1 ELSE YEAR(GETDATE()) END;
+DECLARE @LastPeriode INT = CASE WHEN MONTH(GETDATE()) = 1 THEN 12 ELSE MONTH(GETDATE()) - 1 END;
+
+DECLARE @sql NVARCHAR(MAX);
+DECLARE @whereClause NVARCHAR(500);
+DECLARE @deleteWhereClause NVARCHAR(500);
+
+BEGIN TRY
+    -- Build WHERE clause based on @FullLoad parameter
+    IF @FullLoad = 1
+    BEGIN
+        -- Full load: current year and previous year (all periods)
+        SET @whereClause = 'WHERE BOEKJR IN (' + CAST(@CurrentYear AS VARCHAR) + ', ' + CAST(@PreviousYear AS VARCHAR) + ')';
+        -- Delete for all periods in these years
+        SET @deleteWhereClause = 'target.BOEKJR IN (' + CAST(@CurrentYear AS VARCHAR) + ', ' + CAST(@PreviousYear AS VARCHAR) + ')';
+        SET @OutputMessage = 'Full Load successful for Years: ' + CAST(@PreviousYear AS VARCHAR) + ' and ' + CAST(@CurrentYear AS VARCHAR);
+    END
+    ELSE
+    BEGIN
+        -- Incremental load: current period and last period only
+        SET @whereClause = 'WHERE (BOEKJR = ' + CAST(@LastPeriodYear AS VARCHAR) + ' AND PERIODE = ' + CAST(@LastPeriode AS VARCHAR) + ')
+                              OR (BOEKJR = ' + CAST(@CurrentYear AS VARCHAR) + ' AND PERIODE = ' + CAST(@CurrentPeriode AS VARCHAR) + ')';
+        -- Delete only for the specific periods being loaded
+        SET @deleteWhereClause = '(target.BOEKJR = ' + CAST(@LastPeriodYear AS VARCHAR) + ' AND target.PERIODE = ' + CAST(@LastPeriode AS VARCHAR) + ')
+                                  OR (target.BOEKJR = ' + CAST(@CurrentYear AS VARCHAR) + ' AND target.PERIODE = ' + CAST(@CurrentPeriode AS VARCHAR) + ')';
+        SET @OutputMessage = 'Incremental Load successful for Current Period: ' + CAST(@CurrentYear AS VARCHAR) + '-' + CAST(@CurrentPeriode AS VARCHAR) + 
+                            ' and Last Period: ' + CAST(@LastPeriodYear AS VARCHAR) + '-' + CAST(@LastPeriode AS VARCHAR);
+    END
+
+    -- Build dynamic SQL for MERGE statement with conditional DELETE
+    SET @sql = '
+    MERGE [dbo].[TFINDAGB] AS target
+    USING (
+        SELECT 
+            [ALGREK],
+            [BEDRAG_MNTBKH],
+            [BOEKJR],
+            [CREA],
+            [WYZ],
+            [DAGBOEK],
+            [FIRKODE],
+            [OPMERK],
+            [PERIODE],
+            [ID] as [PK],
+            [TYPE_DAGB],
+            [US],
+            [USCREA],
+            [VERRNR],
+            DATEFROMPARTS(BOEKJR, PERIODE, 1) as [DATUM],
+            [VOLGNR],
+            [LEVERNR]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM FINACC.TFINDAGB ' + @whereClause + ''')
+    ) AS source ON target.PK = source.PK 
+    AND target.BOEKJR = source.BOEKJR 
+    AND target.PERIODE = source.PERIODE
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [ALGREK] = source.[ALGREK],
+        [BEDRAG_MNTBKH] = source.[BEDRAG_MNTBKH],
+        [CREA] = source.[CREA],
+        [WYZ] = source.[WYZ],
+        [DAGBOEK] = source.[DAGBOEK],
+        [FIRKODE] = source.[FIRKODE],
+        [OPMERK] = source.[OPMERK],
+        [TYPE_DAGB] = source.[TYPE_DAGB],
+        [US] = source.[US],
+        [USCREA] = source.[USCREA],
+        [VERRNR] = source.[VERRNR],
+        [DATUM] = source.[DATUM],
+        [VOLGNR] = source.[VOLGNR],
+        [LEVERNR] = source.[LEVERNR],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [ALGREK],
+            [BEDRAG_MNTBKH],
+            [BOEKJR],
+            [CREA],
+            [WYZ],
+            [DAGBOEK],
+            [FIRKODE],
+            [OPMERK],
+            [PERIODE],
+            [PK],
+            [TYPE_DAGB],
+            [US],
+            [USCREA],
+            [VERRNR],
+            [DATUM],
+            [VOLGNR],
+            [LEVERNR],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[ALGREK],
+            source.[BEDRAG_MNTBKH],
+            source.[BOEKJR],
+            source.[CREA],
+            source.[WYZ],
+            source.[DAGBOEK],
+            source.[FIRKODE],
+            source.[OPMERK],
+            source.[PERIODE],
+            source.[PK],
+            source.[TYPE_DAGB],
+            source.[US],
+            source.[USCREA],
+            source.[VERRNR],
+            source.[DATUM],
+            source.[VOLGNR],
+            source.[LEVERNR],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE 
+        AND (' + @deleteWhereClause + ') 
+    THEN DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [Incr].[Load_TVERDAGD]    Script Date: 26-8-2025 21:37:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [Incr].[Load_TVERDAGD]
+    @LineageKey BIGINT,
+    @FullLoad bit
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+DECLARE @OutputMessage NVARCHAR(250);
+DECLARE @RowCount INT = 0;
+
+-- Dynamic variables for BOEKJR and PERIODE
+DECLARE @CurrentYear INT = YEAR(GETDATE());
+DECLARE @PreviousYear INT = YEAR(GETDATE()) - 1;
+DECLARE @CurrentPeriode INT = MONTH(GETDATE());
+DECLARE @LastPeriodYear INT = CASE WHEN MONTH(GETDATE()) = 1 THEN YEAR(GETDATE()) - 1 ELSE YEAR(GETDATE()) END;
+DECLARE @LastPeriode INT = CASE WHEN MONTH(GETDATE()) = 1 THEN 12 ELSE MONTH(GETDATE()) - 1 END;
+
+DECLARE @sql NVARCHAR(MAX);
+DECLARE @whereClause NVARCHAR(500);
+DECLARE @deleteWhereClause NVARCHAR(500);
+
+BEGIN TRY
+    -- Build WHERE clause based on @FullLoad parameter
+    IF @FullLoad = 1
+    BEGIN
+        -- Full load: current year and previous year (all periods)
+        SET @whereClause = 'WHERE BOEKJR IN (' + CAST(@CurrentYear AS VARCHAR) + ', ' + CAST(@PreviousYear AS VARCHAR) + ')';
+        -- Delete for all periods in these years
+        SET @deleteWhereClause = 'target.BOEKJR IN (' + CAST(@CurrentYear AS VARCHAR) + ', ' + CAST(@PreviousYear AS VARCHAR) + ')';
+        SET @OutputMessage = 'Full Load successful for Years: ' + CAST(@PreviousYear AS VARCHAR) + ' and ' + CAST(@CurrentYear AS VARCHAR);
+    END
+    ELSE
+    BEGIN
+        -- Incremental load: current period and last period only
+        SET @whereClause = 'WHERE (BOEKJR = ' + CAST(@LastPeriodYear AS VARCHAR) + ' AND PERIODE = ' + CAST(@LastPeriode AS VARCHAR) + ')
+                              OR (BOEKJR = ' + CAST(@CurrentYear AS VARCHAR) + ' AND PERIODE = ' + CAST(@CurrentPeriode AS VARCHAR) + ')';
+        -- Delete only for the specific periods being loaded
+        SET @deleteWhereClause = '(target.BOEKJR = ' + CAST(@LastPeriodYear AS VARCHAR) + ' AND target.PERIODE = ' + CAST(@LastPeriode AS VARCHAR) + ')
+                                  OR (target.BOEKJR = ' + CAST(@CurrentYear AS VARCHAR) + ' AND target.PERIODE = ' + CAST(@CurrentPeriode AS VARCHAR) + ')';
+        SET @OutputMessage = 'Incremental Load successful for Current Period: ' + CAST(@CurrentYear AS VARCHAR) + '-' + CAST(@CurrentPeriode AS VARCHAR) + 
+                            ' and Last Period: ' + CAST(@LastPeriodYear AS VARCHAR) + '-' + CAST(@LastPeriode AS VARCHAR);
+    END
+
+    -- Build dynamic SQL for MERGE statement with conditional DELETE
+    SET @sql = '
+    MERGE [dbo].[TVERDAGD] AS target
+    USING (
+        SELECT 
+            [ALGREK],
+            [BEDRAG],
+            [BOEKJR],
+            [CREA],
+            [WYZ],
+            [DAGBOEK],
+            [FIRKODE],
+            [OPMERK],
+            [PERIODE],
+            [ID] as [PK],
+            [TYPE_DAGB],
+            [US],
+            [USCREA],
+            [FAKTNR],
+            DATEFROMPARTS(BOEKJR, PERIODE, 1) as [DATUM],
+            [VOLGNR],
+            [REL_LEVERNR]
+        FROM OPENQUERY(FINACC, 
+            ''SELECT * FROM FINACC.TVERDAGD ' + @whereClause + ''')
+    ) AS source ON target.PK = source.PK 
+    AND target.BOEKJR = source.BOEKJR 
+    AND target.PERIODE = source.PERIODE
+    WHEN MATCHED 
+    THEN UPDATE SET
+        [ALGREK] = source.[ALGREK],
+        [BEDRAG] = source.[BEDRAG],
+        [CREA] = source.[CREA],
+        [WYZ] = source.[WYZ],
+        [DAGBOEK] = source.[DAGBOEK],
+        [FIRKODE] = source.[FIRKODE],
+        [OPMERK] = source.[OPMERK],
+        [TYPE_DAGB] = source.[TYPE_DAGB],
+        [US] = source.[US],
+        [USCREA] = source.[USCREA],
+        [FAKTNR] = source.[FAKTNR],
+        [DATUM] = source.[DATUM],
+        [VOLGNR] = source.[VOLGNR],
+        [REL_LEVERNR] = source.[REL_LEVERNR],
+        [Lineage_Key] = ' + CAST(@LineageKey AS VARCHAR) + '
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (
+            [ALGREK],
+            [BEDRAG],
+            [BOEKJR],
+            [CREA],
+            [WYZ],
+            [DAGBOEK],
+            [FIRKODE],
+            [OPMERK],
+            [PERIODE],
+            [PK],
+            [TYPE_DAGB],
+            [US],
+            [USCREA],
+            [FAKTNR],
+            [DATUM],
+            [VOLGNR],
+            [REL_LEVERNR],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[ALGREK],
+            source.[BEDRAG],
+            source.[BOEKJR],
+            source.[CREA],
+            source.[WYZ],
+            source.[DAGBOEK],
+            source.[FIRKODE],
+            source.[OPMERK],
+            source.[PERIODE],
+            source.[PK],
+            source.[TYPE_DAGB],
+            source.[US],
+            source.[USCREA],
+            source.[FAKTNR],
+            source.[DATUM],
+            source.[VOLGNR],
+            source.[REL_LEVERNR],
+            ' + CAST(@LineageKey AS VARCHAR) + '
+        )
+    WHEN NOT MATCHED BY SOURCE 
+        AND (' + @deleteWhereClause + ') 
+    THEN DELETE;';
+   
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql;
+    
+    SET @RowCount = @@ROWCOUNT;
+
+    END TRY
+    BEGIN CATCH
+        SET @OutputMessage = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+
+    SELECT @RowCount, @OutputMessage;
+
+    RETURN 0;
+END;
+GO
