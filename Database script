@@ -1,20 +1,23 @@
 USE [TestDWH]
 GO
-/****** Object:  User [NT AUTHORITY\SYSTEM]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  User [NT AUTHORITY\SYSTEM]    Script Date: 27-8-2025 15:16:48 ******/
 CREATE USER [NT AUTHORITY\SYSTEM] FOR LOGIN [NT AUTHORITY\SYSTEM] WITH DEFAULT_SCHEMA=[dbo]
 GO
-/****** Object:  DatabaseRole [SQLArcExtensionUserRole]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  DatabaseRole [SQLArcExtensionUserRole]    Script Date: 27-8-2025 15:16:48 ******/
 CREATE ROLE [SQLArcExtensionUserRole]
 GO
 ALTER ROLE [SQLArcExtensionUserRole] ADD MEMBER [NT AUTHORITY\SYSTEM]
 GO
-/****** Object:  Schema [exe]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  Schema [exe]    Script Date: 27-8-2025 15:16:48 ******/
 CREATE SCHEMA [exe]
 GO
-/****** Object:  Schema [Test_Suite]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  Schema [Sox]    Script Date: 27-8-2025 15:16:48 ******/
+CREATE SCHEMA [Sox]
+GO
+/****** Object:  Schema [Test_Suite]    Script Date: 27-8-2025 15:16:48 ******/
 CREATE SCHEMA [Test_Suite]
 GO
-/****** Object:  UserDefinedFunction [exe].[fn_GetLastLoadType]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  UserDefinedFunction [exe].[fn_GetLastLoadType]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -40,7 +43,7 @@ BEGIN
     RETURN @LastLoadType;
 END
 GO
-/****** Object:  Table [exe].[Lineage]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  Table [exe].[Lineage]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -72,7 +75,7 @@ CREATE TABLE [exe].[Lineage](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  View [exe].[vw_Last_Successful_Load]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  View [exe].[vw_Last_Successful_Load]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -101,7 +104,7 @@ SELECT
 FROM LastLoad
 WHERE rn = 1;
 GO
-/****** Object:  View [exe].[vw_Load_Type_History]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  View [exe].[vw_Load_Type_History]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -124,7 +127,7 @@ WHERE l.Load_Status = 'S'
     AND l.Load_Type IS NOT NULL
 GROUP BY l.System, l.Table_Name, l.Load_Type;
 GO
-/****** Object:  Table [exe].[Table_List]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  Table [exe].[Table_List]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -167,7 +170,7 @@ CREATE TABLE [exe].[Table_List](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  View [exe].[v_Table_Status]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  View [exe].[v_Table_Status]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -215,7 +218,7 @@ LEFT JOIN (
 ) AS l ON tl.[System] = l.[System] AND tl.[Table_Name] = l.[Table_Name];
 
 GO
-/****** Object:  View [exe].[v_Load_Pattern_Reference]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  View [exe].[v_Load_Pattern_Reference]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -263,7 +266,7 @@ FROM (VALUES
      'Period-based fact tables')
 ) AS Patterns(Pattern, Description, Characteristics, Use_Case);
 GO
-/****** Object:  Table [dbo].[Calender]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  Table [dbo].[Calender]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -312,7 +315,7 @@ CREATE TABLE [dbo].[Calender](
 	[Lineage_Key] [bigint] NOT NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Cognos Accounts]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  Table [dbo].[Cognos Accounts]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -331,7 +334,7 @@ CREATE TABLE [dbo].[Cognos Accounts](
 	[Lineage_Key] [bigint] NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Entity]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  Table [dbo].[Entity]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -348,7 +351,7 @@ CREATE TABLE [dbo].[Entity](
 	[Lineage_Key] [bigint] NOT NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Entity Adjustments]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  Table [dbo].[Entity Adjustments]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -368,7 +371,7 @@ CREATE TABLE [dbo].[Entity Adjustments](
 	[ID] [bigint] IDENTITY(1,1) NOT NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[GL_Table]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  Table [dbo].[GL_Table]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -391,7 +394,7 @@ CREATE TABLE [dbo].[GL_Table](
 	[Entity Code] [nvarchar](250) NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[GL_Transactions]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  Table [dbo].[GL_Transactions]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -433,7 +436,7 @@ CREATE TABLE [dbo].[GL_Transactions](
 	[F_ID] [bigint] NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Ledgerbudget]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  Table [dbo].[Ledgerbudget]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -455,7 +458,7 @@ CREATE TABLE [dbo].[Ledgerbudget](
 	[Site_Table_Key] [bigint] NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Sites]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  Table [dbo].[Sites]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -470,7 +473,7 @@ CREATE TABLE [dbo].[Sites](
 	[Lineage_Key] [int] NOT NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Uploadfile]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  Table [dbo].[Uploadfile]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -506,7 +509,25 @@ CREATE TABLE [dbo].[Uploadfile](
 	[Entity_Table_Key] [bigint] NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [Test_Suite].[Test_Suite_Results]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  Table [Sox].[Users]    Script Date: 27-8-2025 15:16:48 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [Sox].[Users](
+	[ID] [bigint] IDENTITY(1,1) NOT NULL,
+	[AccountStatus] [varchar](50) NULL,
+	[ApplicationUser] [varchar](50) NULL,
+	[IsDBA] [varchar](3) NULL,
+	[OracleUser] [nvarchar](50) NULL,
+	[Source] [varchar](50) NULL,
+	[UserProfile] [varchar](50) NULL,
+	[USID] [nvarchar](30) NULL,
+	[Valid_From] [datetime2](7) NULL,
+	[Lineage_Key] [bigint] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [Test_Suite].[Test_Suite_Results]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -560,7 +581,7 @@ ALTER TABLE [exe].[Table_List]  WITH CHECK ADD  CONSTRAINT [CK__Table_Lis__Load_
 GO
 ALTER TABLE [exe].[Table_List] CHECK CONSTRAINT [CK__Table_Lis__Load___628FA481]
 GO
-/****** Object:  StoredProcedure [dbo].[Load_Entity_AXBE_DATAAREA]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [dbo].[Load_Entity_AXBE_DATAAREA]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -729,7 +750,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_Entity_AXNL_DATAAREA]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [dbo].[Load_Entity_AXNL_DATAAREA]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -897,7 +918,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_Entity_FINACC_TFIRMA]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [dbo].[Load_Entity_FINACC_TFIRMA]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1065,12 +1086,13 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Table_AXBE_LEDGERTABLE]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [dbo].[Load_Entity_SAP-VANESCH]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE   PROCEDURE [dbo].[Load_GL_Table_AXBE_LEDGERTABLE]
+-- Create or modify the procedure for loading data into the staging table
+CREATE PROCEDURE [dbo].[Load_Entity_SAP-VANESCH]
     @LineageKey INT,
     @LoadType CHAR(1) = 'F',  -- F=Full, I=Incremental
     @LastLoadDate DATETIME2(7) = NULL
@@ -1085,77 +1107,108 @@ BEGIN
     DECLARE @RowsUpdated INT = 0;
     DECLARE @RowsDeleted INT = 0;
     DECLARE @OutputMessage NVARCHAR(MAX);
-    DECLARE @System NVARCHAR(25) = 'AXBE';
-    DECLARE @TableName NVARCHAR(100) = 'GL_Table_AXBE_LEDGERTABLE';
+    DECLARE @System NVARCHAR(25) = 'SAP-VANESCH';
+    DECLARE @TableName NVARCHAR(100) = 'Entity_SAP-VANESCH';
     
     BEGIN TRY
         
         BEGIN TRANSACTION;
         
-        -- Delete existing AXBE records (since this table does full refresh for AXBE)
-        DELETE FROM [dbo].[GL_Table] 
-        WHERE [System] = 'AXBE';
+        -- Create temp table for capturing merge output
+        CREATE TABLE #MergeOutput (
+            ActionType NVARCHAR(10)
+        );
         
-        SET @RowsDeleted = @@ROWCOUNT;
+        -- MERGE statement for Entity table
+        MERGE [dbo].[Entity] AS target
+        USING (
+            SELECT 
+                 ea.[Country]
+                ,ea.[SB Code]
+                ,ea.[Entity Code]
+                ,ea.[Entity Description]
+                ,'65' AS [Entity System Code]
+                ,'SAP-VANESCH' AS [Entity System Description]
+                ,'SAP-VANESCH' AS [System]
+                ,@LineageKey AS [Lineage_Key]
+            FROM [Entity Adjustments] ea
+            WHERE ea.[System] = 'SAP-VANESCH'
+                AND ea.Active = 1
+            -- For incremental loads, you could add a WHERE clause here if source has timestamps
+            -- WHERE (@LoadType = 'F' OR ea.ModifiedDate > @LastLoadDate)
+        ) AS source 
+        ON target.[System] = source.[System]
+        AND target.[Entity System Code] = source.[Entity System Code] COLLATE SQL_Latin1_General_CP1_CI_AS
         
-        -- Insert new data from staging
-        INSERT INTO [dbo].[GL_Table] (
-            [System],
-            [BOEKJR],
-            [Cognos_Account],
-            [Description Cognos accts],
-            [GL Account],
-            [GL Account Description],
-            [Entity System Code],
+        -- Update existing records if any column has changed
+        WHEN MATCHED AND (
+            ISNULL(target.[Country], '') != ISNULL(source.[Country], '') OR
+            ISNULL(target.[SB Code], '') != ISNULL(source.[SB Code], '') OR
+            ISNULL(target.[Entity Code], '') != ISNULL(source.[Entity Code], '') OR
+            ISNULL(target.[Entity Description], '') != ISNULL(source.[Entity Description], '') OR
+            ISNULL(target.[Entity System Description], '') != ISNULL(source.[Entity System Description] COLLATE SQL_Latin1_General_CP1_CI_AS, '')
+        ) THEN UPDATE SET
+            [Country] = source.[Country],
+            [SB Code] = source.[SB Code],
+            [Entity Code] = source.[Entity Code],
+            [Entity Description] = source.[Entity Description],
+            [Entity System Description] = source.[Entity System Description],
+            [Lineage_Key] = source.[Lineage_Key]
+            
+        -- Insert new records
+        WHEN NOT MATCHED BY TARGET THEN INSERT (
+            [Country],
+            [SB Code],
             [Entity Code],
-            [BS\IS],
-            [Balance/Cost Group],
-            [Cost Center],
-            [Counterparty Code],
-            [Counterparty Name],
+            [Entity Description],
+            [Entity System Code],
+            [Entity System Description],
+            [System],
             [Lineage_Key]
         )
-        SELECT 
-            'AXBE' AS [System],
-            0 AS [BOEKJR],  -- Cannot be NULL because this is the primary key of the table
-            C.[Cognos_Account],
-            C.[Description Cognos accts],
-            ACCOUNTNUM AS [GL Account],
-            ACCOUNTNAME AS [GL Account Description],
-            DATAAREAID AS [Entity System Code],  -- Cannot be NULL because this is the primary key of the table
-            C.[Entity Code],
-            CASE 
-                WHEN ISNUMERIC(COMPANYGROUPACCOUNT) = 1 THEN 'BS'
-                WHEN COMPANYGROUPACCOUNT = ' ' THEN ' '
-                ELSE 'IS'
-            END AS [BS\IS],
-            COMPANYGROUPACCOUNT AS [Balance/Cost Group],
-            NULL AS [Cost Center],
-            C.[Counterparty Code],
-            C.[Counterparty Name],
-            @LineageKey AS [Lineage_Key]
-        FROM STAGING_AXBE.dbo.LEDGERTABLE l
-        LEFT JOIN [dbo].[Cognos Accounts] C 
-            ON 'AXBE' = C.System 
-            AND C.[GL Account] = l.ACCOUNTNUM COLLATE SQL_Latin1_General_CP1_CI_AS
-            AND C.[Balance/Cost Group] = l.COMPANYGROUPACCOUNT  COLLATE SQL_Latin1_General_CP1_CI_AS 
-            AND C.[Entity System Code] = l.DATAAREAID  COLLATE SQL_Latin1_General_CP1_CI_AS
-        -- For incremental loads, add WHERE clause if source has timestamps
-        -- WHERE (@LoadType = 'F' OR l.ModifiedDate > @LastLoadDate)
-        ;
+        VALUES (
+            source.[Country],
+            source.[SB Code],
+            source.[Entity Code],
+            source.[Entity Description],
+            source.[Entity System Code],
+            source.[Entity System Description],
+            source.[System],
+            source.[Lineage_Key]
+        )
         
-        SET @RowsInserted = @@ROWCOUNT;
-        SET @RowCount = @RowsInserted + @RowsDeleted;
+        -- Delete records that no longer exist in source (only for SAP-VANESCH system)
+        -- For incremental loads, you might want to skip the DELETE clause
+        WHEN NOT MATCHED BY SOURCE 
+            AND target.[System] = 'SAP-VANESCH'
+            AND @LoadType = 'F'  -- Only delete on full loads
+        THEN DELETE
+        
+        -- Output clause to capture what happened
+        OUTPUT $action INTO #MergeOutput(ActionType);
+        
+        -- Get the counts from the merge output
+        SELECT 
+            @RowsInserted = COUNT(CASE WHEN ActionType = 'INSERT' THEN 1 END),
+            @RowsUpdated = COUNT(CASE WHEN ActionType = 'UPDATE' THEN 1 END),
+            @RowsDeleted = COUNT(CASE WHEN ActionType = 'DELETE' THEN 1 END)
+        FROM #MergeOutput;
+        
+        SET @RowCount = @RowsInserted + @RowsUpdated + @RowsDeleted;
+        
+        -- Clean up temp table
+        DROP TABLE #MergeOutput;
         
         COMMIT TRANSACTION;
         
         -- Build success message
         SET @OutputMessage = CONCAT(
-            'GL Table AXBE load completed. ',
+            'Entity SAP-VANESCH load completed. ',
             'Type: ', CASE WHEN @LoadType = 'F' THEN 'Full' ELSE 'Incremental' END,
             ' | From: ', CONVERT(VARCHAR(30), @LastLoadDate, 120),
             ' | Rows affected: ', @RowCount,
             ' (Inserted: ', @RowsInserted,
+            ', Updated: ', @RowsUpdated,
             ', Deleted: ', @RowsDeleted, ')'
         );
         
@@ -1170,6 +1223,10 @@ BEGIN
     BEGIN CATCH
         IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION;
+        
+        -- Clean up temp table if it exists
+        IF OBJECT_ID('tempdb..#MergeOutput') IS NOT NULL
+            DROP TABLE #MergeOutput;
         
         -- Capture error details
         DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
@@ -1196,7 +1253,208 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Table_AXNL_LEDGERTABLE]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Table_AXBE_LEDGERTABLE]    Script Date: 27-8-2025 15:16:48 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE   PROCEDURE [dbo].[Load_GL_Table_AXBE_LEDGERTABLE]
+    @LineageKey INT,
+    @LoadType CHAR(1) = 'F',  -- F=Full, I=Incremental
+    @LastLoadDate DATETIME2(7) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+    
+    -- Variables for tracking results
+    DECLARE @RowCount INT = 0;
+    DECLARE @RowsInserted INT = 0;
+    DECLARE @RowsUpdated INT = 0;
+    DECLARE @RowsDeleted INT = 0;
+    DECLARE @OutputMessage NVARCHAR(MAX);
+    DECLARE @System NVARCHAR(25) = 'AXBE';
+    DECLARE @TableName NVARCHAR(100) = 'GL_Table_AXBE_LEDGERTABLE';
+    
+    BEGIN TRY
+        
+        BEGIN TRANSACTION;
+        
+        -- Create temp table for capturing merge output
+        CREATE TABLE #MergeOutput (
+            ActionType NVARCHAR(10)
+        );
+        
+        -- MERGE statement for GL_Table
+        MERGE [dbo].[GL_Table] AS target
+        USING (
+            SELECT 
+                'AXBE' AS [System],
+                0 AS [BOEKJR],
+                C.[Cognos_Account],
+                C.[Description Cognos accts],
+                ACCOUNTNUM AS [GL Account],
+                ACCOUNTNAME AS [GL Account Description],
+                DATAAREAID AS [Entity System Code],
+                C.[Entity Code],
+                CASE 
+                    WHEN ISNUMERIC(COMPANYGROUPACCOUNT) = 1 THEN 'BS'
+                    WHEN COMPANYGROUPACCOUNT = ' ' THEN ' '
+                    ELSE 'IS'
+                END AS [BS\IS],
+                COMPANYGROUPACCOUNT AS [Balance/Cost Group],
+                NULL AS [Cost Center],
+                C.[Counterparty Code],
+                C.[Counterparty Name],
+                @LineageKey AS [Lineage_Key]
+            FROM STAGING_AXBE.dbo.LEDGERTABLE l
+            LEFT JOIN [dbo].[Cognos Accounts] C 
+                ON 'AXBE' = C.System 
+                AND C.[GL Account] = l.ACCOUNTNUM COLLATE SQL_Latin1_General_CP1_CI_AS
+                AND C.[Balance/Cost Group] = l.COMPANYGROUPACCOUNT COLLATE SQL_Latin1_General_CP1_CI_AS 
+                AND C.[Entity System Code] = l.DATAAREAID COLLATE SQL_Latin1_General_CP1_CI_AS
+            -- For incremental loads, add WHERE clause if source has timestamps
+            -- WHERE (@LoadType = 'F' OR l.ModifiedDate > @LastLoadDate)
+        ) AS source 
+        ON target.[System] = source.[System] COLLATE SQL_Latin1_General_CP1_CI_AS
+            AND target.[GL Account] = source.[GL Account] COLLATE SQL_Latin1_General_CP1_CI_AS
+            AND target.[Entity System Code] = source.[Entity System Code] COLLATE SQL_Latin1_General_CP1_CI_AS
+            AND target.[BOEKJR] = source.[BOEKJR] 
+        
+        -- Update existing records if any column has changed
+        WHEN MATCHED AND (
+            ISNULL(target.[Cognos_Account], '') != ISNULL(source.[Cognos_Account], '') OR
+            ISNULL(target.[Description Cognos accts], '') != ISNULL(source.[Description Cognos accts], '') OR
+            ISNULL(target.[GL Account Description], '') != ISNULL(source.[GL Account Description] COLLATE SQL_Latin1_General_CP1_CI_AS, '') OR
+            ISNULL(target.[Entity Code], '') != ISNULL(source.[Entity Code], '') OR
+            ISNULL(target.[BS\IS], '') != ISNULL(source.[BS\IS], '') OR
+            ISNULL(target.[Balance/Cost Group], '') != ISNULL(source.[Balance/Cost Group] COLLATE SQL_Latin1_General_CP1_CI_AS, '') OR
+            ISNULL(target.[Cost Center], '') != ISNULL(source.[Cost Center], '') OR
+            ISNULL(target.[Counterparty Code], '') != ISNULL(source.[Counterparty Code], '') OR
+            ISNULL(target.[Counterparty Name], '') != ISNULL(source.[Counterparty Name], '')
+        ) THEN UPDATE SET
+            target.[Cognos_Account] = source.[Cognos_Account],
+            target.[Description Cognos accts] = source.[Description Cognos accts],
+            target.[GL Account Description] = source.[GL Account Description],
+            target.[Entity Code] = source.[Entity Code],
+            target.[BS\IS] = source.[BS\IS],
+            target.[Balance/Cost Group] = source.[Balance/Cost Group],
+            target.[Cost Center] = source.[Cost Center],
+            target.[Counterparty Code] = source.[Counterparty Code],
+            target.[Counterparty Name] = source.[Counterparty Name],
+            target.[Lineage_Key] = source.[Lineage_Key]
+            
+        -- Insert new records
+        WHEN NOT MATCHED BY TARGET THEN INSERT (
+            [System],
+            [BOEKJR],
+            [Cognos_Account],
+            [Description Cognos accts],
+            [GL Account],
+            [GL Account Description],
+            [Entity System Code],
+            [Entity Code],
+            [BS\IS],
+            [Balance/Cost Group],
+            [Cost Center],
+            [Counterparty Code],
+            [Counterparty Name],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[System],
+            source.[BOEKJR],
+            source.[Cognos_Account],
+            source.[Description Cognos accts],
+            source.[GL Account],
+            source.[GL Account Description],
+            source.[Entity System Code],
+            source.[Entity Code],
+            source.[BS\IS],
+            source.[Balance/Cost Group],
+            source.[Cost Center],
+            source.[Counterparty Code],
+            source.[Counterparty Name],
+            source.[Lineage_Key]
+        )
+        
+        -- Delete records that no longer exist in source (only for AXBE system)
+        -- For incremental loads, you might want to skip the DELETE clause
+        WHEN NOT MATCHED BY SOURCE 
+            AND target.[System] = 'AXBE'
+            AND @LoadType = 'F'  -- Only delete on full loads
+        THEN DELETE
+        
+        -- Output clause to capture what happened
+        OUTPUT $action INTO #MergeOutput(ActionType);
+        
+        -- Get the counts from the merge output
+        SELECT 
+            @RowsInserted = COUNT(CASE WHEN ActionType = 'INSERT' THEN 1 END),
+            @RowsUpdated = COUNT(CASE WHEN ActionType = 'UPDATE' THEN 1 END),
+            @RowsDeleted = COUNT(CASE WHEN ActionType = 'DELETE' THEN 1 END)
+        FROM #MergeOutput;
+        
+        SET @RowCount = @RowsInserted + @RowsUpdated + @RowsDeleted;
+        
+        -- Clean up temp table
+        DROP TABLE #MergeOutput;
+        
+        COMMIT TRANSACTION;
+        
+        -- Build success message
+        SET @OutputMessage = CONCAT(
+            'GL Table AXBE load completed. ',
+            'Type: ', CASE WHEN @LoadType = 'F' THEN 'Full' ELSE 'Incremental' END,
+            ' | From: ', CONVERT(VARCHAR(30), @LastLoadDate, 120),
+            ' | Rows affected: ', @RowCount,
+            ' (Inserted: ', @RowsInserted,
+            ', Updated: ', @RowsUpdated,
+            ', Deleted: ', @RowsDeleted, ')'
+        );
+        
+        -- Return results for lineage tracking
+        -- This is what the framework expects
+        SELECT @RowCount AS [RowCount], @OutputMessage AS OutputMessage;
+        
+        PRINT @OutputMessage;
+        RETURN 0;
+        
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        
+        -- Clean up temp table if it exists
+        IF OBJECT_ID('tempdb..#MergeOutput') IS NOT NULL
+            DROP TABLE #MergeOutput;
+        
+        -- Capture error details
+        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @ErrorNumber INT = ERROR_NUMBER();
+        DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+        DECLARE @ErrorState INT = ERROR_STATE();
+        DECLARE @ErrorLine INT = ERROR_LINE();
+        
+        -- Build error message
+        SET @OutputMessage = CONCAT(
+            'Error ', @ErrorNumber,
+            ' at line ', @ErrorLine, ': ', @ErrorMessage
+        );
+        
+        -- Return error for lineage tracking
+        SET @RowCount = 0;
+        SELECT @RowCount AS [RowCount], @OutputMessage AS OutputMessage;
+        
+        -- Log error for debugging
+        PRINT @OutputMessage;
+        
+        -- Don't re-throw since we're returning the error info
+        RETURN -1;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_GL_Table_AXNL_LEDGERTABLE]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1327,12 +1585,12 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Table_FINACC_TALGREK]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Table_FINACC_TALGREK]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE   PROCEDURE [dbo].[Load_GL_Table_FINACC_TALGREK]
+CREATE PROCEDURE [dbo].[Load_GL_Table_FINACC_TALGREK]
     @LineageKey INT,
     @LoadType CHAR(1) = 'F',  -- F=Full, I=Incremental
     @LastLoadDate DATETIME2(7) = NULL
@@ -1354,14 +1612,90 @@ BEGIN
         
         BEGIN TRANSACTION;
         
-        -- Delete existing FINACC records (since this table does full refresh for FINACC)
-        DELETE FROM [dbo].[GL_Table] 
-        WHERE [System] = 'FINACC';
+        -- Create temp table for capturing merge output
+        CREATE TABLE #MergeOutput (
+            ActionType NVARCHAR(10)
+        );
         
-        SET @RowsDeleted = @@ROWCOUNT;
+        -- MERGE statement for GL_Table
+        MERGE [dbo].[GL_Table] AS target
+        USING (
+            SELECT
+                'FINACC' AS [System],
+                T.BOEKJR,
+                C.[Cognos_Account],
+                C.[Description Cognos accts],
+                CAST(T.ALGREK AS NVARCHAR(20)) AS [GL Account],
+                T.OMSCHR AS [GL Account Description],
+                T.FIRKODE as [Entity System Code],
+                C.[Entity Code],
+                CASE
+                    WHEN TRY_CAST(
+                        CASE 
+                            WHEN T.KOSTSRT IS NOT NULL THEN T.KOSTSRT 
+                            WHEN T.BALGRPPAS IS NOT NULL THEN T.BALGRPPAS 
+                            ELSE T.BALGRPAKT 
+                        END AS NUMERIC) IS NOT NULL THEN 'BS'
+                    WHEN 
+                        CASE 
+                            WHEN T.KOSTSRT IS NOT NULL THEN T.KOSTSRT 
+                            WHEN T.BALGRPPAS IS NOT NULL THEN T.BALGRPPAS 
+                            ELSE T.BALGRPAKT 
+                        END = ' ' THEN ' '
+                    ELSE 'IS'
+                END AS [BS\IS],
+                CASE 
+                    WHEN T.KOSTSRT IS NOT NULL THEN T.KOSTSRT 
+                    WHEN T.BALGRPPAS IS NOT NULL THEN T.BALGRPPAS 
+                    ELSE T.BALGRPAKT 
+                END AS [Balance/Cost Group],
+                T.KOSTPL_2 AS [Cost Center],
+                C.[Counterparty Code],
+                C.[Counterparty Name],
+                @LineageKey AS [Lineage_Key]
+            FROM STAGING_FINACC.dbo.[TALGREK] AS T
+            LEFT JOIN [dbo].[Cognos Accounts] C 
+                ON 'FINACC' = C.System
+                AND C.[GL Account] = CAST(T.ALGREK AS NVARCHAR(20))
+                AND C.[Balance/Cost Group] = CASE 
+                                                WHEN T.KOSTSRT  IS NOT NULL THEN T.KOSTSRT COLLATE SQL_Latin1_General_CP1_CI_AS 
+                                                WHEN T.BALGRPPAS IS NOT NULL THEN T.BALGRPPAS COLLATE SQL_Latin1_General_CP1_CI_AS
+                                                ELSE T.BALGRPAKT COLLATE SQL_Latin1_General_CP1_CI_AS
+                                            END
+                AND C.[Entity System Code] = T.FIRKODE COLLATE SQL_Latin1_General_CP1_CI_AS
+            -- For incremental loads, add WHERE clause if source has timestamps
+            -- WHERE (@LoadType = 'F' OR T.ModifiedDate > @LastLoadDate)
+        ) AS source 
+        ON target.[System] = source.[System]
+            AND target.[GL Account] = source.[GL Account]
+            AND target.[Entity System Code] = source.[Entity System Code] COLLATE SQL_Latin1_General_CP1_CI_AS
+            AND target.[BOEKJR] = source.[BOEKJR]
         
-        -- Insert new data from staging
-        INSERT INTO [dbo].[GL_Table] (
+        -- Update existing records if any column has changed
+        WHEN MATCHED AND (
+            ISNULL(target.[Cognos_Account], '') != ISNULL(source.[Cognos_Account], '') OR
+            ISNULL(target.[Description Cognos accts], '') != ISNULL(source.[Description Cognos accts], '') OR
+            ISNULL(target.[GL Account Description], '') != ISNULL(source.[GL Account Description] COLLATE SQL_Latin1_General_CP1_CI_AS, '') OR
+            ISNULL(target.[Entity Code], '') != ISNULL(source.[Entity Code], '') OR
+            ISNULL(target.[BS\IS], '') != ISNULL(source.[BS\IS], '') OR
+            ISNULL(target.[Balance/Cost Group], '') != ISNULL(source.[Balance/Cost Group] COLLATE SQL_Latin1_General_CP1_CI_AS, '') OR
+            ISNULL(target.[Cost Center], '') != ISNULL(source.[Cost Center] COLLATE SQL_Latin1_General_CP1_CI_AS, '') OR
+            ISNULL(target.[Counterparty Code], '') != ISNULL(source.[Counterparty Code], '') OR
+            ISNULL(target.[Counterparty Name], '') != ISNULL(source.[Counterparty Name], '')
+        ) THEN UPDATE SET
+            target.[Cognos_Account] = source.[Cognos_Account],
+            target.[Description Cognos accts] = source.[Description Cognos accts],
+            target.[GL Account Description] = source.[GL Account Description],
+            target.[Entity Code] = source.[Entity Code],
+            target.[BS\IS] = source.[BS\IS],
+            target.[Balance/Cost Group] = source.[Balance/Cost Group],
+            target.[Cost Center] = source.[Cost Center],
+            target.[Counterparty Code] = source.[Counterparty Code],
+            target.[Counterparty Name] = source.[Counterparty Name],
+            target.[Lineage_Key] = source.[Lineage_Key]
+            
+        -- Insert new records
+        WHEN NOT MATCHED BY TARGET THEN INSERT (
             [System],
             [BOEKJR],
             [Cognos_Account],
@@ -1377,55 +1711,44 @@ BEGIN
             [Counterparty Name],
             [Lineage_Key]
         )
-        SELECT
-            'FINACC' AS [System],
-            T.BOEKJR,
-            C.[Cognos_Account],
-            C.[Description Cognos accts],
-            CAST(T.ALGREK AS NVARCHAR(20)) AS [GL Account],
-            T.OMSCHR AS [GL Account Description],
-            T.FIRKODE as [Entity System Code],
-            C.[Entity Code],
-            CASE
-                WHEN TRY_CAST(
-                    CASE 
-                        WHEN T.KOSTSRT IS NOT NULL THEN T.KOSTSRT 
-                        WHEN T.BALGRPPAS IS NOT NULL THEN T.BALGRPPAS 
-                        ELSE T.BALGRPAKT 
-                    END AS NUMERIC) IS NOT NULL THEN 'BS'
-                WHEN 
-                    CASE 
-                        WHEN T.KOSTSRT IS NOT NULL THEN T.KOSTSRT 
-                        WHEN T.BALGRPPAS IS NOT NULL THEN T.BALGRPPAS 
-                        ELSE T.BALGRPAKT 
-                    END = ' ' THEN ' '
-                ELSE 'IS'
-            END AS [BS\IS],
-            CASE 
-                WHEN T.KOSTSRT IS NOT NULL THEN T.KOSTSRT 
-                WHEN T.BALGRPPAS IS NOT NULL THEN T.BALGRPPAS 
-                ELSE T.BALGRPAKT 
-            END AS [Balance/Cost Group],
-            T.KOSTPL_2 AS [Cost Center],
-            C.[Counterparty Code],
-            C.[Counterparty Name],
-            @LineageKey
-        FROM STAGING_FINACC.dbo.[TALGREK] AS T
-        LEFT JOIN [dbo].[Cognos Accounts] C 
-            ON 'FINACC' = C.System
-            AND C.[GL Account] = CAST(T.ALGREK AS NVARCHAR(20))
-            AND C.[Balance/Cost Group] = CASE 
-                                            WHEN T.KOSTSRT  IS NOT NULL THEN T.KOSTSRT COLLATE SQL_Latin1_General_CP1_CI_AS 
-                                            WHEN T.BALGRPPAS IS NOT NULL THEN T.BALGRPPAS COLLATE SQL_Latin1_General_CP1_CI_AS
-                                            ELSE T.BALGRPAKT COLLATE SQL_Latin1_General_CP1_CI_AS
-                                        END
-            AND C.[Entity System Code] = T.FIRKODE COLLATE SQL_Latin1_General_CP1_CI_AS
-        -- For incremental loads, add WHERE clause if source has timestamps
-        -- WHERE (@LoadType = 'F' OR T.ModifiedDate > @LastLoadDate)
-        ;
+        VALUES (
+            source.[System],
+            source.[BOEKJR],
+            source.[Cognos_Account],
+            source.[Description Cognos accts],
+            source.[GL Account],
+            source.[GL Account Description],
+            source.[Entity System Code],
+            source.[Entity Code],
+            source.[BS\IS],
+            source.[Balance/Cost Group],
+            source.[Cost Center],
+            source.[Counterparty Code],
+            source.[Counterparty Name],
+            source.[Lineage_Key]
+        )
         
-        SET @RowsInserted = @@ROWCOUNT;
-        SET @RowCount = @RowsInserted + @RowsDeleted;
+        -- Delete records that no longer exist in source (only for FINACC system)
+        -- For incremental loads, you might want to skip the DELETE clause
+        WHEN NOT MATCHED BY SOURCE 
+            AND target.[System] = 'FINACC'
+            AND @LoadType = 'F'  -- Only delete on full loads
+        THEN DELETE
+        
+        -- Output clause to capture what happened
+        OUTPUT $action INTO #MergeOutput(ActionType);
+        
+        -- Get the counts from the merge output
+        SELECT 
+            @RowsInserted = COUNT(CASE WHEN ActionType = 'INSERT' THEN 1 END),
+            @RowsUpdated = COUNT(CASE WHEN ActionType = 'UPDATE' THEN 1 END),
+            @RowsDeleted = COUNT(CASE WHEN ActionType = 'DELETE' THEN 1 END)
+        FROM #MergeOutput;
+        
+        SET @RowCount = @RowsInserted + @RowsUpdated + @RowsDeleted;
+        
+        -- Clean up temp table
+        DROP TABLE #MergeOutput;
         
         COMMIT TRANSACTION;
         
@@ -1436,6 +1759,7 @@ BEGIN
             ' | From: ', CONVERT(VARCHAR(30), @LastLoadDate, 120),
             ' | Rows affected: ', @RowCount,
             ' (Inserted: ', @RowsInserted,
+            ', Updated: ', @RowsUpdated,
             ', Deleted: ', @RowsDeleted, ')'
         );
         
@@ -1450,6 +1774,10 @@ BEGIN
     BEGIN CATCH
         IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION;
+        
+        -- Clean up temp table if it exists
+        IF OBJECT_ID('tempdb..#MergeOutput') IS NOT NULL
+            DROP TABLE #MergeOutput;
         
         -- Capture error details
         DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
@@ -1476,7 +1804,205 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_AXBE_LEDGERTRANS]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Table_SAP-VANESCH_OACT]    Script Date: 27-8-2025 15:16:48 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- Create or modify the procedure for loading data into the staging table
+CREATE PROCEDURE [dbo].[Load_GL_Table_SAP-VANESCH_OACT]
+    @LineageKey INT,
+    @LoadType CHAR(1) = 'F',  -- F=Full, I=Incremental
+    @LastLoadDate DATETIME2(7) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+    
+    -- Variables for tracking results
+    DECLARE @RowCount INT = 0;
+    DECLARE @RowsInserted INT = 0;
+    DECLARE @RowsUpdated INT = 0;
+    DECLARE @RowsDeleted INT = 0;
+    DECLARE @OutputMessage NVARCHAR(MAX);
+    DECLARE @System NVARCHAR(25) = 'SAP-VANESCH';
+    DECLARE @TableName NVARCHAR(100) = 'GL_Table_SAP-VANESCH_OACT';
+    
+    BEGIN TRY
+        
+        BEGIN TRANSACTION;
+        
+        -- Create temp table for capturing merge output
+        CREATE TABLE #MergeOutput (
+            ActionType NVARCHAR(10)
+        );
+        
+        -- MERGE statement for GL_Table
+        MERGE [dbo].[GL_Table] AS target
+        USING (
+            SELECT
+                'SAP-VANESCH' AS [System],
+                0 AS [BOEKJR], -- Cannot be NULL because this is the primary key of the table
+                C.[Cognos_Account],
+                C.[Description Cognos accts],
+                child.AcctCode AS [GL Account],
+                child.AcctName AS [GL Account Description],
+                '65' AS [Entity System Code], -- Cannot be NULL because this is the primary key of the table
+                C.[Entity Code],
+                CASE WHEN child.ActType = 'E' THEN 'IS' ELSE 'BS' END AS [BS\IS],
+                CASE WHEN TRY_CAST(SUBSTRING(parent.AcctName,2,4) AS INTEGER) IS NOT NULL THEN LEFT(parent.AcctName,4) ELSE '' END AS [Balance/Cost Group],
+                CASE WHEN child.ActType = 'E' THEN '3365' ELSE '0000' END AS [Cost Center],
+                C.[Counterparty Code],
+                C.[Counterparty Name],
+                @LineageKey AS [Lineage_Key]
+            FROM [SCH1SQL1V16].STAGING_SAP.[dbo].[OACT_GL_Accounts] child
+            LEFT JOIN [SCH1SQL1V16].STAGING_SAP.[dbo].[OACT_GL_Accounts] parent
+                ON child.FatherNum = parent.AcctCode
+            LEFT JOIN [dbo].[Cognos Accounts] C    
+                ON C.[GL Account] = child.AcctCode COLLATE SQL_Latin1_General_CP1_CI_AS
+                AND C.System = 'SAP-VANESCH'
+            -- For incremental loads, add WHERE clause if source has timestamps
+            -- WHERE (@LoadType = 'F' OR child.ModifiedDate > @LastLoadDate)
+        ) AS source 
+        ON target.[System] = source.[System]
+        AND target.[GL Account] = source.[GL Account] COLLATE SQL_Latin1_General_CP1_CI_AS
+        AND target.[Entity System Code] = source.[Entity System Code] COLLATE SQL_Latin1_General_CP1_CI_AS
+        AND target.[BOEKJR] = source.[BOEKJR]
+        
+        -- Update existing records if any column has changed
+        WHEN MATCHED AND (
+            ISNULL(target.[Cognos_Account], '') != ISNULL(source.[Cognos_Account], '') OR
+            ISNULL(target.[Description Cognos accts], '') != ISNULL(source.[Description Cognos accts], '') OR
+            ISNULL(target.[GL Account Description], '') != ISNULL(source.[GL Account Description] COLLATE SQL_Latin1_General_CP1_CI_AS, '') OR
+            ISNULL(target.[Entity Code], '') != ISNULL(source.[Entity Code], '') OR
+            ISNULL(target.[BS\IS], '') != ISNULL(source.[BS\IS], '') OR
+            ISNULL(target.[Balance/Cost Group], '') != ISNULL(source.[Balance/Cost Group] COLLATE SQL_Latin1_General_CP1_CI_AS, '') OR
+            ISNULL(target.[Cost Center], '') != ISNULL(source.[Cost Center], '') OR
+            ISNULL(target.[Counterparty Code], '') != ISNULL(source.[Counterparty Code], '') OR
+            ISNULL(target.[Counterparty Name], '') != ISNULL(source.[Counterparty Name], '')
+        ) THEN UPDATE SET
+            [Cognos_Account] = source.[Cognos_Account],
+            [Description Cognos accts] = source.[Description Cognos accts],
+            [GL Account Description] = source.[GL Account Description],
+            [Entity Code] = source.[Entity Code],
+            [BS\IS] = source.[BS\IS],
+            [Balance/Cost Group] = source.[Balance/Cost Group],
+            [Cost Center] = source.[Cost Center],
+            [Counterparty Code] = source.[Counterparty Code],
+            [Counterparty Name] = source.[Counterparty Name],
+            [Lineage_Key] = source.[Lineage_Key]
+            
+        -- Insert new records
+        WHEN NOT MATCHED BY TARGET THEN INSERT (
+            [System],
+            [BOEKJR],
+            [Cognos_Account],
+            [Description Cognos accts],
+            [GL Account],
+            [GL Account Description],
+            [Entity System Code],
+            [Entity Code],
+            [BS\IS],
+            [Balance/Cost Group],
+            [Cost Center],
+            [Counterparty Code],
+            [Counterparty Name],
+            [Lineage_Key]
+        )
+        VALUES (
+            source.[System],
+            source.[BOEKJR],
+            source.[Cognos_Account],
+            source.[Description Cognos accts],
+            source.[GL Account],
+            source.[GL Account Description],
+            source.[Entity System Code],
+            source.[Entity Code],
+            source.[BS\IS],
+            source.[Balance/Cost Group],
+            source.[Cost Center],
+            source.[Counterparty Code],
+            source.[Counterparty Name],
+            source.[Lineage_Key]
+        )
+        
+        -- Delete records that no longer exist in source (only for SAP-VANESCH system)
+        -- For incremental loads, you might want to skip the DELETE clause
+        WHEN NOT MATCHED BY SOURCE 
+            AND target.[System] = 'SAP-VANESCH'
+            AND @LoadType = 'F'  -- Only delete on full loads
+        THEN DELETE
+        
+        -- Output clause to capture what happened
+        OUTPUT $action INTO #MergeOutput(ActionType);
+        
+        -- Get the counts from the merge output
+        SELECT 
+            @RowsInserted = COUNT(CASE WHEN ActionType = 'INSERT' THEN 1 END),
+            @RowsUpdated = COUNT(CASE WHEN ActionType = 'UPDATE' THEN 1 END),
+            @RowsDeleted = COUNT(CASE WHEN ActionType = 'DELETE' THEN 1 END)
+        FROM #MergeOutput;
+        
+        SET @RowCount = @RowsInserted + @RowsUpdated + @RowsDeleted;
+        
+        -- Clean up temp table
+        DROP TABLE #MergeOutput;
+        
+        COMMIT TRANSACTION;
+        
+        -- Build success message
+        SET @OutputMessage = CONCAT(
+            'GL Table SAP-VANESCH load completed. ',
+            'Type: ', CASE WHEN @LoadType = 'F' THEN 'Full' ELSE 'Incremental' END,
+            ' | From: ', CONVERT(VARCHAR(30), @LastLoadDate, 120),
+            ' | Rows affected: ', @RowCount,
+            ' (Inserted: ', @RowsInserted,
+            ', Updated: ', @RowsUpdated,
+            ', Deleted: ', @RowsDeleted, ')'
+        );
+        
+        -- Return results for lineage tracking
+        -- This is what the framework expects
+        SELECT @RowCount AS [RowCount], @OutputMessage AS OutputMessage;
+        
+        PRINT @OutputMessage;
+        RETURN 0;
+        
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        
+        -- Clean up temp table if it exists
+        IF OBJECT_ID('tempdb..#MergeOutput') IS NOT NULL
+            DROP TABLE #MergeOutput;
+        
+        -- Capture error details
+        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @ErrorNumber INT = ERROR_NUMBER();
+        DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+        DECLARE @ErrorState INT = ERROR_STATE();
+        DECLARE @ErrorLine INT = ERROR_LINE();
+        
+        -- Build error message
+        SET @OutputMessage = CONCAT(
+            'Error ', @ErrorNumber,
+            ' at line ', @ErrorLine, ': ', @ErrorMessage
+        );
+        
+        -- Return error for lineage tracking
+        SET @RowCount = 0;
+        SELECT @RowCount AS [RowCount], @OutputMessage AS OutputMessage;
+        
+        -- Log error for debugging
+        PRINT @OutputMessage;
+        
+        -- Don't re-throw since we're returning the error info
+        RETURN -1;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_AXBE_LEDGERTRANS]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1737,7 +2263,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_AXNL_LEDGERTRANS]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_AXNL_LEDGERTRANS]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1997,12 +2523,12 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TAANDAGD]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TAANDAGD]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE   PROCEDURE [dbo].[Load_GL_Transactions_FINACC_TAANDAGD]
+CREATE PROCEDURE [dbo].[Load_GL_Transactions_FINACC_TAANDAGD]
     @LineageKey INT,
     @LoadType CHAR(1) = 'I',  -- F=Full, I=Incremental
     @LastLoadDate DATETIME2(7) = NULL
@@ -2030,121 +2556,33 @@ BEGIN
     BEGIN TRY
         BEGIN TRANSACTION;
         
-        -- Create temp table to capture merge results
-        CREATE TABLE #MergeOutput (
-            ActionType NVARCHAR(10)
-        );
-        
-        -- MERGE statement for GL_Transactions
-        MERGE [dbo].[GL_Transactions] AS target
-        USING (
-            SELECT
-                TD.BEDRAG AS Amount,
-                COALESCE(T.KOSTSRT, T.BALGRPPAS, T.BALGRPAKT) AS [Balance/Cost Group],
-                TC.KOSTPL2 AS [Cost_Center],
-                NULL AS [Cost_Center_Description],  -- Add if available
-                NULL AS [Cost_Center2],
-                NULL AS [Cost_Center_Description2],
-                NULL AS [Cost_Center3],
-                NULL AS [Cost_Center_Description3],
-                CONCAT(TD.TYPE_DAGB, ' / ', TD.DAGBOEK) AS Source,
-                CAST(CASE 
-                    WHEN MONTH(TD.DATUM) <> TD.PERIODE OR YEAR(TD.DATUM) <> TD.BOEKJR
-                    THEN EOMONTH(DATEFROMPARTS(TD.BOEKJR, IIF(TD.PERIODE = 0, 1, TD.PERIODE), 1))
-                    ELSE TD.DATUM 
-                END AS DATE) AS [Date],
-                TD.OPMERK AS [JE Description],
-                TD.FIRKODE AS [Entity System Code],
-                CAST(TD.ALGREK AS NVARCHAR(20)) AS [GL_Account],
-                TD.USCREA AS [Posted By],
-                CAST(TD.CREA AS DATETIME2) AS [Posted Time],
-                CAST(TD.CREA AS DATE) AS [Posted Date],
-                TD.BOEKJR * 100 + TD.PERIODE AS [Period],
-                'FINACC' AS [System],
-                L.NAAM AS [Vendor Name],
-                L.LEVERNR AS [Vendor Number],
-                TD.FAKTNR AS [Transaction Number],
-                e.[Entity Code],
-                e.[Entity Description],
-                L2.[GL Account Description],
-                @LineageKey AS [Lineage_Key],
-                TD.Lineage_Key AS Lineage_Key_Origin,
-                L2.GL_Table_Key,
-                e.Entity_Table_Key,
-                TD.BOEKJR AS Fiscal_Year,
-                NULL AS RECID,  -- FINACC doesn't have RECID
-                'TAANDAGD' AS Table_Name,  -- Track source table
-                TD.PK AS F_ID  -- FINACC primary key
-            FROM [STAGING_FINACC].dbo.TAANDAGD TD
-            LEFT JOIN [STAGING_FINACC].dbo.TALGREK T 
-                ON T.BOEKJR = TD.BOEKJR 
-                AND T.FIRKODE = TD.FIRKODE 
-                AND T.ALGREK = TD.ALGREK
-            LEFT JOIN [STAGING_FINACC].dbo.TLEVER L 
-                ON L.LEVERNR = TD.REL_LEVERNR 
-                AND L.FIRKODE = TD.FIRKODE
-            LEFT JOIN STAGING_FINACC.dbo.TAN_DET TAND
-                ON TAND.BEDRAG = TD.BEDRAG 
-                AND TAND.FIRKODE = TD.FIRKODE 
-                AND TAND.BOEKJR = TD.BOEKJR 
-                AND TAND.PERIODE = TD.PERIODE 
-                AND TAND.VERRNR = TD.FAKTNR 
-                AND TAND.VERRVOLGNR = TD.VOLGNR 
-                AND TAND.VNALGREK = TD.ALGREK
-            LEFT JOIN STAGING_FINACC.dbo.TAN_COMBH TC
-                ON TC.SEQ = TAND.NRSEQ 
-                AND TC.FIRKODE = TAND.FIRKODE
-            LEFT JOIN [DWH_FINANCE].dbo.GL_Table L2 
-                ON L2.System = 'FINACC' 
-                AND L2.[Entity System Code] = TD.FIRKODE 
-                AND L2.[GL Account] = CAST(TD.ALGREK AS NVARCHAR(20))
-                AND L2.BOEKJR = TD.BOEKJR
-            LEFT JOIN [DWH_FINANCE].dbo.Entity e 
-                ON e.System = 'FINACC' 
-                AND e.[Entity System Code] = TD.FIRKODE
-            WHERE 
-                CASE 
-                    -- Full load: load current and previous year
-                    WHEN @LoadType = 'F' THEN 
-                        CASE WHEN TD.BOEKJR IN (@CurrentYear, @PreviousYear) THEN 1 ELSE 0 END
-                    -- Incremental: load current and last period only
-                    ELSE 
-                        CASE WHEN (TD.BOEKJR = @LastPeriodYear AND TD.PERIODE = @LastPeriode)
-                               OR (TD.BOEKJR = @CurrentYear AND TD.PERIODE = @CurrentPeriode) THEN 1 ELSE 0 END
-                END = 1
-        ) AS source 
-        ON target.System = 'FINACC' 
-        AND target.Table_Name = 'TAANDAGD' 
-        AND target.F_ID = source.F_ID
-        
-        -- Update existing records
-        WHEN MATCHED THEN UPDATE SET
-            Amount = source.Amount,
-            [Balance/Cost Group] = source.[Balance/Cost Group],
-            [Cost_Center] = source.[Cost_Center],
-            Source = source.Source,
-            [Date] = source.[Date],
-            [JE Description] = source.[JE Description],
-            [Entity System Code] = source.[Entity System Code],
-            [GL_Account] = source.[GL_Account],
-            [Posted By] = source.[Posted By],
-            [Posted Time] = source.[Posted Time],
-            [Posted Date] = source.[Posted Date],
-            [Period] = source.[Period],
-            [Vendor Name] = source.[Vendor Name],
-            [Vendor Number] = source.[Vendor Number],
-            [Transaction Number] = source.[Transaction Number],
-            [Entity Code] = source.[Entity Code],
-            [Entity Description] = source.[Entity Description],
-            [GL Account Description] = source.[GL Account Description],
-            [Lineage_Key] = source.[Lineage_Key],
-            Lineage_Key_Origin = source.Lineage_Key_Origin,
-            [GL_Table_Key] = source.[GL_Table_Key],
-            [Entity_Table_Key] = source.[Entity_Table_Key],
-            Fiscal_Year = source.Fiscal_Year
+        -- Delete existing records for the periods being loaded
+        IF @LoadType = 'F'
+        BEGIN
+            -- Full load: delete current and previous year
+            DELETE FROM [dbo].[GL_Transactions]
+            WHERE System = 'FINACC' 
+            AND Table_Name = 'TAANDAGD'
+            AND Fiscal_Year IN (@CurrentYear, @PreviousYear);
             
+            SET @RowsDeleted = @@ROWCOUNT;
+        END
+        ELSE
+        BEGIN
+            -- Incremental: delete current and last period only
+            DELETE FROM [dbo].[GL_Transactions]
+            WHERE System = 'FINACC' 
+            AND Table_Name = 'TAANDAGD'
+            AND (
+                (Fiscal_Year = @LastPeriodYear AND [Period] = @LastPeriodYear * 100 + @LastPeriode)
+                OR (Fiscal_Year = @CurrentYear AND [Period] = @CurrentYear * 100 + @CurrentPeriode)
+            );
+            
+            SET @RowsDeleted = @@ROWCOUNT;
+        END
+        
         -- Insert new records
-        WHEN NOT MATCHED BY TARGET THEN INSERT (
+        INSERT INTO [dbo].[GL_Transactions] (
             [System],
             [Date],
             [Period],
@@ -2178,69 +2616,83 @@ BEGIN
             Table_Name,
             F_ID
         )
-        VALUES (
-            source.[System],
-            source.[Date],
-            source.[Period],
-            source.[Entity System Code],
-            source.[GL_Account],
-            source.[JE Description],
-            source.Amount,
-            source.Source,
-            source.[Cost_Center],
-            source.[Cost_Center_Description],
-            source.[Cost_Center2],
-            source.[Cost_Center_Description2],
-            source.[Cost_Center3],
-            source.[Cost_Center_Description3],
-            source.[Transaction Number],
-            source.[Balance/Cost Group],
-            source.[Posted Time],
-            source.[Posted By],
-            source.[Posted Date],
-            source.Fiscal_Year,
-            source.[Vendor Number],
-            source.[Vendor Name],
-            source.[Lineage_Key],
-            source.Lineage_Key_Origin,
-            source.[GL_Table_Key],
-            source.[Entity_Table_Key],
-            source.RECID,
-            source.[Entity Code],
-            source.[Entity Description],
-            source.[GL Account Description],
-            source.Table_Name,
-            source.F_ID
-        )
+        SELECT
+            'FINACC' AS [System],
+            CAST(CASE 
+                WHEN MONTH(TD.DATUM) <> TD.PERIODE OR YEAR(TD.DATUM) <> TD.BOEKJR
+                THEN EOMONTH(DATEFROMPARTS(TD.BOEKJR, IIF(TD.PERIODE = 0, 1, TD.PERIODE), 1))
+                ELSE TD.DATUM 
+            END AS DATE) AS [Date],
+            TD.BOEKJR * 100 + TD.PERIODE AS [Period],
+            TD.FIRKODE AS [Entity System Code],
+            CAST(TD.ALGREK AS NVARCHAR(20)) AS [GL_Account],
+            TD.OPMERK AS [JE Description],
+            TD.BEDRAG AS Amount,
+            CONCAT(TD.TYPE_DAGB, ' / ', TD.DAGBOEK) AS Source,
+            TC.KOSTPL2 AS [Cost_Center],
+            NULL AS [Cost_Center_Description],
+            NULL AS [Cost_Center2],
+            NULL AS [Cost_Center_Description2],
+            NULL AS [Cost_Center3],
+            NULL AS [Cost_Center_Description3],
+            TD.FAKTNR AS [Transaction Number],
+            COALESCE(T.KOSTSRT, T.BALGRPPAS, T.BALGRPAKT) AS [Balance/Cost Group],
+            CAST(TD.CREA AS DATETIME2) AS [Posted Time],
+            TD.USCREA AS [Posted By],
+            CAST(TD.CREA AS DATE) AS [Posted Date],
+            TD.BOEKJR AS Fiscal_Year,
+            L.LEVERNR AS [Vendor Number],
+            L.NAAM AS [Vendor Name],
+            @LineageKey AS [Lineage_Key],
+            TD.Lineage_Key AS Lineage_Key_Origin,
+            L2.GL_Table_Key,
+            e.Entity_Table_Key,
+            NULL AS RECID,
+            e.[Entity Code],
+            e.[Entity Description],
+            L2.[GL Account Description],
+            'TAANDAGD' AS Table_Name,
+            TD.PK AS F_ID
+        FROM [STAGING_FINACC].dbo.TAANDAGD TD
+        LEFT JOIN [STAGING_FINACC].dbo.TALGREK T 
+            ON T.BOEKJR = TD.BOEKJR 
+            AND T.FIRKODE = TD.FIRKODE 
+            AND T.ALGREK = TD.ALGREK
+        LEFT JOIN [STAGING_FINACC].dbo.TLEVER L 
+            ON L.LEVERNR = TD.REL_LEVERNR 
+            AND L.FIRKODE = TD.FIRKODE
+        LEFT JOIN STAGING_FINACC.dbo.TAN_DET TAND
+            ON TAND.BEDRAG = TD.BEDRAG 
+            AND TAND.FIRKODE = TD.FIRKODE 
+            AND TAND.BOEKJR = TD.BOEKJR 
+            AND TAND.PERIODE = TD.PERIODE 
+            AND TAND.VERRNR = TD.FAKTNR 
+            AND TAND.VERRVOLGNR = TD.VOLGNR 
+            AND TAND.VNALGREK = TD.ALGREK
+        LEFT JOIN STAGING_FINACC.dbo.TAN_COMBH TC
+            ON TC.SEQ = TAND.NRSEQ 
+            AND TC.FIRKODE = TAND.FIRKODE
+        LEFT JOIN [TestDWH].dbo.GL_Table L2 
+            ON L2.System = 'FINACC' 
+            AND L2.[Entity System Code] = TD.FIRKODE COLLATE SQL_Latin1_General_CP1_CI_AS
+            AND L2.[GL Account] = CAST(TD.ALGREK AS NVARCHAR(20))
+            AND L2.BOEKJR = TD.BOEKJR
+        LEFT JOIN [TestDWH].dbo.Entity e 
+            ON e.System = 'FINACC' 
+            AND e.[Entity System Code] = TD.FIRKODE COLLATE SQL_Latin1_General_CP1_CI_AS
+        WHERE 
+            CASE 
+                -- Full load: load current and previous year
+                WHEN @LoadType = 'F' THEN 
+                    CASE WHEN TD.BOEKJR IN (@CurrentYear, @PreviousYear) THEN 1 ELSE 0 END
+                -- Incremental: load current and last period only
+                ELSE 
+                    CASE WHEN (TD.BOEKJR = @LastPeriodYear AND TD.PERIODE = @LastPeriode)
+                           OR (TD.BOEKJR = @CurrentYear AND TD.PERIODE = @CurrentPeriode) THEN 1 ELSE 0 END
+            END = 1;
         
-        -- Delete records no longer in source (for specified periods)
-        WHEN NOT MATCHED BY SOURCE 
-            AND target.System = 'FINACC' 
-            AND target.Table_Name = 'TAANDAGD'
-            AND (
-                (@LoadType = 'F' AND target.Fiscal_Year IN (@CurrentYear, @PreviousYear))
-                OR 
-                (@LoadType = 'I' AND (
-                    (target.Fiscal_Year = @LastPeriodYear AND target.[Period] = @LastPeriodYear * 100 + @LastPeriode)
-                    OR (target.Fiscal_Year = @CurrentYear AND target.[Period] = @CurrentYear * 100 + @CurrentPeriode)
-                ))
-            )
-        THEN DELETE
-        
-        -- Capture what happened
-        OUTPUT $action INTO #MergeOutput(ActionType);
-        
-        -- Get the counts
-        SELECT 
-            @RowsInserted = COUNT(CASE WHEN ActionType = 'INSERT' THEN 1 END),
-            @RowsUpdated = COUNT(CASE WHEN ActionType = 'UPDATE' THEN 1 END),
-            @RowsDeleted = COUNT(CASE WHEN ActionType = 'DELETE' THEN 1 END)
-        FROM #MergeOutput;
-        
-        SET @RowCount = @RowsInserted + @RowsUpdated + @RowsDeleted;
-        
-        -- Clean up temp table
-        DROP TABLE #MergeOutput;
+        SET @RowsInserted = @@ROWCOUNT;
+        SET @RowCount = @RowsInserted + @RowsDeleted;
         
         COMMIT TRANSACTION;
         
@@ -2251,7 +2703,6 @@ BEGIN
                 'Years: ', @PreviousYear, ' and ', @CurrentYear,
                 ' | Rows affected: ', @RowCount,
                 ' (Inserted: ', @RowsInserted,
-                ', Updated: ', @RowsUpdated,
                 ', Deleted: ', @RowsDeleted, ')'
             );
         ELSE
@@ -2261,7 +2712,6 @@ BEGIN
                 ', Last Period: ', @LastPeriodYear, '-', @LastPeriode,
                 ' | Rows affected: ', @RowCount,
                 ' (Inserted: ', @RowsInserted,
-                ', Updated: ', @RowsUpdated,
                 ', Deleted: ', @RowsDeleted, ')'
             );
         
@@ -2275,10 +2725,6 @@ BEGIN
     BEGIN CATCH
         IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION;
-        
-        -- Clean up temp table if exists
-        IF OBJECT_ID('tempdb..#MergeOutput') IS NOT NULL
-            DROP TABLE #MergeOutput;
         
         -- Capture error details
         DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
@@ -2304,7 +2750,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TALGDAGB]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TALGDAGB]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2543,7 +2989,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TFINDAGB]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TFINDAGB]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2780,7 +3226,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TVERDAGD]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TVERDAGD]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3017,7 +3463,390 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_MDS_Cognos_Accounts]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_SAP_VANESCH_HistoricalCumulativeBalance]    Script Date: 27-8-2025 15:16:48 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[Load_GL_Transactions_SAP_VANESCH_HistoricalCumulativeBalance]
+    @LineageKey INT,
+    @LoadType CHAR(1) = 'F',  -- F=Full, I=Incremental
+    @LastLoadDate DATETIME2(7) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+    
+    -- Variables for tracking results
+    DECLARE @RowCount INT = 0;
+    DECLARE @RowsInserted INT = 0;
+    DECLARE @RowsUpdated INT = 0;
+    DECLARE @RowsDeleted INT = 0;
+    DECLARE @OutputMessage NVARCHAR(MAX);
+    DECLARE @System NVARCHAR(25) = 'SAP-VANESCH';
+    DECLARE @TableName NVARCHAR(100) = 'GL_Transactions_SAP_VANESCH_HistoricalCumulativeBalance';
+    
+    BEGIN TRY
+        
+        BEGIN TRANSACTION;
+        
+        -- Delete existing BeginBalans records for SAP-VANESCH
+        DELETE FROM [dbo].[GL_Transactions]
+        WHERE [JE Description] LIKE '%BeginBalans%' 
+        AND [System] = 'SAP-VANESCH';
+        
+        SET @RowsDeleted = @@ROWCOUNT;
+        
+        -- Insert new data from staging
+        INSERT INTO [dbo].[GL_Transactions] (
+            [System],
+            [Date],
+            [Period],
+            [Entity System Code],
+            [GL_Account],
+            [JE Description],
+            [Amount],
+            [Source],
+            [Cost_Center],
+            [Cost_Center_Description],
+            [Cost_Center2],
+            [Cost_Center_Description2],
+            [Cost_Center3],
+            [Cost_Center_Description3],
+            [Transaction Number],
+            [Balance/Cost Group],
+            [Posted Time],
+            [Posted By],
+            [Posted Date],
+            [Fiscal_Year],
+            [Vendor Number],
+            [Vendor Name],
+            [Lineage_Key],
+            [Lineage_Key_Origin],
+            [GL_Table_Key],
+            [Entity_Table_Key],
+            [RECID],
+            [Entity Code],
+            [Entity Description],
+            [GL Account Description],
+            [Table_Name],
+            [F_ID]
+        )
+        SELECT
+            'SAP-VANESCH' AS [System],
+            JET.[Date] AS [Date],
+            JET.[Period] AS [Period],
+            '65' AS [Entity System Code],
+            CAST(JET.[Account] AS NVARCHAR(20)) AS [GL_Account],
+            CONCAT(JET.[Account], ' - ', 'BeginBalans') AS [JE Description],
+            JET.[Amount] AS [Amount],
+            NULL AS [Source],
+            '4370' AS [Cost_Center],
+            'OEM' AS [Cost_Center_Description],
+            NULL AS [Cost_Center2],
+            NULL AS [Cost_Center_Description2],
+            NULL AS [Cost_Center3],
+            NULL AS [Cost_Center_Description3],
+            NULL AS [Transaction Number],
+            NULL AS [Balance/Cost Group],
+            NULL AS [Posted Time],
+            NULL AS [Posted By],
+            NULL AS [Posted Date],
+            JET.[Fiscal_Year],
+            NULL AS [Vendor Number],
+            NULL AS [Vendor Name],
+            @LineageKey AS [Lineage_Key],
+            JET.Lineage_Key AS [Lineage_Key_Origin],
+            l.GL_Table_Key,
+            e.Entity_Table_Key,
+            NULL AS [RECID],
+            e.[Entity Code],
+            e.[Entity Description],
+            l.[GL Account Description],
+            'HistoricalCumulativeBalance' AS [Table_Name],
+            NULL AS [F_ID]
+        FROM [SCH1SQL1V16].[STAGING_SAP].[dbo].[HistoricalCumulativeBalance] JET
+        LEFT JOIN [DWH_FINANCE].dbo.GL_Table l 
+            ON l.System = 'SAP-VANESCH' 
+            AND l.[GL Account] = CAST(JET.[Account] AS NVARCHAR(20))
+        LEFT JOIN [DWH_FINANCE].dbo.Entity e 
+            ON e.System = 'SAP-VANESCH' 
+            AND e.[Entity System Code] = '65'
+        -- For incremental loads, add WHERE clause if source has timestamps
+        -- WHERE (@LoadType = 'F' OR JET.ModifiedDate > @LastLoadDate)
+        ;
+        
+        SET @RowsInserted = @@ROWCOUNT;
+        SET @RowCount = @RowsInserted;
+        
+        COMMIT TRANSACTION;
+        
+        -- Build success message
+        SET @OutputMessage = CONCAT(
+            'GL Transactions SAP-VANESCH Historical Cumulative Balance load completed. ',
+            'Type: ', CASE WHEN @LoadType = 'F' THEN 'Full' ELSE 'Incremental' END,
+            ' | From: ', CONVERT(VARCHAR(30), @LastLoadDate, 120),
+            ' | Rows affected: ', @RowCount,
+            ' (Inserted: ', @RowsInserted,
+            ', Deleted: ', @RowsDeleted, ')'
+        );
+        
+        -- Return results for lineage tracking
+        SELECT @RowCount AS [RowCount], @OutputMessage AS OutputMessage;
+        
+        PRINT @OutputMessage;
+        RETURN 0;
+        
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        
+        -- Capture error details
+        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @ErrorNumber INT = ERROR_NUMBER();
+        DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+        DECLARE @ErrorState INT = ERROR_STATE();
+        DECLARE @ErrorLine INT = ERROR_LINE();
+        
+        -- Build error message
+        SET @OutputMessage = CONCAT(
+            'Error ', @ErrorNumber,
+            ' at line ', @ErrorLine, ': ', @ErrorMessage
+        );
+        
+        -- Return error for lineage tracking
+        SET @RowCount = 0;
+        SELECT @RowCount AS [RowCount], @OutputMessage AS OutputMessage;
+        
+        -- Log error for debugging
+        PRINT @OutputMessage;
+        
+        RETURN -1;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_SAP_VANESCH_JDT1_OJDT]    Script Date: 27-8-2025 15:16:48 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[Load_GL_Transactions_SAP_VANESCH_JDT1_OJDT]
+    @LineageKey INT,
+    @LoadType CHAR(1) = 'I',  -- F=Full, I=Incremental (default to incremental)
+    @LastLoadDate DATETIME2(7) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+    
+    -- Variables for tracking results
+    DECLARE @RowCount INT = 0;
+    DECLARE @RowsInserted INT = 0;
+    DECLARE @RowsUpdated INT = 0;
+    DECLARE @RowsDeleted INT = 0;
+    DECLARE @OutputMessage NVARCHAR(MAX);
+    DECLARE @System NVARCHAR(25) = 'SAP-VANESCH';
+    DECLARE @TableName NVARCHAR(100) = 'GL_Transactions_SAP_VANESCH_JDT1_OJDT';
+    
+    -- Batch processing variables
+    DECLARE @BatchSize INT = 100000;
+    DECLARE @MaxRow INT;
+    DECLARE @CurrentRow INT;
+    DECLARE @DeleteRowCount INT = 1;
+    
+    BEGIN TRY
+        
+        BEGIN TRANSACTION;
+        
+        -- Get the MIN and MAX ID from JDT1_JournalEntryLines for batch processing
+        SELECT @CurrentRow = MIN([Table_ID]), @MaxRow = MAX([Table_ID])
+        FROM [SCH1SQL1V16].[STAGING_SAP].dbo.[JDT1_JournalEntryLines]
+        WHERE @LoadType = 'F' OR RefDate >= @LastLoadDate;
+        
+        -- Delete old data for incremental load (in batches to avoid lock escalation)
+        IF @LoadType = 'I' AND @LastLoadDate IS NOT NULL
+        BEGIN
+            WHILE @DeleteRowCount > 0
+            BEGIN
+                DELETE TOP (@BatchSize)
+                FROM [dbo].[GL_Transactions]
+                WHERE [Posted Date] >= @LastLoadDate 
+                AND [System] = 'SAP-VANESCH'
+                AND [Table_Name] = 'JDT1_OJDT';
+                
+                SET @DeleteRowCount = @@ROWCOUNT;
+                SET @RowsDeleted = @RowsDeleted + @DeleteRowCount;
+            END;
+        END
+        ELSE IF @LoadType = 'F'
+        BEGIN
+            -- For full load, delete all SAP-VANESCH JDT1_OJDT records
+            DELETE FROM [dbo].[GL_Transactions]
+            WHERE [System] = 'SAP-VANESCH'
+            AND [Table_Name] = 'JDT1_OJDT';
+            
+            SET @RowsDeleted = @@ROWCOUNT;
+        END
+        
+        -- Insert new data in batches
+        WHILE @CurrentRow <= @MaxRow
+        BEGIN
+            INSERT INTO [dbo].[GL_Transactions] (
+                [System],
+                [Date],
+                [Period],
+                [Entity System Code],
+                [GL_Account],
+                [JE Description],
+                [Amount],
+                [Source],
+                [Cost_Center],
+                [Cost_Center_Description],
+                [Cost_Center2],
+                [Cost_Center_Description2],
+                [Cost_Center3],
+                [Cost_Center_Description3],
+                [Transaction Number],
+                [Balance/Cost Group],
+                [Posted Time],
+                [Posted By],
+                [Posted Date],
+                [Fiscal_Year],
+                [Vendor Number],
+                [Vendor Name],
+                [Lineage_Key],
+                [Lineage_Key_Origin],
+                [GL_Table_Key],
+                [Entity_Table_Key],
+                [RECID],
+                [Entity Code],
+                [Entity Description],
+                [GL Account Description],
+                [Table_Name],
+                [F_ID]
+            )
+            SELECT
+                'SAP-VANESCH' AS [System],
+                JET.RefDate AS [Date],
+                YEAR(JET.RefDate) * 100 + MONTH(JET.RefDate) AS [Period],
+                '65' AS [Entity System Code],
+                CAST(JET.[Account] AS NVARCHAR(20)) AS [GL_Account],
+                JET.[LineMemo] AS [JE Description],
+                (JET.[Debit] - JET.[Credit]) AS [Amount],
+                OJDT.TransType AS [Source],
+                '4370' AS [Cost_Center],
+                'OEM' AS [Cost_Center_Description],
+                NULL AS [Cost_Center2],
+                NULL AS [Cost_Center_Description2],
+                NULL AS [Cost_Center3],
+                NULL AS [Cost_Center_Description3],
+                JET.[TransId] AS [Transaction Number],
+                l.[Balance/Cost Group],
+                CAST(JET.RefDate AS TIME) AS [Posted Time],
+                U.U_NAME AS [Posted By],
+                CAST(JET.RefDate AS DATE) AS [Posted Date],
+                YEAR(JET.RefDate) AS [Fiscal_Year],
+                V.CardCode AS [Vendor Number],
+                V.CardName AS [Vendor Name],
+                @LineageKey AS [Lineage_Key],
+                JET.Lineage_Key AS [Lineage_Key_Origin],
+                l.GL_Table_Key,
+                e.Entity_Table_Key,
+                NULL AS [RECID],
+                e.[Entity Code],
+                e.[Entity Description],
+                l.[GL Account Description],
+                'JDT1_OJDT' AS [Table_Name],
+                JET.[Table_ID] AS [F_ID]
+            FROM [SCH1SQL1V16].[STAGING_SAP].[dbo].[JDT1_JournalEntryLines] JET
+            JOIN [SCH1SQL1V16].[STAGING_SAP].[dbo].[OJDT_JournalEntryHeader] OJDT
+                ON JET.TransId = OJDT.TransID
+            LEFT JOIN [SCH1SQL1V16].[STAGING_SAP].[dbo].[OCRD_Business Partners] V 
+                ON JET.ShortName = V.CardCode
+                AND V.CardType = 'S'
+            LEFT JOIN [SCH1SQL1V16].[STAGING_SAP].[dbo].[OUSR_Users] U 
+                ON JET.UserSign = U.USERID
+            LEFT JOIN [DWH_FINANCE].dbo.GL_Table l 
+                ON l.System = 'SAP-VANESCH' 
+                AND l.[GL Account] = CAST(JET.[Account] AS NVARCHAR(20))
+            LEFT JOIN [DWH_FINANCE].dbo.Entity e 
+                ON e.System = 'SAP-VANESCH' 
+                AND e.[Entity System Code] = '65'
+            WHERE 
+                (
+                    -- For batch processing: use ID range for full load
+                    (@LoadType = 'F' AND JET.[Table_ID] BETWEEN @CurrentRow AND @CurrentRow + @BatchSize - 1)
+                    OR 
+                    -- For incremental: use date filter
+                    (@LoadType = 'I' AND JET.RefDate >= @LastLoadDate AND JET.[Table_ID] BETWEEN @CurrentRow AND @CurrentRow + @BatchSize - 1)
+                );
+            
+            SET @RowsInserted = @RowsInserted + @@ROWCOUNT;
+            
+            -- Move to next batch
+            SET @CurrentRow = @CurrentRow + @BatchSize;
+            
+            -- For incremental loads with date filter, we can break after first batch if filtering by date
+            IF @LoadType = 'I' AND @LastLoadDate IS NOT NULL AND NOT EXISTS (
+                SELECT 1 FROM [SCH1SQL1V16].[STAGING_SAP].dbo.[JDT1_JournalEntryLines] 
+                WHERE RefDate >= @LastLoadDate 
+                AND [Table_ID] >= @CurrentRow
+            )
+                BREAK;
+        END;
+        
+        SET @RowCount = @RowsInserted;
+        
+        COMMIT TRANSACTION;
+        
+        -- Build success message
+        SET @OutputMessage = CONCAT(
+            'GL Transactions SAP-VANESCH JDT1_OJDT load completed. ',
+            'Type: ', CASE WHEN @LoadType = 'F' THEN 'Full' ELSE 'Incremental' END,
+            ' | From: ', CONVERT(VARCHAR(30), @LastLoadDate, 120),
+            ' | Rows affected: ', @RowCount,
+            ' (Inserted: ', @RowsInserted,
+            ', Deleted: ', @RowsDeleted, ')',
+            ' | Batch size: ', @BatchSize
+        );
+        
+        -- Return results for lineage tracking
+        SELECT @RowCount AS [RowCount], @OutputMessage AS OutputMessage;
+        
+        PRINT @OutputMessage;
+        RETURN 0;
+        
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        
+        -- Capture error details
+        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @ErrorNumber INT = ERROR_NUMBER();
+        DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+        DECLARE @ErrorState INT = ERROR_STATE();
+        DECLARE @ErrorLine INT = ERROR_LINE();
+        
+        -- Build error message
+        SET @OutputMessage = CONCAT(
+            'Error ', @ErrorNumber,
+            ' at line ', @ErrorLine, ': ', @ErrorMessage
+        );
+        
+        -- Return error for lineage tracking
+        SET @RowCount = 0;
+        SELECT @RowCount AS [RowCount], @OutputMessage AS OutputMessage;
+        
+        -- Log error for debugging
+        PRINT @OutputMessage;
+        
+        RETURN -1;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Load_MDS_Cognos_Accounts]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3267,7 +4096,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_MDS_Entity Adjustments]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [dbo].[Load_MDS_Entity Adjustments]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3445,7 +4274,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_MDS_UploadFile]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [dbo].[Load_MDS_UploadFile]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3615,7 +4444,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_Sites]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [dbo].[Load_Sites]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3738,16 +4567,12 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_Table_Template]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [dbo].[Load_Users]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-
--- =============================================
--- COMPONENT 7: Table Template
--- =============================================
-CREATE   PROCEDURE [dbo].[Load_Table_Template]
+CREATE PROCEDURE [dbo].[Load_Users]
     @LineageKey INT,
     @LoadType CHAR(1) = 'F',  -- F=Full, I=Incremental
     @LastLoadDate DATETIME2(7) = NULL
@@ -3756,200 +4581,128 @@ BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
     
-    -- Declare variables
-    DECLARE @RowCount BIGINT = 0;
-    DECLARE @RowsInserted BIGINT = 0;
-    DECLARE @RowsUpdated BIGINT = 0;
-    DECLARE @RowsDeleted BIGINT = 0;
+    -- Variables for tracking results
+    DECLARE @RowCount INT = 0;
+    DECLARE @RowsInserted INT = 0;
+    DECLARE @RowsUpdated INT = 0;
+    DECLARE @RowsDeleted INT = 0;
     DECLARE @OutputMessage NVARCHAR(MAX);
-    DECLARE @ErrorNumber INT;
-    DECLARE @ErrorSeverity INT;
-    DECLARE @ErrorState INT;
-    DECLARE @StartTime DATETIME2(7) = SYSDATETIME();
-    DECLARE @EndTime DATETIME2(7);
+    DECLARE @System NVARCHAR(25) = 'FINACC';
+    DECLARE @TableName NVARCHAR(100) = 'Users';
     
     BEGIN TRY
+        
         BEGIN TRANSACTION;
         
-        -- Validate LineageKey
-        IF NOT EXISTS (SELECT 1 FROM [exe].[Lineage] WHERE [Lineage_Key] = @LineageKey)
-        BEGIN
-            RAISERROR('Invalid LineageKey: %d', 16, 1, @LineageKey);
-            RETURN -1;
-        END
+        -- For Users table, we typically do a full refresh
+        -- Truncate destination table
+        TRUNCATE TABLE [Sox].[Users];
         
-        -- For incremental loads, get last load date if not provided
-        IF @LoadType = 'I' AND @LastLoadDate IS NULL
-        BEGIN
-            SELECT @LastLoadDate = [Last_Loaded_Date]
-            FROM [exe].[Lineage]
-            WHERE [Lineage_Key] = @LineageKey;
-        END
+        -- Insert data from Oracle DBA_USERS
+        INSERT INTO [Sox].[Users] (
+            [AccountStatus],
+            [UserProfile],
+            [ApplicationUser],
+            [OracleUser],
+            [USID],
+            [Source],
+            [IsDBA],
+            [Valid_From],
+            [Lineage_Key]
+        )
+        SELECT 
+            DBA.[ACCOUNT_STATUS] AS [AccountStatus],
+            DBA.[PROFILE] AS [UserProfile],
+            ISNULL(BM.[USID], '') AS [ApplicationUser],
+            DBA.[USERNAME] AS [OracleUser],
+            DBA.[USERNAME] AS [USID],
+            'Oracle' AS [Source],
+            IIF(RP.[GRANTED_ROLE] = 'DBA', 'Yes', 'No') AS [IsDBA],
+            GETDATE() AS [Valid_From],
+            @LineageKey
+        FROM [SCH1SQL1V16].[STAGING_FINACC].dbo.[DBA_USERS] DBA
+        LEFT JOIN [SCH1SQL1V16].[STAGING_FINACC].dbo.[BM_USERS] BM 
+            ON DBA.[USERNAME] = BM.[USID]
+        LEFT JOIN [SCH1SQL1V16].[STAGING_FINACC].dbo.[DBA_ROLE_PRIVS] RP 
+            ON RP.[GRANTEE] = DBA.[USERNAME]
+        -- For incremental loads, add WHERE clause if source has timestamps
+        -- WHERE (@LoadType = 'F' OR DBA.ModifiedDate > @LastLoadDate)
         
-        -- FULL LOAD LOGIC
-        IF @LoadType = 'F'
-        BEGIN
-            -- Truncate target table
-            TRUNCATE TABLE [Target_Schema].[Target_Table];
-            
-            -- Insert all data
-            INSERT INTO [Target_Schema].[Target_Table] (
-                [Column1],
-                [Column2],
-                [Column3],
-                -- ... other columns
-                [LineageKey]
-            )
-            SELECT 
-                src.[Column1],
-                src.[Column2],
-                src.[Column3],
-                -- ... other columns
-                @LineageKey
-            FROM [Source_Schema].[Source_Table] AS src
-            LEFT JOIN [Other_Schema].[Other_Table] AS oth
-                ON src.[JoinKey] = oth.[JoinKey]
-            WHERE 1=1  -- Add any filtering conditions
-            OPTION (RECOMPILE);  -- Use for parameter sniffing issues
-            
-            SET @RowsInserted = @@ROWCOUNT;
-            SET @RowCount = @RowsInserted;
-        END
+        UNION
         
-        -- INCREMENTAL LOAD LOGIC
-        ELSE IF @LoadType = 'I'
-        BEGIN
-            -- Create temp table for merge output
-            DECLARE @MergeOutput TABLE (
-                [Action] NVARCHAR(10),
-                [RowCount] INT
-            );
-            
-            -- Use MERGE for incremental updates
-            MERGE [Target_Schema].[Target_Table] AS tgt
-            USING (
-                SELECT 
-                    src.[Key_Column],
-                    src.[Column1],
-                    src.[Column2],
-                    src.[Column3],
-                    -- ... other columns
-                    @LineageKey AS [LineageKey]
-                FROM [Source_Schema].[Source_Table] AS src
-                WHERE src.[Modified_Date] > @LastLoadDate  -- Incremental filter
-            ) AS src ON tgt.[Key_Column] = src.[Key_Column]
-            
-            -- Update existing records
-            WHEN MATCHED AND (
-                tgt.[Column1] != src.[Column1] OR
-                tgt.[Column2] != src.[Column2] OR
-                tgt.[Column3] != src.[Column3]
-                -- Check other columns for changes
-            )
-            THEN UPDATE SET
-                tgt.[Column1] = src.[Column1],
-                tgt.[Column2] = src.[Column2],
-                tgt.[Column3] = src.[Column3],
-                -- ... update other columns
-                tgt.[LineageKey] = src.[LineageKey]
-            
-            -- Insert new records
-            WHEN NOT MATCHED BY TARGET THEN
-                INSERT (
-                    [Key_Column],
-                    [Column1],
-                    [Column2],
-                    [Column3],
-                    -- ... other columns
-                    [LineageKey]
-                )
-                VALUES (
-                    src.[Key_Column],
-                    src.[Column1],
-                    src.[Column2],
-                    src.[Column3],
-                    -- ... other values
-                    src.[LineageKey]
-                )
-            
-            -- Optional: Delete records not in source
-            -- WHEN NOT MATCHED BY SOURCE THEN DELETE
-            
-            OUTPUT 
-                $action AS [Action],
-                1 AS [RowCount]
-            INTO @MergeOutput;
-            
-            -- Count the operations
-            SELECT 
-                @RowsInserted = SUM(CASE WHEN [Action] = 'INSERT' THEN [RowCount] ELSE 0 END),
-                @RowsUpdated = SUM(CASE WHEN [Action] = 'UPDATE' THEN [RowCount] ELSE 0 END),
-                @RowsDeleted = SUM(CASE WHEN [Action] = 'DELETE' THEN [RowCount] ELSE 0 END)
-            FROM @MergeOutput;
-            
-            SET @RowCount = @RowsInserted + @RowsUpdated + @RowsDeleted;
-        END
+        -- Insert BM_USERS that don't exist in DBA_USERS
+        SELECT
+            '' AS [AccountStatus],
+            '' AS [UserProfile],
+            BMU.[USID] AS [ApplicationUser],
+            '' AS [OracleUser],
+            BMU.[USID] AS [USID],
+            'Oracle' AS [Source],
+            'No' AS [IsDBA],
+            GETDATE() AS [Valid_From],
+            @LineageKey
+        FROM [SCH1SQL1V16].[STAGING_FINACC].dbo.[BM_USERS] BMU
+        LEFT JOIN [SCH1SQL1V16].[STAGING_FINACC].dbo.[DBA_USERS] DBAU 
+            ON DBAU.[USERNAME] = BMU.[USID]
+        WHERE DBAU.[USERNAME] IS NULL
+        -- For incremental loads, add WHERE clause if source has timestamps
+        -- AND (@LoadType = 'F' OR BMU.ModifiedDate > @LastLoadDate)
+        ;
         
-        SET @EndTime = SYSDATETIME();
-        
-        -- Build success message
-        SET @OutputMessage = CONCAT(
-            'Load completed successfully. ',
-            'Rows: ', @RowCount, ' ',
-            '(Inserted: ', @RowsInserted, ', ',
-            'Updated: ', @RowsUpdated, ', ',
-            'Deleted: ', @RowsDeleted, '). ',
-            'Duration: ', DATEDIFF(SECOND, @StartTime, @EndTime), ' seconds.'
-        );
+        SET @RowsInserted = @@ROWCOUNT;
+        SET @RowCount = @RowsInserted;
         
         COMMIT TRANSACTION;
         
-        -- Return results for the calling process
-        SELECT 
-            @RowCount AS [RowCount],
-            @RowsInserted AS [RowsInserted],
-            @RowsUpdated AS [RowsUpdated],
-            @RowsDeleted AS [RowsDeleted],
-            @OutputMessage AS [OutputMessage],
-            'Success' AS [Status];
+        -- Build success message
+        SET @OutputMessage = CONCAT(
+            'Users load completed. ',
+            'Type: ', CASE WHEN @LoadType = 'F' THEN 'Full' ELSE 'Incremental' END,
+            ' | From: ', CONVERT(VARCHAR(30), @LastLoadDate, 120),
+            ' | Rows affected: ', @RowCount,
+            ' (Inserted: ', @RowsInserted,
+            ', Updated: ', @RowsUpdated,
+            ', Deleted: ', @RowsDeleted, ')'
+        );
         
+        -- Return results for lineage tracking
+        -- This is what the framework expects
+        SELECT @RowCount AS [RowCount], @OutputMessage AS OutputMessage;
+        
+        PRINT @OutputMessage;
         RETURN 0;
+        
     END TRY
     BEGIN CATCH
         IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION;
         
         -- Capture error details
-        SET @ErrorNumber = ERROR_NUMBER();
-        SET @ErrorSeverity = ERROR_SEVERITY();
-        SET @ErrorState = ERROR_STATE();
+        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @ErrorNumber INT = ERROR_NUMBER();
+        DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+        DECLARE @ErrorState INT = ERROR_STATE();
+        DECLARE @ErrorLine INT = ERROR_LINE();
+        
+        -- Build error message
         SET @OutputMessage = CONCAT(
-            'Error ', @ErrorNumber, ': ',
-            ERROR_MESSAGE(),
-            ' (Line: ', ERROR_LINE(), ')'
+            'Error ', @ErrorNumber,
+            ' at line ', @ErrorLine, ': ', @ErrorMessage
         );
         
-        -- Return error information
-        SELECT 
-            0 AS [RowCount],
-            0 AS [RowsInserted],
-            0 AS [RowsUpdated],
-            0 AS [RowsDeleted],
-            @OutputMessage AS [OutputMessage],
-            'Error' AS [Status],
-            @ErrorNumber AS [ErrorNumber],
-            @ErrorSeverity AS [ErrorSeverity],
-            @ErrorState AS [ErrorState];
+        -- Return error for lineage tracking
+        SET @RowCount = 0;
+        SELECT @RowCount AS [RowCount], @OutputMessage AS OutputMessage;
         
-        -- Re-throw the error
-        THROW;
+        -- Log error for debugging
+        PRINT @OutputMessage;
         
+        -- Don't re-throw since we're returning the error info
         RETURN -1;
     END CATCH
 END;
-
 GO
-/****** Object:  StoredProcedure [exe].[00_PreCheck_Tables]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [exe].[00_PreCheck_Tables]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4229,7 +4982,7 @@ BEGIN
     RETURN @HasIssues;
 END;
 GO
-/****** Object:  StoredProcedure [exe].[01_Get_Table_Config]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [exe].[01_Get_Table_Config]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4288,7 +5041,7 @@ BEGIN
     RETURN 0;
 END;
 GO
-/****** Object:  StoredProcedure [exe].[02_Validate_Table]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [exe].[02_Validate_Table]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4358,7 +5111,7 @@ BEGIN
     RETURN 0;
 END;
 GO
-/****** Object:  StoredProcedure [exe].[03_Calculate_Load_Date]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [exe].[03_Calculate_Load_Date]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4468,7 +5221,7 @@ BEGIN
     RETURN 0;
 END;
 GO
-/****** Object:  StoredProcedure [exe].[04_Check_Dependencies]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [exe].[04_Check_Dependencies]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4512,7 +5265,7 @@ BEGIN
     RETURN 0;
 END;
 GO
-/****** Object:  StoredProcedure [exe].[05_Get_Unmet_Dependencies]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [exe].[05_Get_Unmet_Dependencies]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4557,7 +5310,7 @@ BEGIN
     RETURN 0;
 END;
 GO
-/****** Object:  StoredProcedure [exe].[06_Create_Lineage_Entry]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [exe].[06_Create_Lineage_Entry]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4653,7 +5406,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [exe].[07_Update_Lineage_Status]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [exe].[07_Update_Lineage_Status]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4683,7 +5436,7 @@ BEGIN
     RETURN 0;
 END;
 GO
-/****** Object:  StoredProcedure [exe].[08_Record_Lineage_Metrics]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [exe].[08_Record_Lineage_Metrics]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4722,7 +5475,7 @@ BEGIN
     RETURN 0;
 END;
 GO
-/****** Object:  StoredProcedure [exe].[09_Update_Table_Status]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [exe].[09_Update_Table_Status]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4760,7 +5513,7 @@ BEGIN
     RETURN 0;
 END;
 GO
-/****** Object:  StoredProcedure [exe].[10_Reset_Retry_Count]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [exe].[10_Reset_Retry_Count]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4785,7 +5538,7 @@ BEGIN
     RETURN 0;
 END;
 GO
-/****** Object:  StoredProcedure [exe].[11_Increment_Retry_Count]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [exe].[11_Increment_Retry_Count]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4821,7 +5574,7 @@ BEGIN
     RETURN 0;
 END;
 GO
-/****** Object:  StoredProcedure [exe].[12_Execute_ETL_Procedure]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [exe].[12_Execute_ETL_Procedure]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4875,7 +5628,7 @@ BEGIN
     RETURN @ExecutionResult;
 END;
 GO
-/****** Object:  StoredProcedure [exe].[13_Get_Next_Table]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [exe].[13_Get_Next_Table]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4911,7 +5664,7 @@ BEGIN
     RETURN 0;
 END;
 GO
-/****** Object:  StoredProcedure [exe].[14_Check_InProgress_Loads]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [exe].[14_Check_InProgress_Loads]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4949,7 +5702,7 @@ BEGIN
     RETURN 0;
 END;
 GO
-/****** Object:  StoredProcedure [exe].[15_Calculate_Average_Duration]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [exe].[15_Calculate_Average_Duration]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4980,7 +5733,7 @@ BEGIN
     RETURN 0;
 END;
 GO
-/****** Object:  StoredProcedure [exe].[16_Get_Execution_Metrics]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [exe].[16_Get_Execution_Metrics]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -5017,22 +5770,11 @@ BEGIN
     RETURN 0;
 END;
 GO
-/****** Object:  StoredProcedure [exe].[17_Master_ETL_Controller]    Script Date: 27-8-2025 13:37:43 ******/
+/****** Object:  StoredProcedure [exe].[17_Master_ETL_Controller]    Script Date: 27-8-2025 15:16:48 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-	
-  
-						   
-	 
-  
-	  
-  
-
-			
-				  
-			
 CREATE PROCEDURE [exe].[17_Master_ETL_Controller]
     @System NVARCHAR(25) = NULL,
     @RunGroup NVARCHAR(250) = NULL,
@@ -5103,7 +5845,6 @@ BEGIN
     -- If issues found and not forcing or auto-fixing
     IF @PreCheckResult > 0 AND @ForceStart = 0 AND @AutoFixStuck = 0
     BEGIN
-								  
         SELECT 
             0 AS TablesProcessed,
             0 AS TablesSucceeded,
@@ -5141,7 +5882,6 @@ BEGIN
     WHERE (@System IS NULL OR [System] = @System)
         AND [Is_Active] = 1
         AND (@RunGroup IS NULL OR [Run_Group] = @RunGroup);
-					 
     
     -- Process each execution order level
     WHILE @CurrentExecutionOrder <= @MaxExecutionOrder
@@ -5370,7 +6110,6 @@ BEGIN
             END CATCH
             
             NextTable:
-			 
             SET @TableName = NULL;
             SET @LineageKey = NULL;
             
@@ -5400,12 +6139,9 @@ BEGIN
     );
     
     PRINT '';
-   
-	 
     PRINT '========================================';
     PRINT @OutputMessage;
     PRINT '========================================';
-	
     
     -- Return summary result set
     SELECT 
@@ -5432,4 +6168,450 @@ BEGIN
     ELSE
         RETURN 0;
 END;
+GO
+/****** Object:  StoredProcedure [exe].[Load_Table_Template]    Script Date: 27-8-2025 15:16:48 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- COMPONENT 7: Table Template
+-- =============================================
+CREATE   PROCEDURE [exe].[Load_Table_Template]
+    @LineageKey INT,
+    @LoadType CHAR(1) = 'F',  -- F=Full, I=Incremental
+    @LastLoadDate DATETIME2(7) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+    
+    -- Declare variables
+    DECLARE @RowCount BIGINT = 0;
+    DECLARE @RowsInserted BIGINT = 0;
+    DECLARE @RowsUpdated BIGINT = 0;
+    DECLARE @RowsDeleted BIGINT = 0;
+    DECLARE @OutputMessage NVARCHAR(MAX);
+    DECLARE @ErrorNumber INT;
+    DECLARE @ErrorSeverity INT;
+    DECLARE @ErrorState INT;
+    DECLARE @StartTime DATETIME2(7) = SYSDATETIME();
+    DECLARE @EndTime DATETIME2(7);
+    
+    BEGIN TRY
+        BEGIN TRANSACTION;
+        
+        -- Validate LineageKey
+        IF NOT EXISTS (SELECT 1 FROM [exe].[Lineage] WHERE [Lineage_Key] = @LineageKey)
+        BEGIN
+            RAISERROR('Invalid LineageKey: %d', 16, 1, @LineageKey);
+            RETURN -1;
+        END
+        
+        -- For incremental loads, get last load date if not provided
+        IF @LoadType = 'I' AND @LastLoadDate IS NULL
+        BEGIN
+            SELECT @LastLoadDate = [Last_Loaded_Date]
+            FROM [exe].[Lineage]
+            WHERE [Lineage_Key] = @LineageKey;
+        END
+        
+        -- FULL LOAD LOGIC
+        IF @LoadType = 'F'
+        BEGIN
+            -- Truncate target table
+            TRUNCATE TABLE [Target_Schema].[Target_Table];
+            
+            -- Insert all data
+            INSERT INTO [Target_Schema].[Target_Table] (
+                [Column1],
+                [Column2],
+                [Column3],
+                -- ... other columns
+                [LineageKey]
+            )
+            SELECT 
+                src.[Column1],
+                src.[Column2],
+                src.[Column3],
+                -- ... other columns
+                @LineageKey
+            FROM [Source_Schema].[Source_Table] AS src
+            LEFT JOIN [Other_Schema].[Other_Table] AS oth
+                ON src.[JoinKey] = oth.[JoinKey]
+            WHERE 1=1  -- Add any filtering conditions
+            OPTION (RECOMPILE);  -- Use for parameter sniffing issues
+            
+            SET @RowsInserted = @@ROWCOUNT;
+            SET @RowCount = @RowsInserted;
+        END
+        
+        -- INCREMENTAL LOAD LOGIC
+        ELSE IF @LoadType = 'I'
+        BEGIN
+            -- Create temp table for merge output
+            DECLARE @MergeOutput TABLE (
+                [Action] NVARCHAR(10),
+                [RowCount] INT
+            );
+            
+            -- Use MERGE for incremental updates
+            MERGE [Target_Schema].[Target_Table] AS tgt
+            USING (
+                SELECT 
+                    src.[Key_Column],
+                    src.[Column1],
+                    src.[Column2],
+                    src.[Column3],
+                    -- ... other columns
+                    @LineageKey AS [LineageKey]
+                FROM [Source_Schema].[Source_Table] AS src
+                WHERE src.[Modified_Date] > @LastLoadDate  -- Incremental filter
+            ) AS src ON tgt.[Key_Column] = src.[Key_Column]
+            
+            -- Update existing records
+            WHEN MATCHED AND (
+                tgt.[Column1] != src.[Column1] OR
+                tgt.[Column2] != src.[Column2] OR
+                tgt.[Column3] != src.[Column3]
+                -- Check other columns for changes
+            )
+            THEN UPDATE SET
+                tgt.[Column1] = src.[Column1],
+                tgt.[Column2] = src.[Column2],
+                tgt.[Column3] = src.[Column3],
+                -- ... update other columns
+                tgt.[LineageKey] = src.[LineageKey]
+            
+            -- Insert new records
+            WHEN NOT MATCHED BY TARGET THEN
+                INSERT (
+                    [Key_Column],
+                    [Column1],
+                    [Column2],
+                    [Column3],
+                    -- ... other columns
+                    [LineageKey]
+                )
+                VALUES (
+                    src.[Key_Column],
+                    src.[Column1],
+                    src.[Column2],
+                    src.[Column3],
+                    -- ... other values
+                    src.[LineageKey]
+                )
+            
+            -- Optional: Delete records not in source
+            -- WHEN NOT MATCHED BY SOURCE THEN DELETE
+            
+            OUTPUT 
+                $action AS [Action],
+                1 AS [RowCount]
+            INTO @MergeOutput;
+            
+            -- Count the operations
+            SELECT 
+                @RowsInserted = SUM(CASE WHEN [Action] = 'INSERT' THEN [RowCount] ELSE 0 END),
+                @RowsUpdated = SUM(CASE WHEN [Action] = 'UPDATE' THEN [RowCount] ELSE 0 END),
+                @RowsDeleted = SUM(CASE WHEN [Action] = 'DELETE' THEN [RowCount] ELSE 0 END)
+            FROM @MergeOutput;
+            
+            SET @RowCount = @RowsInserted + @RowsUpdated + @RowsDeleted;
+        END
+        
+        SET @EndTime = SYSDATETIME();
+        
+        -- Build success message
+        SET @OutputMessage = CONCAT(
+            'Load completed successfully. ',
+            'Rows: ', @RowCount, ' ',
+            '(Inserted: ', @RowsInserted, ', ',
+            'Updated: ', @RowsUpdated, ', ',
+            'Deleted: ', @RowsDeleted, '). ',
+            'Duration: ', DATEDIFF(SECOND, @StartTime, @EndTime), ' seconds.'
+        );
+        
+        COMMIT TRANSACTION;
+        
+        -- Return results for the calling process
+        SELECT 
+            @RowCount AS [RowCount],
+            @RowsInserted AS [RowsInserted],
+            @RowsUpdated AS [RowsUpdated],
+            @RowsDeleted AS [RowsDeleted],
+            @OutputMessage AS [OutputMessage],
+            'Success' AS [Status];
+        
+        RETURN 0;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        
+        -- Capture error details
+        SET @ErrorNumber = ERROR_NUMBER();
+        SET @ErrorSeverity = ERROR_SEVERITY();
+        SET @ErrorState = ERROR_STATE();
+        SET @OutputMessage = CONCAT(
+            'Error ', @ErrorNumber, ': ',
+            ERROR_MESSAGE(),
+            ' (Line: ', ERROR_LINE(), ')'
+        );
+        
+        -- Return error information
+        SELECT 
+            0 AS [RowCount],
+            0 AS [RowsInserted],
+            0 AS [RowsUpdated],
+            0 AS [RowsDeleted],
+            @OutputMessage AS [OutputMessage],
+            'Error' AS [Status],
+            @ErrorNumber AS [ErrorNumber],
+            @ErrorSeverity AS [ErrorSeverity],
+            @ErrorState AS [ErrorState];
+        
+        -- Re-throw the error
+        THROW;
+        
+        RETURN -1;
+    END CATCH
+END;
+
+GO
+/****** Object:  StoredProcedure [Test_Suite].[AXBE_LEDGERTRANS]    Script Date: 27-8-2025 15:16:48 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [Test_Suite].[AXBE_LEDGERTRANS]
+	
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	INSERT INTO [Test_Suite].[Test_Suite_Results] (
+	    [System],
+	    [Table_Name],
+	    [Count_Staging],
+	    [Count_DWH]
+	)
+	SELECT
+	    'AXBE',
+	    'LEDGERTRANS',
+	    (SELECT COUNT(1)
+	     FROM [STAGING_AXNL].dbo.LEDGERTRANS TD
+	     WHERE (POSTING <> 19 AND DATAAREAID <> 700) OR DATAAREAID = 100),
+	    (SELECT COUNT(1) 
+	     FROM [Incr].[GL_Transactions] 
+	     WHERE [System] = 'AXBE')
+		
+
+END
+GO
+/****** Object:  StoredProcedure [Test_Suite].[AXNL_LEDGERTRANS]    Script Date: 27-8-2025 15:16:48 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [Test_Suite].[AXNL_LEDGERTRANS]
+	
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	INSERT INTO [Test_Suite].[Test_Suite_Results] (
+	    [System],
+	    [Table_Name],
+	    [Count_Staging],
+	    [Count_DWH]
+	)
+	SELECT
+	    'AXNL',
+	    'LEDGERTRANS',
+	    (SELECT COUNT(1)
+	     FROM [STAGING_AXNL].dbo.LEDGERTRANS TD
+	     WHERE POSTING <> 19),
+	    (SELECT COUNT(1) 
+	     FROM [Incr].[GL_Transactions] 
+	     WHERE [System] = 'AXNL')
+		
+
+END
+GO
+/****** Object:  StoredProcedure [Test_Suite].[FINACC_TAANDAGD]    Script Date: 27-8-2025 15:16:48 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [Test_Suite].[FINACC_TAANDAGD]
+	
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	INSERT INTO [Test_Suite].[Test_Suite_Results] (
+	    [System],
+	    [Table_Name],
+	    [Count_Staging],
+	    [Count_DWH]
+	)
+	SELECT
+	    'FINACC',
+	    'TAANDAGD',
+	    (SELECT COUNT(1)
+	     FROM [STAGING_FINACC].dbo.TAANDAGD TD
+	     JOIN [DWH_FINANCE].dbo.Entity e 
+	         ON e.System = 'FINACC' AND e.[Entity System Code] = TD.FIRKODE),
+	    (SELECT COUNT(1) 
+	     FROM [Incr].[GL_Transactions] 
+	     WHERE [System] = 'FINACC' AND Table_Name = 'TAANDAGD')
+		
+
+END
+GO
+/****** Object:  StoredProcedure [Test_Suite].[FINACC_TALGDAGB]    Script Date: 27-8-2025 15:16:48 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [Test_Suite].[FINACC_TALGDAGB]
+	
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	INSERT INTO [Test_Suite].[Test_Suite_Results] (
+	    [System],
+	    [Table_Name],
+	    [Count_Staging],
+	    [Count_DWH]
+	)
+	SELECT
+	    'FINACC',
+	    'TALGDAGB',
+	    (SELECT COUNT(1)
+	     FROM [STAGING_FINACC].dbo.TALGDAGB TD
+	     JOIN [DWH_FINANCE].dbo.Entity e 
+	         ON e.System = 'FINACC' AND e.[Entity System Code] = TD.FIRKODE AND TD.DAGBOEK NOT IN ('CAAN','CVER')),
+	    (SELECT COUNT(1) 
+	     FROM [Incr].[GL_Transactions] 
+	     WHERE [System] = 'FINACC' AND Table_Name = 'TALGDAGB')
+		
+
+END
+GO
+/****** Object:  StoredProcedure [Test_Suite].[FINACC_TFINDAGB]    Script Date: 27-8-2025 15:16:48 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [Test_Suite].[FINACC_TFINDAGB]
+	
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	INSERT INTO [Test_Suite].[Test_Suite_Results] (
+	    [System],
+	    [Table_Name],
+	    [Count_Staging],
+	    [Count_DWH]
+	)
+	SELECT
+	    'FINACC',
+	    'TFINDAGB',
+	    (SELECT COUNT(1)
+	     FROM [STAGING_FINACC].dbo.TFINDAGB TD
+	     JOIN [DWH_FINANCE].dbo.Entity e 
+	         ON e.System = 'FINACC' AND e.[Entity System Code] = TD.FIRKODE),
+	    (SELECT COUNT(1) 
+	     FROM [Incr].[GL_Transactions] 
+	     WHERE [System] = 'FINACC' AND Table_Name = 'TFINDAGB')
+		
+
+END
+GO
+/****** Object:  StoredProcedure [Test_Suite].[FINACC_TVERDAGD]    Script Date: 27-8-2025 15:16:48 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [Test_Suite].[FINACC_TVERDAGD]
+	
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	INSERT INTO [Test_Suite].[Test_Suite_Results] (
+	    [System],
+	    [Table_Name],
+	    [Count_Staging],
+	    [Count_DWH]
+	)
+	SELECT
+	    'FINACC',
+	    'TVERDAGD',
+	    (SELECT COUNT(1)
+	     FROM [STAGING_FINACC].dbo.TVERDAGD TD
+	     JOIN [DWH_FINANCE].dbo.Entity e 
+	         ON e.System = 'FINACC' AND e.[Entity System Code] = TD.FIRKODE),
+	    (SELECT COUNT(1) 
+	     FROM [Incr].[GL_Transactions] 
+	     WHERE [System] = 'FINACC' AND Table_Name = 'TVERDAGD')
+		
+
+END
 GO
