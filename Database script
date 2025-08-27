@@ -1,20 +1,130 @@
 USE [TestDWH]
 GO
-/****** Object:  User [NT AUTHORITY\SYSTEM]    Script Date: 26-8-2025 21:15:35 ******/
+/****** Object:  User [NT AUTHORITY\SYSTEM]    Script Date: 27-8-2025 12:33:37 ******/
 CREATE USER [NT AUTHORITY\SYSTEM] FOR LOGIN [NT AUTHORITY\SYSTEM] WITH DEFAULT_SCHEMA=[dbo]
 GO
-/****** Object:  DatabaseRole [SQLArcExtensionUserRole]    Script Date: 26-8-2025 21:15:35 ******/
+/****** Object:  DatabaseRole [SQLArcExtensionUserRole]    Script Date: 27-8-2025 12:33:37 ******/
 CREATE ROLE [SQLArcExtensionUserRole]
 GO
 ALTER ROLE [SQLArcExtensionUserRole] ADD MEMBER [NT AUTHORITY\SYSTEM]
 GO
-/****** Object:  Schema [exe]    Script Date: 26-8-2025 21:15:35 ******/
+/****** Object:  Schema [exe]    Script Date: 27-8-2025 12:33:37 ******/
 CREATE SCHEMA [exe]
 GO
-/****** Object:  Schema [Test_Suite]    Script Date: 26-8-2025 21:15:35 ******/
+/****** Object:  Schema [Test_Suite]    Script Date: 27-8-2025 12:33:37 ******/
 CREATE SCHEMA [Test_Suite]
 GO
-/****** Object:  Table [exe].[Table_List]    Script Date: 26-8-2025 21:15:35 ******/
+/****** Object:  UserDefinedFunction [exe].[fn_GetLastLoadType]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Function to get last used load type for a table
+CREATE   FUNCTION [exe].[fn_GetLastLoadType]
+(
+    @TableName NVARCHAR(255)
+)
+RETURNS CHAR(1)
+AS
+BEGIN
+    DECLARE @LastLoadType CHAR(1);
+    
+    SELECT TOP 1 @LastLoadType = Load_Type
+    FROM exe.Lineage
+    WHERE Table_Name = @TableName
+        AND Load_Status = 'S'
+        AND Load_Type IS NOT NULL
+    ORDER BY Finish_Load DESC;
+    
+    RETURN @LastLoadType;
+END
+GO
+/****** Object:  Table [exe].[Lineage]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [exe].[Lineage](
+	[Lineage_Key] [int] IDENTITY(1,1) NOT NULL,
+	[System] [nvarchar](25) NOT NULL,
+	[Table_Name] [nvarchar](200) NOT NULL,
+	[Start_Load] [datetime2](7) NOT NULL,
+	[Finish_Load] [datetime2](7) NULL,
+	[Last_Loaded_Date] [datetime2](7) NULL,
+	[Type] [char](1) NOT NULL,
+	[Load_Status] [char](1) NOT NULL,
+	[Row_Count] [bigint] NULL,
+	[Rows_Inserted] [bigint] NULL,
+	[Rows_Updated] [bigint] NULL,
+	[Rows_Deleted] [bigint] NULL,
+	[Duration_Seconds]  AS (datediff(second,[Start_Load],[Finish_Load])),
+	[Output_Message] [nvarchar](max) NULL,
+	[Error_Number] [int] NULL,
+	[Error_Severity] [int] NULL,
+	[Error_State] [int] NULL,
+	[Created_By] [nvarchar](128) NULL,
+	[Host_Name] [nvarchar](128) NULL,
+	[Load_Type] [char](1) NULL,
+ CONSTRAINT [PK_Lineage] PRIMARY KEY CLUSTERED 
+(
+	[Lineage_Key] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  View [exe].[vw_Last_Successful_Load]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Create a view to get the last successful load information for each table
+CREATE   VIEW [exe].[vw_Last_Successful_Load]
+AS
+WITH LastLoad AS (
+    SELECT 
+        System,
+        Table_Name,
+        Load_Type,
+        Finish_Load,
+        Row_Count,
+        ROW_NUMBER() OVER (PARTITION BY System, Table_Name ORDER BY Finish_Load DESC) AS rn
+    FROM exe.Lineage
+    WHERE Load_Status = 'S'  -- Only successful loads
+)
+SELECT 
+    System,
+    Table_Name,
+    Load_Type AS Last_Load_Type_Used,
+    Finish_Load AS Last_Load_Date,
+    Row_Count AS Last_Load_Row_Count
+FROM LastLoad
+WHERE rn = 1;
+GO
+/****** Object:  View [exe].[vw_Load_Type_History]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Create a view to analyze load type patterns
+CREATE   VIEW [exe].[vw_Load_Type_History]
+AS
+SELECT 
+    l.System,
+    l.Table_Name,
+    l.Load_Type,
+    COUNT(*) AS Load_Count,
+    AVG(l.Row_Count) AS Avg_Row_Count,
+    MIN(l.Finish_Load) AS First_Load,
+    MAX(l.Finish_Load) AS Last_Load,
+    AVG(DATEDIFF(SECOND, l.Start_Load, l.Finish_Load)) AS Avg_Duration_Seconds
+FROM exe.Lineage l
+WHERE l.Load_Status = 'S'
+    AND l.Load_Type IS NOT NULL
+GROUP BY l.System, l.Table_Name, l.Load_Type;
+GO
+/****** Object:  Table [exe].[Table_List]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -45,6 +155,7 @@ CREATE TABLE [exe].[Table_List](
 	[Created_Date] [datetime2](7) NOT NULL,
 	[Modified_Date] [datetime2](7) NOT NULL,
 	[Modified_By] [nvarchar](128) NOT NULL,
+	[Default_Load_Years] [int] NULL,
  CONSTRAINT [PK_Table_List] PRIMARY KEY CLUSTERED 
 (
 	[ID] ASC
@@ -56,38 +167,7 @@ CREATE TABLE [exe].[Table_List](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [exe].[Lineage]    Script Date: 26-8-2025 21:15:35 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [exe].[Lineage](
-	[Lineage_Key] [int] IDENTITY(1,1) NOT NULL,
-	[System] [nvarchar](25) NOT NULL,
-	[Table_Name] [nvarchar](200) NOT NULL,
-	[Start_Load] [datetime2](7) NOT NULL,
-	[Finish_Load] [datetime2](7) NULL,
-	[Last_Loaded_Date] [datetime2](7) NULL,
-	[Type] [char](1) NOT NULL,
-	[Load_Status] [char](1) NOT NULL,
-	[Row_Count] [bigint] NULL,
-	[Rows_Inserted] [bigint] NULL,
-	[Rows_Updated] [bigint] NULL,
-	[Rows_Deleted] [bigint] NULL,
-	[Duration_Seconds]  AS (datediff(second,[Start_Load],[Finish_Load])),
-	[Output_Message] [nvarchar](max) NULL,
-	[Error_Number] [int] NULL,
-	[Error_Severity] [int] NULL,
-	[Error_State] [int] NULL,
-	[Created_By] [nvarchar](128) NULL,
-	[Host_Name] [nvarchar](128) NULL,
- CONSTRAINT [PK_Lineage] PRIMARY KEY CLUSTERED 
-(
-	[Lineage_Key] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-GO
-/****** Object:  View [exe].[v_Table_Status]    Script Date: 26-8-2025 21:15:35 ******/
+/****** Object:  View [exe].[v_Table_Status]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -135,7 +215,7 @@ LEFT JOIN (
 ) AS l ON tl.[System] = l.[System] AND tl.[Table_Name] = l.[Table_Name];
 
 GO
-/****** Object:  View [exe].[v_Load_Pattern_Reference]    Script Date: 26-8-2025 21:15:35 ******/
+/****** Object:  View [exe].[v_Load_Pattern_Reference]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -183,7 +263,7 @@ FROM (VALUES
      'Period-based fact tables')
 ) AS Patterns(Pattern, Description, Characteristics, Use_Case);
 GO
-/****** Object:  Table [dbo].[Calender]    Script Date: 26-8-2025 21:15:35 ******/
+/****** Object:  Table [dbo].[Calender]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -232,7 +312,7 @@ CREATE TABLE [dbo].[Calender](
 	[Lineage_Key] [bigint] NOT NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Cognos Accounts]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  Table [dbo].[Cognos Accounts]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -251,7 +331,7 @@ CREATE TABLE [dbo].[Cognos Accounts](
 	[Lineage_Key] [bigint] NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Entity]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  Table [dbo].[Entity]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -268,7 +348,7 @@ CREATE TABLE [dbo].[Entity](
 	[Lineage_Key] [bigint] NOT NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Entity Adjustments]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  Table [dbo].[Entity Adjustments]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -288,7 +368,7 @@ CREATE TABLE [dbo].[Entity Adjustments](
 	[ID] [bigint] IDENTITY(1,1) NOT NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[GL_Table]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  Table [dbo].[GL_Table]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -311,7 +391,7 @@ CREATE TABLE [dbo].[GL_Table](
 	[Entity Code] [nvarchar](250) NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[GL_Transactions]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  Table [dbo].[GL_Transactions]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -353,7 +433,7 @@ CREATE TABLE [dbo].[GL_Transactions](
 	[F_ID] [bigint] NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Ledgerbudget]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  Table [dbo].[Ledgerbudget]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -375,7 +455,7 @@ CREATE TABLE [dbo].[Ledgerbudget](
 	[Site_Table_Key] [bigint] NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Sites]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  Table [dbo].[Sites]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -390,7 +470,7 @@ CREATE TABLE [dbo].[Sites](
 	[Lineage_Key] [int] NOT NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Uploadfile]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  Table [dbo].[Uploadfile]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -426,7 +506,7 @@ CREATE TABLE [dbo].[Uploadfile](
 	[Entity_Table_Key] [bigint] NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [Test_Suite].[Test_Suite_Results]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  Table [Test_Suite].[Test_Suite_Results]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -464,6 +544,8 @@ ALTER TABLE [exe].[Table_List] ADD  CONSTRAINT [DF__Table_Lis__Modif__6477ECF3] 
 GO
 ALTER TABLE [exe].[Table_List] ADD  CONSTRAINT [DF__Table_Lis__Modif__656C112C]  DEFAULT (suser_sname()) FOR [Modified_By]
 GO
+ALTER TABLE [exe].[Table_List] ADD  DEFAULT ((2)) FOR [Default_Load_Years]
+GO
 ALTER TABLE [Test_Suite].[Test_Suite_Results] ADD  DEFAULT (getdate()) FOR [Date_Entry]
 GO
 ALTER TABLE [exe].[Lineage]  WITH CHECK ADD CHECK  (([Load_Status]='W' OR [Load_Status]='E' OR [Load_Status]='S' OR [Load_Status]='P'))
@@ -478,7 +560,7 @@ ALTER TABLE [exe].[Table_List]  WITH CHECK ADD  CONSTRAINT [CK__Table_Lis__Load_
 GO
 ALTER TABLE [exe].[Table_List] CHECK CONSTRAINT [CK__Table_Lis__Load___628FA481]
 GO
-/****** Object:  StoredProcedure [dbo].[Load_Entity_AXBE_DATAAREA]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [dbo].[Load_Entity_AXBE_DATAAREA]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -503,14 +585,6 @@ BEGIN
     DECLARE @TableName NVARCHAR(100) = 'Entity_AXBE_DATAAREA';
     
     BEGIN TRY
-        -- If LastLoadDate is not provided, set a default
-        IF @LastLoadDate IS NULL
-        BEGIN
-            IF @LoadType = 'I'
-                SET @LastLoadDate = DATEADD(DAY, -7, GETDATE());  -- Default to last 7 days for incremental
-            ELSE
-                SET @LastLoadDate = '1900-01-01';  -- Default for full load
-        END
         
         BEGIN TRANSACTION;
         
@@ -655,7 +729,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_Entity_AXNL_DATAAREA]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [dbo].[Load_Entity_AXNL_DATAAREA]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -679,14 +753,6 @@ BEGIN
     DECLARE @TableName NVARCHAR(100) = 'Entity_AXNL_DATAAREA';
     
     BEGIN TRY
-        -- If LastLoadDate is not provided, set a default
-        IF @LastLoadDate IS NULL
-        BEGIN
-            IF @LoadType = 'I'
-                SET @LastLoadDate = DATEADD(DAY, -7, GETDATE());  -- Default to last 7 days for incremental
-            ELSE
-                SET @LastLoadDate = '1900-01-01';  -- Default for full load
-        END
         
         BEGIN TRANSACTION;
         
@@ -831,7 +897,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_Entity_FINACC_TFIRMA]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [dbo].[Load_Entity_FINACC_TFIRMA]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -855,14 +921,6 @@ BEGIN
     DECLARE @TableName NVARCHAR(100) = 'Entity_FINACC_TFIRMA';
     
     BEGIN TRY
-        -- If LastLoadDate is not provided, set a default
-        IF @LastLoadDate IS NULL
-        BEGIN
-            IF @LoadType = 'I'
-                SET @LastLoadDate = DATEADD(DAY, -7, GETDATE());  -- Default to last 7 days for incremental
-            ELSE
-                SET @LastLoadDate = '1900-01-01';  -- Default for full load
-        END
         
         BEGIN TRANSACTION;
         
@@ -1007,7 +1065,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Table_AXBE_LEDGERTABLE]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Table_AXBE_LEDGERTABLE]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1031,14 +1089,6 @@ BEGIN
     DECLARE @TableName NVARCHAR(100) = 'GL_Table_AXBE_LEDGERTABLE';
     
     BEGIN TRY
-        -- If LastLoadDate is not provided, set a default
-        IF @LastLoadDate IS NULL
-        BEGIN
-            IF @LoadType = 'I'
-                SET @LastLoadDate = DATEADD(DAY, -7, GETDATE());  -- Default to last 7 days for incremental
-            ELSE
-                SET @LastLoadDate = '1900-01-01';  -- Default for full load
-        END
         
         BEGIN TRANSACTION;
         
@@ -1146,12 +1196,12 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Table_AXNL_LEDGERTABLE]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Table_AXNL_LEDGERTABLE]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE   PROCEDURE [dbo].[Load_GL_Table_AXNL_LEDGERTABLE]
+CREATE PROCEDURE [dbo].[Load_GL_Table_AXNL_LEDGERTABLE]
     @LineageKey INT,
     @LoadType CHAR(1) = 'F',  -- F=Full, I=Incremental
     @LastLoadDate DATETIME2(7) = NULL
@@ -1170,14 +1220,6 @@ BEGIN
     DECLARE @TableName NVARCHAR(100) = 'GL_Table_AXNL_LEDGERTABLE';
     
     BEGIN TRY
-        -- If LastLoadDate is not provided, set a default
-        IF @LastLoadDate IS NULL
-        BEGIN
-            IF @LoadType = 'I'
-                SET @LastLoadDate = DATEADD(DAY, -7, GETDATE());  -- Default to last 7 days for incremental
-            ELSE
-                SET @LastLoadDate = '1900-01-01';  -- Default for full load
-        END
         
         BEGIN TRANSACTION;
         
@@ -1285,7 +1327,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Table_FINACC_TALGREK]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Table_FINACC_TALGREK]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1309,14 +1351,6 @@ BEGIN
     DECLARE @TableName NVARCHAR(100) = 'GL_Table_FINACC_TALGREK';
     
     BEGIN TRY
-        -- If LastLoadDate is not provided, set a default
-        IF @LastLoadDate IS NULL
-        BEGIN
-            IF @LoadType = 'I'
-                SET @LastLoadDate = DATEADD(DAY, -7, GETDATE());  -- Default to last 7 days for incremental
-            ELSE
-                SET @LastLoadDate = '1900-01-01';  -- Default for full load
-        END
         
         BEGIN TRANSACTION;
         
@@ -1442,7 +1476,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_AXBE_LEDGERTRANS]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_AXBE_LEDGERTRANS]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1466,31 +1500,12 @@ BEGIN
     DECLARE @TableName NVARCHAR(100) = 'GL_Transactions_AXBE_LEDGERTRANS';
     
     -- Batch processing variables
-    DECLARE @BatchSize INT = 100000;
+    DECLARE @BatchSize INT = 1000000;
     DECLARE @MaxRow INT;
     DECLARE @CurrentRow INT;
     DECLARE @DeleteRowCount INT = 1;
     
     BEGIN TRY
-        -- Get last load date if not provided
-        IF @LastLoadDate IS NULL
-        BEGIN
-            IF @LoadType = 'I'
-            BEGIN
-                -- Get the last posted date from the target table
-                SELECT @LastLoadDate = MAX([Posted Date])
-                FROM [dbo].[GL_Transactions]
-                WHERE [System] = 'AXBE';
-                
-                -- If no data exists, do a full load from a default date
-                IF @LastLoadDate IS NULL
-                    SET @LastLoadDate = DATEADD(MONTH, -3, GETDATE()); -- Default to 3 months back
-            END
-            ELSE
-            BEGIN
-                SET @LastLoadDate = '1900-01-01'; -- Full load
-            END
-        END
         
         BEGIN TRANSACTION;
         
@@ -1722,7 +1737,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_AXNL_LEDGERTRANS]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_AXNL_LEDGERTRANS]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1746,31 +1761,12 @@ BEGIN
     DECLARE @TableName NVARCHAR(100) = 'GL_Transactions_AXNL_LEDGERTRANS';
     
     -- Batch processing variables
-    DECLARE @BatchSize INT = 100000;
+    DECLARE @BatchSize INT = 1000000;
     DECLARE @MaxRow INT;
     DECLARE @CurrentRow INT;
     DECLARE @DeleteRowCount INT = 1;
     
     BEGIN TRY
-        -- Get last load date if not provided
-        IF @LastLoadDate IS NULL
-        BEGIN
-            IF @LoadType = 'I'
-            BEGIN
-                -- Get the last posted date from the target table
-                SELECT @LastLoadDate = MAX([Posted Date])
-                FROM [dbo].[GL_Transactions]
-                WHERE [System] = 'AXNL';
-                
-                -- If no data exists, do a full load from a default date
-                IF @LastLoadDate IS NULL
-                    SET @LastLoadDate = DATEADD(MONTH, -3, GETDATE()); -- Default to 3 months back
-            END
-            ELSE
-            BEGIN
-                SET @LastLoadDate = '1900-01-01'; -- Full load
-            END
-        END
         
         BEGIN TRANSACTION;
         
@@ -2001,7 +1997,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TAANDAGD]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TAANDAGD]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2308,7 +2304,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TALGDAGB]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TALGDAGB]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2338,26 +2334,6 @@ BEGIN
     DECLARE @DeleteRowCount INT = 1;
     
     BEGIN TRY
-        -- Get last load date if not provided
-        IF @LastLoadDate IS NULL
-        BEGIN
-            IF @LoadType = 'I'
-            BEGIN
-                -- Get the last posted date from the target table for this specific source
-                SELECT @LastLoadDate = MAX([Posted Date])
-                FROM [dbo].[GL_Transactions]
-                WHERE [System] = 'FINACC' 
-                AND [Table_Name] = 'TALGDAGB';
-                
-                -- If no data exists, default to 3 months back
-                IF @LastLoadDate IS NULL
-                    SET @LastLoadDate = DATEADD(MONTH, -3, GETDATE());
-            END
-            ELSE
-            BEGIN
-                SET @LastLoadDate = '1900-01-01'; -- Full load
-            END
-        END
         
         BEGIN TRANSACTION;
         
@@ -2449,9 +2425,9 @@ BEGIN
                 NULL AS [Cost_Center_Description3],
                 TD.VERRNR AS [Transaction Number],
                 COALESCE(T.KOSTSRT, T.BALGRPPAS, T.BALGRPAKT) AS [Balance/Cost Group],
-                CAST(TD.CREA AS DATETIME2) AS [Posted Time],
+                CAST(TD.WYZ AS DATETIME2) AS [Posted Time],
                 TD.USCREA AS [Posted By],
-                CAST(TD.CREA AS DATE) AS [Posted Date],
+                CAST(TD.WYZ AS DATE) AS [Posted Date],
                 TD.BOEKJR AS [Fiscal_Year],
                 L.LEVERNR AS [Vendor Number],
                 L.NAAM AS [Vendor Name],
@@ -2567,7 +2543,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TFINDAGB]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TFINDAGB]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2597,33 +2573,13 @@ BEGIN
     DECLARE @DeleteRowCount INT = 1;
     
     BEGIN TRY
-        -- Get last load date if not provided
-        IF @LastLoadDate IS NULL
-        BEGIN
-            IF @LoadType = 'I'
-            BEGIN
-                -- Get the last posted date from the target table for this specific source
-                SELECT @LastLoadDate = MAX([Posted Date])
-                FROM [dbo].[GL_Transactions]
-                WHERE [System] = 'FINACC' 
-                AND [Table_Name] = 'TFINDAGB';
-                
-                -- If no data exists, default to 3 months back
-                IF @LastLoadDate IS NULL
-                    SET @LastLoadDate = DATEADD(MONTH, -3, GETDATE());
-            END
-            ELSE
-            BEGIN
-                SET @LastLoadDate = '1900-01-01'; -- Full load
-            END
-        END
         
         BEGIN TRANSACTION;
         
         -- Get the MIN and MAX ID from TFINDAGB for batch processing
         SELECT @CurrentRow = MIN(ID), @MaxRow = MAX(ID)
         FROM [STAGING_FINACC].dbo.TFINDAGB
-        WHERE @LoadType = 'F' OR CREA >= @LastLoadDate;
+        WHERE @LoadType = 'F' OR WYZ >= @LastLoadDate;
         
         -- Delete old data for incremental load (in batches to avoid lock escalation)
         IF @LoadType = 'I' AND @LastLoadDate IS NOT NULL
@@ -2708,9 +2664,9 @@ BEGIN
                 NULL AS [Cost_Center_Description3],
                 TD.VERRNR AS [Transaction Number],
                 COALESCE(T.KOSTSRT, T.BALGRPPAS, T.BALGRPAKT) AS [Balance/Cost Group],
-                CAST(TD.CREA AS DATETIME2) AS [Posted Time],
+                CAST(TD.WYZ AS DATETIME2) AS [Posted Time],
                 TD.USCREA AS [Posted By],
-                CAST(TD.CREA AS DATE) AS [Posted Date],
+                CAST(TD.WYZ AS DATE) AS [Posted Date],
                 TD.BOEKJR AS [Fiscal_Year],
                 L.LEVERNR AS [Vendor Number],
                 L.NAAM AS [Vendor Name],
@@ -2754,7 +2710,7 @@ BEGIN
             WHERE TD.ID BETWEEN @CurrentRow AND @CurrentRow + @BatchSize - 1
                 AND (
                     -- For incremental: use date filter
-                    (@LoadType = 'I' AND TD.CREA >= @LastLoadDate)
+                    (@LoadType = 'I' AND TD.WYZ >= @LastLoadDate)
                     OR 
                     -- For full load: no date filter
                     (@LoadType = 'F')
@@ -2769,7 +2725,7 @@ BEGIN
             IF NOT EXISTS (
                 SELECT 1 FROM [STAGING_FINACC].dbo.TFINDAGB 
                 WHERE ID >= @CurrentRow
-                AND (@LoadType = 'F' OR CREA >= @LastLoadDate)
+                AND (@LoadType = 'F' OR WYZ >= @LastLoadDate)
             )
                 BREAK;
         END;
@@ -2824,7 +2780,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TVERDAGD]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [dbo].[Load_GL_Transactions_FINACC_TVERDAGD]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2854,33 +2810,13 @@ BEGIN
     DECLARE @DeleteRowCount INT = 1;
     
     BEGIN TRY
-        -- Get last load date if not provided
-        IF @LastLoadDate IS NULL
-        BEGIN
-            IF @LoadType = 'I'
-            BEGIN
-                -- Get the last posted date from the target table for this specific source
-                SELECT @LastLoadDate = MAX([Posted Date])
-                FROM [dbo].[GL_Transactions]
-                WHERE [System] = 'FINACC' 
-                AND [Table_Name] = 'TVERDAGD';
-                
-                -- If no data exists, default to 3 months back
-                IF @LastLoadDate IS NULL
-                    SET @LastLoadDate = DATEADD(MONTH, -3, GETDATE());
-            END
-            ELSE
-            BEGIN
-                SET @LastLoadDate = '1900-01-01'; -- Full load
-            END
-        END
         
         BEGIN TRANSACTION;
         
         -- Get the MIN and MAX ID from TVERDAGD for batch processing
         SELECT @CurrentRow = MIN(ID), @MaxRow = MAX(ID)
         FROM [STAGING_FINACC].dbo.TVERDAGD
-        WHERE @LoadType = 'F' OR CREA >= @LastLoadDate;
+        WHERE @LoadType = 'F' OR WYZ >= @LastLoadDate;
         
         -- Delete old data for incremental load (in batches to avoid lock escalation)
         IF @LoadType = 'I' AND @LastLoadDate IS NOT NULL
@@ -2965,9 +2901,9 @@ BEGIN
                 NULL AS [Cost_Center_Description3],
                 TD.FAKTNR AS [Transaction Number],  -- Note: FAKTNR instead of VERRNR
                 COALESCE(T.KOSTSRT, T.BALGRPPAS, T.BALGRPAKT) AS [Balance/Cost Group],
-                CAST(TD.CREA AS DATETIME2) AS [Posted Time],
+                CAST(TD.WYZ AS DATETIME2) AS [Posted Time],
                 TD.USCREA AS [Posted By],
-                CAST(TD.CREA AS DATE) AS [Posted Date],
+                CAST(TD.WYZ AS DATE) AS [Posted Date],
                 TD.BOEKJR AS [Fiscal_Year],
                 L.LEVERNR AS [Vendor Number],
                 L.NAAM AS [Vendor Name],
@@ -3011,7 +2947,7 @@ BEGIN
             WHERE TD.ID BETWEEN @CurrentRow AND @CurrentRow + @BatchSize - 1
                 AND (
                     -- For incremental: use date filter
-                    (@LoadType = 'I' AND TD.CREA >= @LastLoadDate)
+                    (@LoadType = 'I' AND TD.WYZ >= @LastLoadDate)
                     OR 
                     -- For full load: no date filter
                     (@LoadType = 'F')
@@ -3026,7 +2962,7 @@ BEGIN
             IF NOT EXISTS (
                 SELECT 1 FROM [STAGING_FINACC].dbo.TVERDAGD 
                 WHERE ID >= @CurrentRow
-                AND (@LoadType = 'F' OR CREA >= @LastLoadDate)
+                AND (@LoadType = 'F' OR WYZ >= @LastLoadDate)
             )
                 BREAK;
         END;
@@ -3081,7 +3017,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_MDS_Cognos_Accounts]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [dbo].[Load_MDS_Cognos_Accounts]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3331,7 +3267,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_MDS_Entity Adjustments]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [dbo].[Load_MDS_Entity Adjustments]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3355,14 +3291,6 @@ BEGIN
     DECLARE @TableName NVARCHAR(100) = 'Entity Adjustments';
     
     BEGIN TRY
-        -- If LastLoadDate is not provided, set a default
-        IF @LastLoadDate IS NULL
-        BEGIN
-            IF @LoadType = 'I'
-                SET @LastLoadDate = DATEADD(DAY, -7, GETDATE());  -- Default to last 7 days for incremental
-            ELSE
-                SET @LastLoadDate = '1900-01-01';  -- Default for full load
-        END
         
         BEGIN TRANSACTION;
         
@@ -3517,7 +3445,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_MDS_UploadFile]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [dbo].[Load_MDS_UploadFile]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3542,14 +3470,6 @@ BEGIN
     DECLARE @MaxPeriod NVARCHAR(10);
     
     BEGIN TRY
-        -- If LastLoadDate is not provided, set a default
-        IF @LastLoadDate IS NULL
-        BEGIN
-            IF @LoadType = 'I'
-                SET @LastLoadDate = DATEADD(DAY, -7, GETDATE());  -- Default to last 7 days for incremental
-            ELSE
-                SET @LastLoadDate = '1900-01-01';  -- Default for full load
-        END
         
         BEGIN TRANSACTION;
         
@@ -3695,7 +3615,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_Sites]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [dbo].[Load_Sites]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3818,7 +3738,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Load_Table_Template]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [dbo].[Load_Table_Template]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4029,850 +3949,372 @@ BEGIN
 END;
 
 GO
-/****** Object:  StoredProcedure [exe].[Get_Next_Table_To_Process]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [exe].[01_Get_Table_Config]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 -- =============================================
--- COMPONENT 9: Helper Procedure to get to the next table
+-- 1. CONFIGURATION PROCEDURES
 -- =============================================
-CREATE   PROCEDURE [exe].[Get_Next_Table_To_Process]
-    @System NVARCHAR(25),
-    @RunGroup NVARCHAR(250) = NULL,
-    @LoadType CHAR(1) = NULL
-AS
-BEGIN
-    SET NOCOUNT ON;
-    
-    -- Get the next table that's ready to process
-    WITH ReadyTables AS (
-        SELECT TOP 1
-            tl.*,
-            CASE 
-                WHEN tl.[Dependencies] IS NULL OR tl.[Dependencies] = '' THEN 1
-                ELSE (
-                    SELECT MIN(CASE WHEN dep_tl.[Load_Status] = 'S' THEN 1 ELSE 0 END)
-                    FROM STRING_SPLIT(tl.[Dependencies], ',') AS dep
-                    INNER JOIN [exe].[Table_List] AS dep_tl 
-                        ON LTRIM(RTRIM(dep.value)) = dep_tl.[Table_Name]
-                        AND dep_tl.[System] = tl.[System]
-                )
-            END AS [Dependencies_Met]
-        FROM [exe].[Table_List] AS tl
-        WHERE tl.[System] = @System
-            AND tl.[Is_Active] = 1
-            AND tl.[Load_Status] != 'P'  -- Not currently processing
-            AND (tl.[Load_Status] != 'E' OR tl.[Retry_Count] < tl.[Max_Retries])  -- Can retry if failed
-            AND (@RunGroup IS NULL OR tl.[Run_Group] = @RunGroup)
-            AND (@LoadType IS NULL OR tl.[Load_Type] = @LoadType)
-        ORDER BY 
-            tl.[Execution_Order],
-            tl.[Table_Name]
-    )
-    SELECT * FROM ReadyTables
-    WHERE [Dependencies_Met] = 1;  -- Only return tables with met dependencies
-    
-    RETURN 0;
-END;
 
-GO
-/****** Object:  StoredProcedure [exe].[Master_ETL_Orchestration]    Script Date: 26-8-2025 21:15:36 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [exe].[Master_ETL_Orchestration]
-    @System NVARCHAR(25),
-    @RunGroup NVARCHAR(250) = NULL,
-    @LoadType CHAR(1) = NULL,
-    @MaxParallelJobs INT = 5,
-    @DebugMode BIT = 0
-AS
-BEGIN
-    SET NOCOUNT ON;
-    
-    -- All variable declarations
-    DECLARE @StartTime DATETIME2(7) = SYSDATETIME();
-    DECLARE @TableName NVARCHAR(100);
-    DECLARE @StoredProcedureName NVARCHAR(200);
-    DECLARE @TableSystem NVARCHAR(25);
-    DECLARE @LineageKey INT;
-    DECLARE @LastLoadDate DATETIME2(7);
-    DECLARE @LoadTypeActual CHAR(1);
-    DECLARE @RowCount BIGINT = 0;
-    DECLARE @RowsInserted BIGINT = 0;
-    DECLARE @RowsUpdated BIGINT = 0;
-    DECLARE @RowsDeleted BIGINT = 0;
-    DECLARE @OutputMessage NVARCHAR(MAX);
-    DECLARE @ErrorMessage NVARCHAR(MAX);
-    DECLARE @ProcessedCount INT = 0;
-    DECLARE @ErrorCount INT = 0;
-    DECLARE @SuccessCount INT = 0;
-    DECLARE @SkippedCount INT = 0;  -- Add counter for skipped tables
-    DECLARE @SQL NVARCHAR(MAX);
-    DECLARE @CurrentExecutionOrder INT = 0;
-    DECLARE @MaxExecutionOrder INT = 0;
-    DECLARE @DependenciesMet BIT;
-    DECLARE @Dependencies NVARCHAR(500);
-    DECLARE @ReturnCode INT;
-    
-    -- Start main logic
-    IF @DebugMode = 1
-        PRINT CONCAT('Starting orchestration for System: ', ISNULL(@System, 'ALL'), ', RunGroup: ', ISNULL(@RunGroup, 'ALL'), ' at ', CONVERT(NVARCHAR(30), @StartTime, 120));
-    
-    -- Create temp table
-    CREATE TABLE #CurrentBatch (
-        ID INT,
-        System NVARCHAR(25),
-        Table_Name NVARCHAR(100),
-        Stored_Procedure_Name NVARCHAR(200),
-        Load_Type CHAR(1),
-        Execution_Order INT,
-        Dependencies NVARCHAR(500),
-        Processing_Status CHAR(1) DEFAULT 'P',
-        LineageKey INT NULL,
-        Start_Time DATETIME2(7) NULL,
-        End_Time DATETIME2(7) NULL,
-        Error_Message NVARCHAR(MAX) NULL
-    );
-    
-    -- Populate temp table
-    INSERT INTO #CurrentBatch (ID, System, Table_Name, Stored_Procedure_Name, Load_Type, Execution_Order, Dependencies)
-    SELECT 
-        ID,
-        System,
-        Table_Name,
-        Stored_Procedure_Name,
-        Load_Type,
-        Execution_Order,
-        Dependencies
-    FROM [exe].[Table_List]
-    WHERE (@System IS NULL OR System = @System)
-        AND Is_Active = 1
-        AND (@RunGroup IS NULL OR Run_Group = @RunGroup)
-        AND (@LoadType IS NULL OR Load_Type = @LoadType)
-        AND (Load_Status IS NULL OR Load_Status != 'P')
-        AND Retry_Count < Max_Retries
-    ORDER BY Execution_Order, Table_Name;
-    
-    -- Debug: Show what tables we're processing
-    IF @DebugMode = 1
-    BEGIN
-        PRINT 'Tables to process:';
-        SELECT System, Table_Name, Stored_Procedure_Name, Load_Type, Execution_Order, Dependencies
-        FROM #CurrentBatch
-        ORDER BY Execution_Order, Table_Name;
-    END
-    
-    -- Get max execution order
-    SELECT @MaxExecutionOrder = ISNULL(MAX(Execution_Order), 0) FROM #CurrentBatch;
-    
-    IF @DebugMode = 1
-        PRINT CONCAT('Processing execution orders from 0 to ', @MaxExecutionOrder);
-    
-    -- Process tables by execution order
-    WHILE @CurrentExecutionOrder <= @MaxExecutionOrder
-    BEGIN
-        -- Get first table at this execution order
-        SELECT TOP 1
-            @TableName = Table_Name,
-            @TableSystem = System,
-            @StoredProcedureName = Stored_Procedure_Name,
-            @LoadTypeActual = Load_Type,
-            @Dependencies = Dependencies
-        FROM #CurrentBatch
-        WHERE Execution_Order = @CurrentExecutionOrder
-            AND Processing_Status = 'P'
-        ORDER BY Table_Name;
-        
-        -- Process while we have tables at this execution order
-        WHILE @TableName IS NOT NULL
-        BEGIN
-            SET @LineageKey = NULL;
-            SET @LastLoadDate = NULL;
-            SET @DependenciesMet = 1;
-            
-            IF @DebugMode = 1
-                PRINT CONCAT('Checking table: ', @TableName, ' (System: ', @TableSystem, ', Dependencies: ', ISNULL(@Dependencies, 'None'), ')');
-            
-            -- Check dependencies (FIXED: Check against Table_List, not #CurrentBatch)
-            IF @Dependencies IS NOT NULL AND @Dependencies != ''
-            BEGIN
-                DECLARE @UnmetDeps NVARCHAR(500) = '';
-                
-                -- Check each dependency against the actual Table_List table
-                SELECT @UnmetDeps = STRING_AGG(dep.value, ', ')
-                FROM STRING_SPLIT(@Dependencies, ',') dep
-                LEFT JOIN [exe].[Table_List] tl 
-                    ON tl.Table_Name = LTRIM(RTRIM(dep.value))
-                    AND tl.System = @TableSystem  -- Dependencies should be in same system
-                WHERE tl.Load_Status IS NULL 
-                   OR tl.Load_Status != 'S';
-                
-                IF @UnmetDeps IS NOT NULL AND @UnmetDeps != ''
-                BEGIN
-                    SET @DependenciesMet = 0;
-                    IF @DebugMode = 1
-                        PRINT CONCAT('  Skipping ', @TableName, ' - unmet dependencies: ', @UnmetDeps);
-                    
-                    -- IMPORTANT: Mark as skipped to avoid infinite loop
-                    UPDATE #CurrentBatch 
-                    SET Processing_Status = 'D',  -- D for Dependencies not met
-                        End_Time = SYSDATETIME(),
-                        Error_Message = CONCAT('Dependencies not met: ', @UnmetDeps)
-                    WHERE Table_Name = @TableName AND System = @TableSystem;
-                    
-                    SET @SkippedCount = @SkippedCount + 1;
-                END
-                ELSE
-                BEGIN
-                    IF @DebugMode = 1
-                        PRINT CONCAT('  All dependencies met for ', @TableName);
-                END
-            END
-            
-            IF @DependenciesMet = 1
-            BEGIN
-                -- Update status to running
-                UPDATE #CurrentBatch 
-                SET Processing_Status = 'R', Start_Time = SYSDATETIME()
-                WHERE Table_Name = @TableName AND System = @TableSystem;
-                
-                BEGIN TRY
-                    -- Start lineage with actual table system
-                    IF @DebugMode = 1
-                        PRINT CONCAT('  Starting lineage for: ', @TableName, ' (System: ', @TableSystem, ')');
-                    
-                    EXEC @ReturnCode = [exe].[Update_Lineage_Start]
-                        @LoadType = @LoadTypeActual,
-                        @TableName = @TableName,
-                        @System = @TableSystem,
-                        @RunGroup = @RunGroup,
-                        @ForceStart = 0,
-                        @LineageKey = @LineageKey OUTPUT,
-                        @LastLoadDate = @LastLoadDate OUTPUT;
-                    
-                    IF @ReturnCode = 0 AND @LineageKey IS NOT NULL
-                    BEGIN
-                        -- Update lineage key
-                        UPDATE #CurrentBatch 
-                        SET LineageKey = @LineageKey 
-                        WHERE Table_Name = @TableName AND System = @TableSystem;
-                        
-                        IF @DebugMode = 1
-                            PRINT CONCAT('  Processing: ', @TableName, ' (System: ', @TableSystem, ', LineageKey: ', @LineageKey, ')');
-                        
-                        -- Build and execute the stored procedure
-                        SET @SQL = CONCAT('EXEC ', @StoredProcedureName, ' @LineageKey = ', @LineageKey);
-                        
-                        IF @LoadTypeActual IS NOT NULL
-                            SET @SQL = CONCAT(@SQL, ', @LoadType = ''', @LoadTypeActual, '''');
-                        
-                        IF @LastLoadDate IS NOT NULL
-                            SET @SQL = CONCAT(@SQL, ', @LastLoadDate = ''', CONVERT(NVARCHAR(30), @LastLoadDate, 126), '''');
-                        
-                        IF @DebugMode = 1
-                            PRINT CONCAT('  Executing: ', @SQL);
-                        
-                        -- Execute the stored procedure
-                        EXEC sp_executesql @SQL;
-                        
-                        -- Get row counts from lineage
-                        SELECT 
-                            @RowCount = ISNULL(Row_Count, 0),
-                            @RowsInserted = ISNULL(Rows_Inserted, 0),
-                            @RowsUpdated = ISNULL(Rows_Updated, 0),
-                            @RowsDeleted = ISNULL(Rows_Deleted, 0)
-                        FROM [exe].[Lineage]
-                        WHERE Lineage_Key = @LineageKey;
-                        
-                        -- Update lineage success
-                        SET @OutputMessage = CONCAT('Successfully loaded ', @TableName, ' - Rows: ', @RowCount);
-                        
-                        EXEC [exe].[Update_Lineage_Success]
-                            @LineageKey = @LineageKey,
-                            @TableName = @TableName,
-                            @RowCount = @RowCount,
-                            @RowsInserted = @RowsInserted,
-                            @RowsUpdated = @RowsUpdated,
-                            @RowsDeleted = @RowsDeleted,
-                            @OutputMessage = @OutputMessage,
-                            @System = @TableSystem;
-                        
-                        -- Mark success
-                        UPDATE #CurrentBatch 
-                        SET Processing_Status = 'C', End_Time = SYSDATETIME()
-                        WHERE Table_Name = @TableName AND System = @TableSystem;
-                        
-                        SET @SuccessCount = @SuccessCount + 1;
-                        
-                        IF @DebugMode = 1
-                            PRINT CONCAT('  SUCCESS: ', @TableName, ' - Rows: ', @RowCount);
-                    END
-                    ELSE
-                    BEGIN
-                        -- Lineage start failed
-                        UPDATE #CurrentBatch 
-                        SET Processing_Status = 'E', 
-                            End_Time = SYSDATETIME(),
-                            Error_Message = 'Failed to start lineage'
-                        WHERE Table_Name = @TableName AND System = @TableSystem;
-                        
-                        SET @ErrorCount = @ErrorCount + 1;
-                        
-                        IF @DebugMode = 1
-                            PRINT CONCAT('  FAILED to start lineage for ', @TableName, ' (System: ', @TableSystem, ')');
-                    END
-                END TRY
-                BEGIN CATCH
-                    -- Handle errors - capture error info into variables
-                    DECLARE @CatchErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
-                    DECLARE @CatchErrorNumber INT = ERROR_NUMBER();
-                    DECLARE @CatchErrorSeverity INT = ERROR_SEVERITY();
-                    DECLARE @CatchErrorState INT = ERROR_STATE();
-                    
-                    SET @ErrorMessage = @CatchErrorMessage;
-                    
-                    IF @DebugMode = 1
-                        PRINT CONCAT('  ERROR processing ', @TableName, ': ', @ErrorMessage);
-                    
-                    -- Update lineage error if we have a lineage key
-                    IF @LineageKey IS NOT NULL
-                    BEGIN
-                        EXEC [exe].[Update_Lineage_Error]
-                            @LineageKey = @LineageKey,
-                            @OutputMessage = @ErrorMessage,
-                            @ErrorNumber = @CatchErrorNumber,
-                            @ErrorSeverity = @CatchErrorSeverity,
-                            @ErrorState = @CatchErrorState,
-                            @TableName = @TableName,
-                            @System = @TableSystem;
-                    END
-                    
-                    -- Mark error
-                    UPDATE #CurrentBatch 
-                    SET Processing_Status = 'E', 
-                        End_Time = SYSDATETIME(),
-                        Error_Message = @ErrorMessage
-                    WHERE Table_Name = @TableName AND System = @TableSystem;
-                    
-                    SET @ErrorCount = @ErrorCount + 1;
-                END CATCH
-            END
-            
-            -- Get next table at this execution order
-            SET @TableName = NULL;
-            SET @TableSystem = NULL;
-            SET @Dependencies = NULL;
-            
-            SELECT TOP 1
-                @TableName = Table_Name,
-                @TableSystem = System,
-                @StoredProcedureName = Stored_Procedure_Name,
-                @LoadTypeActual = Load_Type,
-                @Dependencies = Dependencies
-            FROM #CurrentBatch
-            WHERE Execution_Order = @CurrentExecutionOrder
-                AND Processing_Status = 'P'
-            ORDER BY Table_Name;
-        END
-        
-        SET @CurrentExecutionOrder = @CurrentExecutionOrder + 1;
-    END
-    
-    -- Summary
-    SET @OutputMessage = CONCAT(
-        'Completed for ', ISNULL(@System, 'ALL SYSTEMS'),
-        ', RunGroup: ', ISNULL(@RunGroup, 'ALL'),
-        '. Success: ', @SuccessCount,
-        ', Errors: ', @ErrorCount,
-        ', Skipped: ', @SkippedCount,
-        ', Duration: ', DATEDIFF(SECOND, @StartTime, SYSDATETIME()), ' seconds'
-    );
-    
-    PRINT '';
-    PRINT @OutputMessage;
-    
-    IF @DebugMode = 1 OR @ErrorCount > 0 OR @SkippedCount > 0
-    BEGIN
-        -- Show detailed results
-        SELECT 
-            System,
-            Table_Name,
-            Stored_Procedure_Name,
-            Processing_Status,
-            CASE Processing_Status
-                WHEN 'C' THEN 'Completed'
-                WHEN 'E' THEN 'Error'
-                WHEN 'D' THEN 'Skipped - Dependencies'
-                WHEN 'R' THEN 'Running'
-                WHEN 'P' THEN 'Pending'
-                ELSE Processing_Status
-            END AS Status_Description,
-            LineageKey,
-            Start_Time,
-            End_Time,
-            DATEDIFF(SECOND, Start_Time, End_Time) AS Duration_Seconds,
-            Error_Message
-        FROM #CurrentBatch 
-        ORDER BY Execution_Order, Table_Name;
-    END
-    
-    -- Cleanup
-    DROP TABLE #CurrentBatch;
-    
-    -- Return summary
-    SELECT 
-        @SuccessCount AS Tables_Succeeded,
-        @ErrorCount AS Tables_Failed,
-        @SkippedCount AS Tables_Skipped,
-        DATEDIFF(SECOND, @StartTime, SYSDATETIME()) AS Total_Duration_Seconds,
-        @OutputMessage AS Summary;
-    
-    IF @ErrorCount > 0
-        RETURN 1;
-    ELSE
-        RETURN 0;
-END;
-GO
-/****** Object:  StoredProcedure [exe].[Monitor_ETL_Health]    Script Date: 26-8-2025 21:15:36 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
--- =============================================
--- COMPONENT 13: Monitoring and Alerting
--- =============================================
-CREATE   PROCEDURE [exe].[Monitor_ETL_Health]
-    @System NVARCHAR(25),
-    @AlertThresholdMinutes INT = 60,
-    @SendAlert BIT = 1
-AS
-BEGIN
-    SET NOCOUNT ON;
-    
-    DECLARE @AlertMessage NVARCHAR(MAX) = '';
-    DECLARE @HasIssues BIT = 0;
-    
-    -- Check for long-running jobs
-    IF EXISTS (
-        SELECT 1 FROM [exe].[Lineage]
-        WHERE System = @System
-            AND Load_Status = 'P'
-            AND DATEDIFF(MINUTE, Start_Load, SYSDATETIME()) > @AlertThresholdMinutes
-    )
-    BEGIN
-        SET @HasIssues = 1;
-        SET @AlertMessage = @AlertMessage + 'LONG RUNNING JOBS:' + CHAR(13) + CHAR(10);
-        
-        SELECT @AlertMessage = @AlertMessage + 
-            '- ' + Table_Name + ' (Running for ' + 
-            CAST(DATEDIFF(MINUTE, Start_Load, SYSDATETIME()) AS NVARCHAR(10)) + 
-            ' minutes)' + CHAR(13) + CHAR(10)
-        FROM [exe].[Lineage]
-        WHERE System = @System
-            AND Load_Status = 'P'
-            AND DATEDIFF(MINUTE, Start_Load, SYSDATETIME()) > @AlertThresholdMinutes;
-    END
-    
-    -- Check for tables hitting retry limits
-    IF EXISTS (
-        SELECT 1 FROM [exe].[Table_List]
-        WHERE System = @System
-            AND Retry_Count >= Max_Retries
-    )
-    BEGIN
-        SET @HasIssues = 1;
-        SET @AlertMessage = @AlertMessage + CHAR(13) + CHAR(10) + 'TABLES AT MAX RETRIES:' + CHAR(13) + CHAR(10);
-        
-        SELECT @AlertMessage = @AlertMessage + 
-            '- ' + Table_Name + ' (Retries: ' + 
-            CAST(Retry_Count AS NVARCHAR(10)) + '/' + 
-            CAST(Max_Retries AS NVARCHAR(10)) + ')' + CHAR(13) + CHAR(10)
-        FROM [exe].[Table_List]
-        WHERE System = @System
-            AND Retry_Count >= Max_Retries;
-    END
-    
-    -- Check for stale tables (not loaded in expected timeframe)
-    IF EXISTS (
-        SELECT 1 FROM [exe].[Table_List]
-        WHERE System = @System
-            AND Is_Active = 1
-            AND (
-                Last_Loaded_Date IS NULL 
-                OR (Load_Type = 'I' AND DATEDIFF(HOUR, Last_Loaded_Date, SYSDATETIME()) > 25)
-                OR (Load_Type = 'F' AND DATEDIFF(DAY, Last_Loaded_Date, SYSDATETIME()) > 1)
-            )
-    )
-    BEGIN
-        SET @HasIssues = 1;
-        SET @AlertMessage = @AlertMessage + CHAR(13) + CHAR(10) + 'STALE TABLES:' + CHAR(13) + CHAR(10);
-        
-        SELECT @AlertMessage = @AlertMessage + 
-            '- ' + Table_Name + ' (Last loaded: ' + 
-            ISNULL(CONVERT(NVARCHAR(30), Last_Loaded_Date, 120), 'Never') + ')' + CHAR(13) + CHAR(10)
-        FROM [exe].[Table_List]
-        WHERE System = @System
-            AND Is_Active = 1
-            AND (
-                Last_Loaded_Date IS NULL 
-                OR (Load_Type = 'I' AND DATEDIFF(HOUR, Last_Loaded_Date, SYSDATETIME()) > 25)
-                OR (Load_Type = 'F' AND DATEDIFF(DAY, Last_Loaded_Date, SYSDATETIME()) > 1)
-            );
-    END
-    
-    -- Send alert if issues found
-    IF @HasIssues = 1 AND @SendAlert = 1
-    BEGIN
-        -- Log to event log
-        RAISERROR(@AlertMessage, 10, 1) WITH LOG;
-        
-        -- Send email (when configured)
-        /*
-        EXEC msdb.dbo.sp_send_dbmail
-            @profile_name = 'DBA_Mail_Profile',
-            @recipients = 'etl-team@company.com',
-            @subject = 'ETL Health Alert - ' + @System,
-            @body = @AlertMessage;
-        */
-    END
-    
-    -- Return status
-    SELECT 
-        @HasIssues AS HasIssues,
-        @AlertMessage AS AlertMessage;
-END;
-
-GO
-/****** Object:  StoredProcedure [exe].[Select_Table_For_Execute]    Script Date: 26-8-2025 21:15:36 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
--- =============================================
--- COMPONENT 6: Select Table to Execute
--- =============================================
-CREATE   PROCEDURE [exe].[Select_Table_For_Execute]
-    @ExecutionOrder INT = NULL,     -- Changed from CounterNumber
-    @LoadType CHAR(1) = NULL,
-    @RunGroup NVARCHAR(250) = NULL, -- Changed from Run
-    @System NVARCHAR(25),
-    @ExcludeInProgress BIT = 1,     -- New: option to exclude in-progress tables
-    @MaxRetries INT = NULL          -- New: override max retries
-AS
-BEGIN
-    SET NOCOUNT ON;
-    
-    -- Build dynamic query based on parameters
-    SELECT 
-        tl.[ID],
-        tl.[System],
-        tl.[Execution_Order],
-        tl.[Schema_Name],
-        tl.[Table_Name],
-        tl.[Stored_Procedure_Name],
-        tl.[Load_Type],
-        tl.[Run_Group],
-        tl.[Is_Active],
-        tl.[Retry_Count],
-        tl.[Max_Retries],
-        tl.[Timeout_Seconds],
-        tl.[Last_Loaded_Date],
-        tl.[Load_Status],
-        tl.[Dependencies],
-        -- Check if dependencies are met
-        CASE 
-            WHEN tl.[Dependencies] IS NULL OR tl.[Dependencies] = '' THEN 1
-            ELSE (
-                SELECT MIN(CASE WHEN dep_tl.[Load_Status] = 'S' THEN 1 ELSE 0 END)
-                FROM STRING_SPLIT(tl.[Dependencies], ',') AS dep
-                INNER JOIN [exe].[Table_List] AS dep_tl 
-                    ON LTRIM(RTRIM(dep.value)) = dep_tl.[Table_Name]
-                    AND dep_tl.[System] = tl.[System]
-            )
-        END AS [Dependencies_Met]
-    FROM [exe].[Table_List] AS tl
-    WHERE tl.[System] = @System
-        AND tl.[Is_Active] = 1
-        AND (@ExecutionOrder IS NULL OR tl.[Execution_Order] = @ExecutionOrder)
-        AND (@LoadType IS NULL OR tl.[Load_Type] = @LoadType)
-        AND (@RunGroup IS NULL OR tl.[Run_Group] = @RunGroup)
-        AND (@ExcludeInProgress = 0 OR tl.[Load_Status] != 'P')
-        AND (@MaxRetries IS NULL OR tl.[Retry_Count] < ISNULL(@MaxRetries, tl.[Max_Retries]))
-    ORDER BY tl.[Execution_Order], tl.[Table_Name];
-    
-    RETURN 0;
-END;
-
-GO
-/****** Object:  StoredProcedure [exe].[Update_Lineage_Error]    Script Date: 26-8-2025 21:15:36 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
--- =============================================
--- COMPONENT 5: Lineage Error
--- =============================================
-CREATE   PROCEDURE [exe].[Update_Lineage_Error]
-    @LineageKey INT,
-    @OutputMessage NVARCHAR(MAX),
-    @ErrorNumber INT = NULL,
-    @ErrorSeverity INT = NULL,
-    @ErrorState INT = NULL,
-    @TableName NVARCHAR(100) = NULL,
-    @System NVARCHAR(25) = NULL
-AS
-BEGIN
-    SET NOCOUNT ON;
-    SET XACT_ABORT ON;
-    
-    BEGIN TRY
-        BEGIN TRANSACTION;
-        
-        -- Validate LineageKey exists
-        IF NOT EXISTS (SELECT 1 FROM [exe].[Lineage] WHERE [Lineage_Key] = @LineageKey)
-        BEGIN
-            RAISERROR('LineageKey %d not found.', 16, 1, @LineageKey);
-            RETURN -1;
-        END
-        
-        -- Get table info if not provided
-        IF @TableName IS NULL OR @System IS NULL
-        BEGIN
-            SELECT @TableName = [Table_Name], @System = [System]
-            FROM [exe].[Lineage]
-            WHERE [Lineage_Key] = @LineageKey;
-        END
-        
-        DECLARE @FinishTime DATETIME2(7) = SYSDATETIME();
-        
-        -- Update the lineage table
-        UPDATE [exe].[Lineage]
-        SET 
-            [Finish_Load] = @FinishTime,
-            [Load_Status] = 'E',  -- Error
-            [Output_Message] = @OutputMessage,
-            [Error_Number] = @ErrorNumber,
-            [Error_Severity] = @ErrorSeverity,
-            [Error_State] = @ErrorState
-        WHERE [Lineage_Key] = @LineageKey;
-        
-        -- Update the table list and increment retry count
-        UPDATE [exe].[Table_List]
-        SET 
-            [Load_Status] = 'E',
-            [Output_Message] = @OutputMessage,
-            [Retry_Count] = [Retry_Count] + 1,
-            [Modified_Date] = SYSDATETIME(),
-            [Modified_By] = SUSER_SNAME()
-        WHERE [Table_Name] = @TableName 
-        AND [System] = @System;
-        
-        COMMIT TRANSACTION;
-        RETURN 0;
-    END TRY
-    BEGIN CATCH
-        IF @@TRANCOUNT > 0
-            ROLLBACK TRANSACTION;
-        
-        DECLARE @ErrorMsg NVARCHAR(4000) = ERROR_MESSAGE();
-        DECLARE @ErrorSev INT = ERROR_SEVERITY();
-        DECLARE @ErrorSt INT = ERROR_STATE();
-        
-        RAISERROR(@ErrorMsg, @ErrorSev, @ErrorSt);
-        RETURN -1;
-    END CATCH
-END;
-
-GO
-/****** Object:  StoredProcedure [exe].[Update_Lineage_Start]    Script Date: 26-8-2025 21:15:36 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
--- =============================================
--- COMPONENT 3: Lineage Start
--- =============================================
-CREATE   PROCEDURE [exe].[Update_Lineage_Start]
-    @LoadType CHAR(1) = NULL,           -- Can be NULL to read from Table_List
+-- Get table configuration
+CREATE   PROCEDURE [exe].[01_Get_Table_Config]
     @TableName NVARCHAR(100),
     @System NVARCHAR(25),
-    @RunGroup NVARCHAR(50) = NULL,      -- Optional: validate against Table_List
-    @ForceStart BIT = 0,                -- Force start even if dependencies not met
-    @LineageKey INT OUTPUT,             -- Return as OUTPUT parameter
-    @LastLoadDate DATETIME2(7) OUTPUT   -- Return last load date for use in procedures
+    @SchemaName NVARCHAR(128) OUTPUT,
+    @StoredProcedureName NVARCHAR(200) OUTPUT,
+    @IsActive BIT OUTPUT,
+    @LoadType CHAR(1) OUTPUT,
+    @ExecutionOrder INT OUTPUT,
+    @RunGroup NVARCHAR(50) OUTPUT,
+    @Dependencies NVARCHAR(500) OUTPUT,
+    @MaxRetries INT OUTPUT,
+    @RetryCount INT OUTPUT,
+    @TimeoutSeconds INT OUTPUT,
+    @DefaultLoadDays INT OUTPUT,
+    @DefaultLoadDate DATETIME2(7) OUTPUT,
+    @UseFullHistory BIT OUTPUT,
+    @DefaultLoadYears INT OUTPUT,
+    @Exists BIT OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
-    SET XACT_ABORT ON;
     
-    -- Variables for table configuration
-    DECLARE @SchemaName NVARCHAR(128);
-    DECLARE @StoredProcedureName NVARCHAR(200);
+    SELECT 
+        @SchemaName = [Schema_Name],
+        @StoredProcedureName = [Stored_Procedure_Name],
+        @IsActive = [Is_Active],
+        @LoadType = [Load_Type],
+        @ExecutionOrder = [Execution_Order],
+        @RunGroup = [Run_Group],
+        @Dependencies = [Dependencies],
+        @MaxRetries = [Max_Retries],
+        @RetryCount = [Retry_Count],
+        @TimeoutSeconds = [Timeout_Seconds],
+        @DefaultLoadDays = [Default_Load_Days],
+        @DefaultLoadDate = [Default_Load_Date],
+        @UseFullHistory = [Use_Full_History],
+        @DefaultLoadYears = [Default_Load_Years], -- Renamed from Years_Back
+        @Exists = 1
+    FROM [exe].[Table_List]
+    WHERE [Table_Name] = @TableName 
+    AND [System] = @System;
+    
+    IF @@ROWCOUNT = 0
+        SET @Exists = 0;
+    
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[02_Validate_Table]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Validate table configuration
+CREATE   PROCEDURE [exe].[02_Validate_Table]
+    @TableName NVARCHAR(100),
+    @System NVARCHAR(25),
+    @LoadType CHAR(1) = NULL,
+    @IsValid BIT OUTPUT,
+    @ValidationMessage NVARCHAR(500) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
     DECLARE @IsActive BIT;
-    DECLARE @MaxRetries INT;
     DECLARE @RetryCount INT;
-    DECLARE @TimeoutSeconds INT;
-    DECLARE @Dependencies NVARCHAR(500);
-    DECLARE @DependenciesMet BIT = 1;
+    DECLARE @MaxRetries INT;
     DECLARE @ConfiguredLoadType CHAR(1);
+    
+    SET @IsValid = 1;
+    SET @ValidationMessage = 'Valid';
+    
+    -- Check if table exists
+    IF NOT EXISTS (SELECT 1 FROM [exe].[Table_List] 
+                   WHERE [Table_Name] = @TableName AND [System] = @System)
+    BEGIN
+        SET @IsValid = 0;
+        SET @ValidationMessage = CONCAT('Table ', @TableName, ' for system ', @System, ' not found in Table_List');
+        RETURN 0;
+    END
+    
+    -- Get table properties
+    SELECT 
+        @IsActive = [Is_Active],
+        @RetryCount = [Retry_Count],
+        @MaxRetries = [Max_Retries],
+        @ConfiguredLoadType = [Load_Type]
+    FROM [exe].[Table_List]
+    WHERE [Table_Name] = @TableName AND [System] = @System;
+    
+    -- Check if active
+    IF @IsActive = 0
+    BEGIN
+        SET @IsValid = 0;
+        SET @ValidationMessage = CONCAT('Table ', @TableName, ' is inactive');
+        RETURN 0;
+    END
+    
+    -- Check retry limit
+    IF @RetryCount >= @MaxRetries
+    BEGIN
+        SET @IsValid = 0;
+        SET @ValidationMessage = CONCAT('Table ', @TableName, ' has exceeded maximum retries (', @MaxRetries, ')');
+        RETURN 0;
+    END
+    
+    -- Validate load type if provided
+    IF @LoadType IS NOT NULL AND @LoadType NOT IN ('F', 'I')
+    BEGIN
+        SET @IsValid = 0;
+        SET @ValidationMessage = 'Invalid LoadType. Must be F (Full) or I (Incremental)';
+        RETURN 0;
+    END
+    
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[03_Calculate_Load_Date]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE   PROCEDURE [exe].[03_Calculate_Load_Date]
+    @TableName NVARCHAR(100),
+    @System NVARCHAR(25),
+    @LoadType CHAR(1),
+    @OverrideFullLoad BIT = 0,
+    @LastLoadDate DATETIME2(7) OUTPUT,
+    @LoadDateSource NVARCHAR(50) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
     DECLARE @DefaultLoadDays INT;
     DECLARE @DefaultLoadDate DATETIME2(7);
     DECLARE @UseFullHistory BIT;
-    DECLARE @StartLoad DATETIME2(7) = SYSDATETIME();
-    DECLARE @HostName NVARCHAR(128) = HOST_NAME();
-    DECLARE @UserName NVARCHAR(128) = SUSER_SNAME();
+    DECLARE @DefaultLoadYears INT;
+    
+    -- Get configuration
+    SELECT 
+        @DefaultLoadDays = [Default_Load_Days],
+        @DefaultLoadDate = [Default_Load_Date],
+        @UseFullHistory = [Use_Full_History],
+        @DefaultLoadYears = [Default_Load_Years]
+    FROM [exe].[Table_List]
+    WHERE [Table_Name] = @TableName AND [System] = @System;
+    
+    -- FULL LOAD Logic
+    IF @LoadType = 'F' OR @OverrideFullLoad = 1
+    BEGIN
+        -- Priority 1: Default_Load_Date
+        IF @DefaultLoadDate IS NOT NULL
+        BEGIN
+            SET @LastLoadDate = @DefaultLoadDate;
+            SET @LoadDateSource = 'Default_Load_Date (Full)';
+        END
+        -- Priority 2: Default_Load_Years
+        ELSE IF @DefaultLoadYears IS NOT NULL
+        BEGIN
+            SET @LastLoadDate = DATEADD(YEAR, -@DefaultLoadYears, SYSDATETIME());
+            SET @LoadDateSource = CONCAT('Full Load Limited to ', @DefaultLoadYears, ' years');
+        END
+        -- Priority 3: Default_Load_Days
+        ELSE IF @DefaultLoadDays IS NOT NULL
+        BEGIN
+            SET @LastLoadDate = DATEADD(DAY, -@DefaultLoadDays, SYSDATETIME());
+            SET @LoadDateSource = CONCAT('Full Load Limited to ', @DefaultLoadDays, ' days');
+        END
+        -- Priority 4: Default to full history
+        ELSE
+        BEGIN
+            SET @LastLoadDate = '1900-01-01';
+            SET @LoadDateSource = CASE 
+                WHEN @UseFullHistory = 1 THEN 'Use_Full_History (Full Load)'
+                WHEN @OverrideFullLoad = 1 THEN 'Full Load Override (All History)'
+                ELSE 'Full Load Default (All History)'
+            END;
+        END
+        RETURN 0;
+    END
+    
+    -- INCREMENTAL LOAD Logic
+    SELECT @LastLoadDate = MAX([Finish_Load]) 
+    FROM [exe].[Lineage] 
+    WHERE [Table_Name] = @TableName 
+    AND [System] = @System 
+    AND [Load_Status] = 'S';
+    
+    -- Priority 1: Last successful load
+    IF @LastLoadDate IS NOT NULL
+    BEGIN
+        SET @LoadDateSource = 'Last successful load';
+    END
+    -- Priority 2: Default_Load_Years
+    ELSE IF @DefaultLoadYears IS NOT NULL
+    BEGIN
+        SET @LastLoadDate = DATEADD(YEAR, -@DefaultLoadYears, SYSDATETIME());
+        SET @LoadDateSource = CONCAT('Initial Incremental: ', @DefaultLoadYears, ' years back');
+    END
+    -- Priority 3: Use_Full_History
+    ELSE IF @UseFullHistory = 1
+    BEGIN
+        SET @LastLoadDate = '1900-01-01';
+        SET @LoadDateSource = 'Use_Full_History (Incremental)';
+    END
+    -- Priority 4: Default_Load_Date
+    ELSE IF @DefaultLoadDate IS NOT NULL
+    BEGIN
+        SET @LastLoadDate = @DefaultLoadDate;
+        SET @LoadDateSource = 'Default_Load_Date (Incremental)';
+    END
+    -- Priority 5: Default_Load_Days
+    ELSE IF @DefaultLoadDays IS NOT NULL
+    BEGIN
+        SET @LastLoadDate = DATEADD(DAY, -@DefaultLoadDays, SYSDATETIME());
+        SET @LoadDateSource = CONCAT('Initial Incremental: ', @DefaultLoadDays, ' days');
+    END
+    -- Fallback (should rarely be reached)
+    ELSE
+    BEGIN
+        SET @LastLoadDate = DATEADD(DAY, -7, SYSDATETIME());
+        SET @LoadDateSource = 'Fallback default (7 days)';
+    END
+    
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[04_Check_Dependencies]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- 2. DEPENDENCY PROCEDURES
+-- =============================================
+
+-- Check if dependencies are met
+CREATE   PROCEDURE [exe].[04_Check_Dependencies]
+    @TableName NVARCHAR(100),
+    @System NVARCHAR(25),
+    @Dependencies NVARCHAR(500),
+    @DependenciesMet BIT OUTPUT,
+    @UnmetDependencies NVARCHAR(500) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SET @DependenciesMet = 1;
+    SET @UnmetDependencies = '';
+    
+    IF @Dependencies IS NULL OR @Dependencies = ''
+        RETURN 0;
+    
+    -- Check each dependency
+    SELECT @UnmetDependencies = STRING_AGG(dep.value, ', ')
+    FROM STRING_SPLIT(@Dependencies, ',') AS dep
+    LEFT JOIN [exe].[Table_List] AS tl 
+        ON LTRIM(RTRIM(dep.value)) = tl.[Table_Name]
+        AND tl.[System] = @System
+    WHERE tl.[Load_Status] IS NULL 
+       OR tl.[Load_Status] != 'S';
+    
+    IF @UnmetDependencies IS NOT NULL AND @UnmetDependencies != ''
+    BEGIN
+        SET @DependenciesMet = 0;
+    END
+    
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[05_Get_Unmet_Dependencies]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Get list of unmet dependencies with details
+CREATE   PROCEDURE [exe].[05_Get_Unmet_Dependencies]
+    @TableName NVARCHAR(100),
+    @System NVARCHAR(25)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @Dependencies NVARCHAR(500);
+    
+    SELECT @Dependencies = [Dependencies]
+    FROM [exe].[Table_List]
+    WHERE [Table_Name] = @TableName AND [System] = @System;
+    
+    IF @Dependencies IS NULL OR @Dependencies = ''
+    BEGIN
+        SELECT 
+            CAST(NULL AS NVARCHAR(100)) AS DependencyName,
+            CAST(NULL AS CHAR(1)) AS LoadStatus,
+            CAST(NULL AS DATETIME2(7)) AS LastLoadedDate
+        WHERE 1 = 0;
+        RETURN 0;
+    END
+    
+    -- Return detailed dependency status
+    SELECT 
+        LTRIM(RTRIM(dep.value)) AS DependencyName,
+        ISNULL(tl.[Load_Status], 'N') AS LoadStatus,
+        tl.[Last_Loaded_Date] AS LastLoadedDate
+    FROM STRING_SPLIT(@Dependencies, ',') AS dep
+    LEFT JOIN [exe].[Table_List] AS tl 
+        ON LTRIM(RTRIM(dep.value)) = tl.[Table_Name]
+        AND tl.[System] = @System
+    WHERE tl.[Load_Status] IS NULL 
+       OR tl.[Load_Status] != 'S';
+    
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[06_Create_Lineage_Entry]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- 3. LINEAGE PROCEDURES
+-- =============================================
+
+-- Create lineage entry
+CREATE   PROCEDURE [exe].[06_Create_Lineage_Entry]
+    @System NVARCHAR(25),
+    @TableName NVARCHAR(100),
+    @LoadType CHAR(1),
+    @LastLoadDate DATETIME2(7),
+    @LoadDateSource NVARCHAR(50),
+    @ForceStart BIT,
+    @RetryCount INT,
+    @MaxRetries INT,
+    @LineageKey INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
     
     BEGIN TRY
         BEGIN TRANSACTION;
-        
-        -- Get table configuration from Table_List
-        SELECT 
-            @SchemaName = [Schema_Name],
-            @StoredProcedureName = [Stored_Procedure_Name],
-            @IsActive = [Is_Active],
-            @ConfiguredLoadType = [Load_Type],
-            @MaxRetries = [Max_Retries],
-            @RetryCount = [Retry_Count],
-            @TimeoutSeconds = [Timeout_Seconds],
-            @Dependencies = [Dependencies],
-            @DefaultLoadDays = [Default_Load_Days],
-            @DefaultLoadDate = [Default_Load_Date],
-            @UseFullHistory = [Use_Full_History]
-        FROM [exe].[Table_List]
-        WHERE [Table_Name] = @TableName 
-        AND [System] = @System;
-        
-        -- Check if table exists
-        IF @@ROWCOUNT = 0
-        BEGIN
-            RAISERROR('Table %s for system %s not found in Table_List.', 16, 1, @TableName, @System);
-            RETURN -1;
-        END
-        
-        -- Check if table is active
-        IF @IsActive = 0
-        BEGIN
-            RAISERROR('Table %s for system %s is inactive. Enable it in Table_List first.', 16, 1, @TableName, @System);
-            RETURN -1;
-        END
-        
-        -- Use configured load type if not provided
-        IF @LoadType IS NULL
-            SET @LoadType = @ConfiguredLoadType;
-        
-        -- Validate load type
-        IF @LoadType NOT IN ('F', 'I')
-        BEGIN
-            RAISERROR('Invalid LoadType. Must be F (Full) or I (Incremental).', 16, 1);
-            RETURN -1;
-        END
-        
-        -- Check if retry limit exceeded
-        IF @RetryCount >= @MaxRetries
-        BEGIN
-            RAISERROR('Table %s has exceeded maximum retry attempts (%d). Reset retry count in Table_List to continue.', 16, 1, @TableName, @MaxRetries);
-            RETURN -1;
-        END
         
         -- Check for existing in-progress loads
         IF EXISTS (SELECT 1 FROM [exe].[Lineage] 
                   WHERE [Table_Name] = @TableName 
                   AND [System] = @System 
                   AND [Load_Status] = 'P')
+           AND @ForceStart = 0
         BEGIN
-            -- Get details of the in-progress load
-            DECLARE @InProgressStart DATETIME2(7);
-            DECLARE @MinutesRunning INT;
-            
-            SELECT 
-                @InProgressStart = [Start_Load],
-                @MinutesRunning = DATEDIFF(MINUTE, [Start_Load], SYSDATETIME())
-            FROM [exe].[Lineage]
-            WHERE [Table_Name] = @TableName 
-            AND [System] = @System 
-            AND [Load_Status] = 'P';
-            
-
-		DECLARE @InProgressStartStr NVARCHAR(30) = CONVERT(NVARCHAR(30), @InProgressStart, 120);
-		RAISERROR('Table %s has been in-progress since %s (%d minutes). Please investigate or mark as failed.', 16, 1, 
-          @TableName, @InProgressStartStr, @MinutesRunning);
+            RAISERROR('Table %s has an in-progress load. Use ForceStart to override.', 16, 1, @TableName);
             RETURN -1;
-        END
-        
-        -- Check dependencies (unless forced)
-        IF @Dependencies IS NOT NULL AND @Dependencies != '' AND @ForceStart = 0
-        BEGIN
-            -- Check if all dependencies have completed successfully
-            DECLARE @UnmetDependencies NVARCHAR(500) = '';
-            
-            SELECT @UnmetDependencies = STRING_AGG(dep.value, ', ')
-            FROM STRING_SPLIT(@Dependencies, ',') AS dep
-            LEFT JOIN [exe].[Table_List] AS dep_tl 
-                ON LTRIM(RTRIM(dep.value)) = dep_tl.[Table_Name]
-            WHERE dep_tl.[Load_Status] IS NULL 
-               OR dep_tl.[Load_Status] != 'S';
-            
-            IF @UnmetDependencies != ''
-            BEGIN
-                SET @DependenciesMet = 0;
-                RAISERROR('Table %s has unmet dependencies: %s. Use @ForceStart=1 to override.', 16, 1, 
-                          @TableName, @UnmetDependencies);
-                RETURN -1;
-            END
-        END
-        
-        -- Get the last successful load date
-        SELECT @LastLoadDate = MAX([Finish_Load]) 
-        FROM [exe].[Lineage] 
-        WHERE [Table_Name] = @TableName 
-        AND [System] = @System 
-        AND [Load_Status] = 'S';
-        
-        -- If no previous successful load, use configured defaults from Table_List
-        IF @LastLoadDate IS NULL
-        BEGIN
-            -- Priority order for determining default date:
-            -- 1. Use_Full_History flag (typically for full loads or when complete history needed)
-            -- 2. Default_Load_Date (specific date configured)
-            -- 3. Default_Load_Days (number of days to look back)
-            -- 4. System defaults based on load type
-            
-            IF @UseFullHistory = 1
-            BEGIN
-                SET @LastLoadDate = '1900-01-01';
-            END
-            ELSE IF @DefaultLoadDate IS NOT NULL
-            BEGIN
-                SET @LastLoadDate = @DefaultLoadDate;
-            END
-            ELSE IF @DefaultLoadDays IS NOT NULL
-            BEGIN
-                SET @LastLoadDate = DATEADD(DAY, -@DefaultLoadDays, SYSDATETIME());
-            END
-            ELSE
-            BEGIN
-                -- System defaults if nothing is configured
-                IF @LoadType = 'I'
-                BEGIN
-                    SET @LastLoadDate = DATEADD(DAY, -7, SYSDATETIME()); -- Default to last 7 days for incremental
-                END
-                ELSE
-                BEGIN
-                    SET @LastLoadDate = '1900-01-01'; -- Default for full loads
-                END
-            END
-            
-            -- Log the default being used
-            PRINT CONCAT('No previous load found for ', @TableName, 
-                        '. Using default date: ', CONVERT(NVARCHAR(30), @LastLoadDate, 120));
         END
         
         -- Calculate average duration for estimation
@@ -4882,213 +4324,787 @@ BEGIN
         WHERE [Table_Name] = @TableName 
         AND [System] = @System 
         AND [Load_Status] = 'S'
-        AND [Finish_Load] > DATEADD(DAY, -30, SYSDATETIME()); -- Last 30 days
+        AND [Finish_Load] > DATEADD(DAY, -30, SYSDATETIME());
         
-        -- Insert new lineage record with all enhanced fields
+        -- Insert new lineage record
         INSERT INTO [exe].[Lineage] (
             [System],
             [Table_Name],
             [Start_Load],
-            [Finish_Load],
             [Load_Status],
             [Type],
             [Last_Loaded_Date],
-            [Row_Count],
-            [Rows_Inserted],
-            [Rows_Updated],
-            [Rows_Deleted],
             [Output_Message],
-            [Error_Number],
-            [Error_Severity],
-            [Error_State],
             [Created_By],
             [Host_Name]
         )
         VALUES (
             @System,
             @TableName,
-            @StartLoad,
-            NULL,
+            SYSDATETIME(),
             'P',  -- In Progress
             @LoadType,
             @LastLoadDate,
-            NULL, -- Will be updated on completion
-            NULL, -- Will be updated on completion
-            NULL, -- Will be updated on completion
-            NULL, -- Will be updated on completion
             CONCAT(
-                'Load started at ', CONVERT(NVARCHAR(30), @StartLoad, 120),
-                ' | Load Type: ', @LoadType,
-                ' | From Date: ', CONVERT(NVARCHAR(30), @LastLoadDate, 120),
+                'Load started | Type: ', @LoadType,
+                ' | From: ', CONVERT(NVARCHAR(30), @LastLoadDate, 120),
+                ' | Source: ', @LoadDateSource,
                 CASE WHEN @AvgDurationMinutes IS NOT NULL 
                      THEN CONCAT(' | Avg duration: ', @AvgDurationMinutes, ' min')
                      ELSE '' END,
-                CASE WHEN @ForceStart = 1 
-                     THEN ' [FORCED START]' 
-                     ELSE '' END,
+                CASE WHEN @ForceStart = 1 THEN ' [FORCED]' ELSE '' END,
                 CASE WHEN @RetryCount > 0 
-                     THEN CONCAT(' [Retry ', @RetryCount, ' of ', @MaxRetries, ']')
+                     THEN CONCAT(' [Retry ', @RetryCount, '/', @MaxRetries, ']')
                      ELSE '' END
             ),
-            NULL, -- No error at start
-            NULL, -- No error at start
-            NULL, -- No error at start
-            @UserName,
-            @HostName
+            SUSER_SNAME(),
+            HOST_NAME()
         );
         
-        -- Get the generated LineageKey
         SET @LineageKey = SCOPE_IDENTITY();
         
-        -- Update Table_List to show in-progress and track modification
-        UPDATE [exe].[Table_List]
-        SET 
-            [Load_Status] = 'P',
-            [Output_Message] = CONCAT(
-                'Load started at ', CONVERT(NVARCHAR(30), @StartLoad, 120),
-                ' by ', @UserName,
-                ' | From: ', CONVERT(NVARCHAR(30), @LastLoadDate, 120),
-                CASE WHEN @RetryCount > 0 
-                     THEN CONCAT(' (Retry ', @RetryCount, ')')
-                     ELSE '' END
-            ),
-            [Modified_Date] = SYSDATETIME(),
-            [Modified_By] = @UserName
-        WHERE [Table_Name] = @TableName 
-        AND [System] = @System;
-        
         COMMIT TRANSACTION;
-        
-        -- Return success with additional information
-        SELECT 
-            @LineageKey AS [LineageKey],
-            @LastLoadDate AS [LastLoadDate],
-            @LoadType AS [LoadType],
-            @SchemaName AS [SchemaName],
-            @StoredProcedureName AS [StoredProcedureName],
-            @TimeoutSeconds AS [TimeoutSeconds],
-            @RetryCount AS [RetryCount],
-            @MaxRetries AS [MaxRetries],
-            @AvgDurationMinutes AS [EstimatedDurationMinutes],
-            'Started' AS [Status],
-            CONCAT('Using date range from: ', CONVERT(NVARCHAR(30), @LastLoadDate, 120)) AS [Message];
-        
         RETURN 0;
     END TRY
     BEGIN CATCH
         IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION;
-        
-        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
-        DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
-        DECLARE @ErrorState INT = ERROR_STATE();
-        DECLARE @ErrorLine INT = ERROR_LINE();
-        
-        -- Log the failed attempt in Table_List
-        UPDATE [exe].[Table_List]
-        SET 
-            [Output_Message] = CONCAT('Failed to start: ', @ErrorMessage),
-            [Modified_Date] = SYSDATETIME(),
-            [Modified_By] = @UserName
-        WHERE [Table_Name] = @TableName 
-        AND [System] = @System;
-        
-        -- Return error information
-        SELECT 
-            -1 AS [LineageKey],
-            NULL AS [LastLoadDate],
-            @LoadType AS [LoadType],
-            NULL AS [SchemaName],
-            NULL AS [StoredProcedureName],
-            NULL AS [TimeoutSeconds],
-            @RetryCount AS [RetryCount],
-            @MaxRetries AS [MaxRetries],
-            NULL AS [EstimatedDurationMinutes],
-            'Error' AS [Status],
-            @ErrorMessage AS [ErrorMessage],
-            @ErrorLine AS [ErrorLine];
-        
-        RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState);
-        RETURN -1;
+        THROW;
     END CATCH
 END;
-
 GO
-/****** Object:  StoredProcedure [exe].[Update_Lineage_Success]    Script Date: 26-8-2025 21:15:36 ******/
+/****** Object:  StoredProcedure [exe].[07_Update_Lineage_Status]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Update lineage status
+CREATE   PROCEDURE [exe].[07_Update_Lineage_Status]
+    @LineageKey INT,
+    @Status CHAR(1), -- P=Progress, S=Success, E=Error, W=Warning
+    @OutputMessage NVARCHAR(MAX) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    UPDATE [exe].[Lineage]
+    SET 
+        [Load_Status] = @Status,
+        [Output_Message] = ISNULL(@OutputMessage, [Output_Message])
+    WHERE [Lineage_Key] = @LineageKey;
+    
+    IF @@ROWCOUNT = 0
+    BEGIN
+        RAISERROR('LineageKey %d not found.', 16, 1, @LineageKey);
+        RETURN -1;
+    END
+    
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[08_Record_Lineage_Metrics]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Record lineage metrics
+CREATE   PROCEDURE [exe].[08_Record_Lineage_Metrics]
+    @LineageKey INT,
+    @RowCount BIGINT = NULL,
+    @RowsInserted BIGINT = NULL,
+    @RowsUpdated BIGINT = NULL,
+    @RowsDeleted BIGINT = NULL,
+    @ErrorNumber INT = NULL,
+    @ErrorSeverity INT = NULL,
+    @ErrorState INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    UPDATE [exe].[Lineage]
+    SET 
+        [Row_Count] = ISNULL(@RowCount, [Row_Count]),
+        [Rows_Inserted] = ISNULL(@RowsInserted, [Rows_Inserted]),
+        [Rows_Updated] = ISNULL(@RowsUpdated, [Rows_Updated]),
+        [Rows_Deleted] = ISNULL(@RowsDeleted, [Rows_Deleted]),
+        [Error_Number] = ISNULL(@ErrorNumber, [Error_Number]),
+        [Error_Severity] = ISNULL(@ErrorSeverity, [Error_Severity]),
+        [Error_State] = ISNULL(@ErrorState, [Error_State]),
+        [Finish_Load] = CASE 
+            WHEN [Load_Status] IN ('S', 'E', 'W') 
+            THEN SYSDATETIME() 
+            ELSE [Finish_Load] 
+        END
+    WHERE [Lineage_Key] = @LineageKey;
+    
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[09_Update_Table_Status]    Script Date: 27-8-2025 12:33:37 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 -- =============================================
--- COMPONENT 4: Lineage Success
+-- 4. STATUS MANAGEMENT PROCEDURES
 -- =============================================
-CREATE   PROCEDURE [exe].[Update_Lineage_Success]
-    @LineageKey INT,
+
+-- Update table status
+CREATE   PROCEDURE [exe].[09_Update_Table_Status]
     @TableName NVARCHAR(100),
-    @RowCount BIGINT,
-    @RowsInserted BIGINT = NULL,
-    @RowsUpdated BIGINT = NULL,
-    @RowsDeleted BIGINT = NULL,
-    @OutputMessage NVARCHAR(MAX),
+    @System NVARCHAR(25),
+    @Status CHAR(1),
+    @OutputMessage NVARCHAR(MAX) = NULL,
+    @UpdateLastLoadedDate BIT = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    UPDATE [exe].[Table_List]
+    SET 
+        [Load_Status] = @Status,
+        [Output_Message] = ISNULL(@OutputMessage, [Output_Message]),
+        [Last_Loaded_Date] = CASE 
+            WHEN @UpdateLastLoadedDate = 1 
+            THEN SYSDATETIME() 
+            ELSE [Last_Loaded_Date] 
+        END,
+        [Modified_Date] = SYSDATETIME(),
+        [Modified_By] = SUSER_SNAME()
+    WHERE [Table_Name] = @TableName 
+    AND [System] = @System;
+    
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[10_Reset_Retry_Count]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Reset retry counter
+CREATE   PROCEDURE [exe].[10_Reset_Retry_Count]
+    @TableName NVARCHAR(100),
     @System NVARCHAR(25)
 AS
 BEGIN
     SET NOCOUNT ON;
-    SET XACT_ABORT ON;
+    
+    UPDATE [exe].[Table_List]
+    SET 
+        [Retry_Count] = 0,
+        [Modified_Date] = SYSDATETIME(),
+        [Modified_By] = SUSER_SNAME()
+    WHERE [Table_Name] = @TableName 
+    AND [System] = @System;
+    
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[11_Increment_Retry_Count]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Increment retry counter
+CREATE   PROCEDURE [exe].[11_Increment_Retry_Count]
+    @TableName NVARCHAR(100),
+    @System NVARCHAR(25),
+    @NewRetryCount INT OUTPUT,
+    @MaxRetriesReached BIT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @MaxRetries INT;
+    
+    UPDATE [exe].[Table_List]
+    SET 
+        [Retry_Count] = [Retry_Count] + 1,
+        @NewRetryCount = [Retry_Count] + 1,
+        @MaxRetries = [Max_Retries],
+        [Modified_Date] = SYSDATETIME(),
+        [Modified_By] = SUSER_SNAME()
+    WHERE [Table_Name] = @TableName 
+    AND [System] = @System;
+    
+    SET @MaxRetriesReached = CASE 
+        WHEN @NewRetryCount >= @MaxRetries THEN 1 
+        ELSE 0 
+    END;
+    
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[12_Execute_ETL_Procedure]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- 5. EXECUTION PROCEDURES
+-- =============================================
+
+-- Execute single ETL procedure
+CREATE   PROCEDURE [exe].[12_Execute_ETL_Procedure]
+    @StoredProcedureName NVARCHAR(200),
+    @LineageKey INT,
+    @LoadType CHAR(1),
+    @LastLoadDate DATETIME2(7),
+    @ExecutionResult INT OUTPUT,
+    @ExecutionMessage NVARCHAR(MAX) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @SQL NVARCHAR(MAX);
+    DECLARE @Params NVARCHAR(500);
     
     BEGIN TRY
-        BEGIN TRANSACTION;
+        -- Build dynamic SQL
+        SET @SQL = CONCAT('EXEC ', @StoredProcedureName, ' @LineageKey = @p_LineageKey');
         
-        -- Validate LineageKey exists and is in progress
-        IF NOT EXISTS (SELECT 1 FROM [exe].[Lineage] 
-                      WHERE [Lineage_Key] = @LineageKey 
-                      AND [Load_Status] = 'P')
-        BEGIN
-            RAISERROR('LineageKey %d not found or not in progress status.', 16, 1, @LineageKey);
-            RETURN -1;
-        END
+        -- Add optional parameters if the procedure supports them
+        SET @SQL = @SQL + ', @LoadType = @p_LoadType';
+        SET @SQL = @SQL + ', @LastLoadDate = @p_LastLoadDate';
         
-        DECLARE @FinishTime DATETIME2(7) = SYSDATETIME();
+        SET @Params = N'@p_LineageKey INT, @p_LoadType CHAR(1), @p_LastLoadDate DATETIME2(7)';
         
-        -- Update the lineage table
-        UPDATE [exe].[Lineage]
-        SET 
-            [Finish_Load] = @FinishTime,
-            [Load_Status] = 'S',  -- Success
-            [Row_Count] = @RowCount,
-            [Rows_Inserted] = @RowsInserted,
-            [Rows_Updated] = @RowsUpdated,
-            [Rows_Deleted] = @RowsDeleted,
-            [Output_Message] = @OutputMessage
-        WHERE [Lineage_Key] = @LineageKey;
+        -- Execute the procedure
+        EXEC sp_executesql 
+            @SQL, 
+            @Params,
+            @p_LineageKey = @LineageKey,
+            @p_LoadType = @LoadType,
+            @p_LastLoadDate = @LastLoadDate;
         
-        -- Update the table list
-        UPDATE [exe].[Table_List]
-        SET 
-            [Last_Loaded_Date] = @FinishTime,
-            [Load_Status] = 'S',
-            [Output_Message] = @OutputMessage,
-            [Retry_Count] = 0,  -- Reset retry count on success
-            [Modified_Date] = SYSDATETIME(),
-            [Modified_By] = SUSER_SNAME()
-        WHERE [Table_Name] = @TableName 
-        AND [System] = @System;
-        
-        COMMIT TRANSACTION;
-        RETURN 0;
+        SET @ExecutionResult = 0;
+        SET @ExecutionMessage = 'Procedure executed successfully';
     END TRY
     BEGIN CATCH
-        IF @@TRANCOUNT > 0
-            ROLLBACK TRANSACTION;
-        
-        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
-        DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
-        DECLARE @ErrorState INT = ERROR_STATE();
-        
-        RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState);
-        RETURN -1;
+        SET @ExecutionResult = -1;
+        SET @ExecutionMessage = ERROR_MESSAGE();
     END CATCH
+    
+    RETURN @ExecutionResult;
 END;
+GO
+/****** Object:  StoredProcedure [exe].[13_Get_Next_Table]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 
+-- =============================================
+-- FIX 1: Modify 13_Get_Next_Table to not filter by LoadType
+-- =============================================
+CREATE   PROCEDURE [exe].[13_Get_Next_Table]
+    @System NVARCHAR(25) = NULL,
+    @RunGroup NVARCHAR(250) = NULL,
+    @LoadType CHAR(1) = NULL,  -- Now used as override, not filter
+    @ExecutionOrder INT,
+    @TableName NVARCHAR(100) OUTPUT,
+    @TableSystem NVARCHAR(25) OUTPUT,
+    @StoredProcedureName NVARCHAR(200) OUTPUT,
+    @TableLoadType CHAR(1) OUTPUT,
+    @Dependencies NVARCHAR(500) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT TOP 1
+        @TableName = [Table_Name],
+        @TableSystem = [System],
+        @StoredProcedureName = [Stored_Procedure_Name],
+        -- Override the Load_Type if @LoadType is provided
+        @TableLoadType = ISNULL(@LoadType, [Load_Type]),
+        @Dependencies = [Dependencies]
+    FROM [exe].[Table_List]
+    WHERE (@System IS NULL OR [System] = @System)
+        AND [Is_Active] = 1
+        AND (@RunGroup IS NULL OR [Run_Group] = @RunGroup)
+        -- REMOVED: AND (@LoadType IS NULL OR [Load_Type] = @LoadType)
+        -- Now we don't filter by LoadType, we override it
+        AND [Execution_Order] = @ExecutionOrder
+        AND ([Load_Status] IS NULL OR [Load_Status] NOT IN ('P', 'R'))
+    ORDER BY [Table_Name];
+    
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[14_Check_InProgress_Loads]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- 6. MONITORING PROCEDURES
+-- =============================================
+
+-- Check for in-progress loads
+CREATE   PROCEDURE [exe].[14_Check_InProgress_Loads]
+    @TableName NVARCHAR(100),
+    @System NVARCHAR(25),
+    @HasInProgress BIT OUTPUT,
+    @InProgressMinutes INT OUTPUT,
+    @InProgressLineageKey INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SET @HasInProgress = 0;
+    SET @InProgressMinutes = 0;
+    SET @InProgressLineageKey = NULL;
+    
+    SELECT TOP 1
+        @HasInProgress = 1,
+        @InProgressMinutes = DATEDIFF(MINUTE, [Start_Load], SYSDATETIME()),
+        @InProgressLineageKey = [Lineage_Key]
+    FROM [exe].[Lineage]
+    WHERE [Table_Name] = @TableName 
+    AND [System] = @System 
+    AND [Load_Status] = 'P'
+    ORDER BY [Start_Load] DESC;
+    
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[15_Calculate_Average_Duration]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Calculate average duration
+CREATE   PROCEDURE [exe].[15_Calculate_Average_Duration]
+    @TableName NVARCHAR(100),
+    @System NVARCHAR(25),
+    @DaysBack INT = 30,
+    @AvgDurationMinutes INT OUTPUT,
+    @MinDurationMinutes INT OUTPUT,
+    @MaxDurationMinutes INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        @AvgDurationMinutes = AVG(DATEDIFF(MINUTE, [Start_Load], [Finish_Load])),
+        @MinDurationMinutes = MIN(DATEDIFF(MINUTE, [Start_Load], [Finish_Load])),
+        @MaxDurationMinutes = MAX(DATEDIFF(MINUTE, [Start_Load], [Finish_Load]))
+    FROM [exe].[Lineage]
+    WHERE [Table_Name] = @TableName 
+    AND [System] = @System 
+    AND [Load_Status] = 'S'
+    AND [Finish_Load] > DATEADD(DAY, -@DaysBack, SYSDATETIME());
+    
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[16_Get_Execution_Metrics]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Get execution metrics
+CREATE   PROCEDURE [exe].[16_Get_Execution_Metrics]
+    @System NVARCHAR(25) = NULL,
+    @RunGroup NVARCHAR(250) = NULL,
+    @DaysBack INT = 7
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        l.[System],
+        l.[Table_Name],
+        COUNT(*) AS TotalExecutions,
+        SUM(CASE WHEN l.[Load_Status] = 'S' THEN 1 ELSE 0 END) AS SuccessfulExecutions,
+        SUM(CASE WHEN l.[Load_Status] = 'E' THEN 1 ELSE 0 END) AS FailedExecutions,
+        AVG(DATEDIFF(MINUTE, l.[Start_Load], l.[Finish_Load])) AS AvgDurationMinutes,
+        MAX(l.[Finish_Load]) AS LastExecutionTime,
+        AVG(l.[Row_Count]) AS AvgRowCount
+    FROM [exe].[Lineage] l
+    INNER JOIN [exe].[Table_List] tl 
+        ON l.[Table_Name] = tl.[Table_Name] 
+        AND l.[System] = tl.[System]
+    WHERE l.[Start_Load] > DATEADD(DAY, -@DaysBack, SYSDATETIME())
+        AND (@System IS NULL OR l.[System] = @System)
+        AND (@RunGroup IS NULL OR tl.[Run_Group] = @RunGroup)
+    GROUP BY l.[System], l.[Table_Name]
+    ORDER BY l.[System], l.[Table_Name];
+    
+    RETURN 0;
+END;
+GO
+/****** Object:  StoredProcedure [exe].[17_Master_ETL_Controller]    Script Date: 27-8-2025 12:33:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- FIX 3: Update Master Controller with OverrideLoadType parameter
+-- =============================================
+CREATE   PROCEDURE [exe].[17_Master_ETL_Controller]
+    @System NVARCHAR(25) = NULL,
+    @RunGroup NVARCHAR(250) = NULL,
+    @OverrideLoadType CHAR(1) = NULL,  -- Override the configured Load_Type (F=Full, I=Incremental)
+    @MaxParallelJobs INT = 5,
+    @ForceStart BIT = 0,
+    @DebugMode BIT = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Variables
+    DECLARE @StartTime DATETIME2(7) = SYSDATETIME();
+    DECLARE @TableName NVARCHAR(100);
+    DECLARE @TableSystem NVARCHAR(25);
+    DECLARE @StoredProcedureName NVARCHAR(200);
+    DECLARE @LineageKey INT;
+    DECLARE @LastLoadDate DATETIME2(7);
+    DECLARE @LoadDateSource NVARCHAR(50);
+    DECLARE @LoadTypeActual CHAR(1);
+    DECLARE @ConfiguredLoadType CHAR(1);  -- Store original configured type
+    DECLARE @Dependencies NVARCHAR(500);
+    DECLARE @IsValid BIT;
+    DECLARE @ValidationMessage NVARCHAR(500);
+    DECLARE @DependenciesMet BIT;
+    DECLARE @UnmetDependencies NVARCHAR(500);
+    DECLARE @HasInProgress BIT;
+    DECLARE @InProgressMinutes INT;
+    DECLARE @InProgressLineageKey INT;
+    DECLARE @ExecutionResult INT;
+    DECLARE @ExecutionMessage NVARCHAR(MAX);
+    DECLARE @OutputMessage NVARCHAR(MAX);
+    DECLARE @CurrentExecutionOrder INT = 0;
+    DECLARE @MaxExecutionOrder INT;
+    DECLARE @ProcessedCount INT = 0;
+    DECLARE @SuccessCount INT = 0;
+    DECLARE @ErrorCount INT = 0;
+    DECLARE @SkippedCount INT = 0;
+    DECLARE @RetryCount INT;
+    DECLARE @MaxRetries INT;
+    DECLARE @NewRetryCount INT;
+    DECLARE @MaxRetriesReached BIT;
+    DECLARE @OverrideFullLoad BIT = 0;  -- Flag for full load override
+    
+    -- Configuration variables
+    DECLARE @SchemaName NVARCHAR(128);
+    DECLARE @IsActive BIT;
+    DECLARE @ExecutionOrder INT;
+    DECLARE @RunGroupConfig NVARCHAR(50);
+    DECLARE @TimeoutSeconds INT;
+    DECLARE @DefaultLoadDays INT;
+    DECLARE @DefaultLoadDate DATETIME2(7);
+    DECLARE @UseFullHistory BIT;
+    DECLARE @DefaultLoadYears INT;
+    DECLARE @Exists BIT;
+    
+    IF @DebugMode = 1
+    BEGIN
+        PRINT CONCAT('Starting Master ETL Controller at ', CONVERT(NVARCHAR(30), @StartTime, 120));
+        IF @OverrideLoadType IS NOT NULL
+            PRINT CONCAT('Load Type Override: ', @OverrideLoadType);
+    END
+    
+    -- Get max execution order (no longer filtered by LoadType)
+    SELECT @MaxExecutionOrder = MAX([Execution_Order])
+    FROM [exe].[Table_List]
+    WHERE (@System IS NULL OR [System] = @System)
+        AND [Is_Active] = 1
+        AND (@RunGroup IS NULL OR [Run_Group] = @RunGroup);
+        -- No filter by Load_Type - override applies to all matching tables
+    
+    -- Process each execution order level
+    WHILE @CurrentExecutionOrder <= @MaxExecutionOrder
+    BEGIN
+        -- Get next table at this execution order
+        EXEC [exe].[13_Get_Next_Table]
+            @System = @System,
+            @RunGroup = @RunGroup,
+            @LoadType = @OverrideLoadType,  -- Pass as override
+            @ExecutionOrder = @CurrentExecutionOrder,
+            @TableName = @TableName OUTPUT,
+            @TableSystem = @TableSystem OUTPUT,
+            @StoredProcedureName = @StoredProcedureName OUTPUT,
+            @TableLoadType = @LoadTypeActual OUTPUT,  -- Will contain override if specified
+            @Dependencies = @Dependencies OUTPUT;
+        
+        WHILE @TableName IS NOT NULL
+        BEGIN
+            SET @ProcessedCount = @ProcessedCount + 1;
+            
+            IF @DebugMode = 1
+                PRINT CONCAT('Processing: ', @TableName, ' (', @TableSystem, ')');
+            
+            -- Get full configuration (01)
+            EXEC [exe].[01_Get_Table_Config]
+                @TableName = @TableName,
+                @System = @TableSystem,
+                @SchemaName = @SchemaName OUTPUT,
+                @StoredProcedureName = @StoredProcedureName OUTPUT,
+                @IsActive = @IsActive OUTPUT,
+                @LoadType = @ConfiguredLoadType OUTPUT,  -- Get configured type
+                @ExecutionOrder = @ExecutionOrder OUTPUT,
+                @RunGroup = @RunGroupConfig OUTPUT,
+                @Dependencies = @Dependencies OUTPUT,
+                @MaxRetries = @MaxRetries OUTPUT,
+                @RetryCount = @RetryCount OUTPUT,
+                @TimeoutSeconds = @TimeoutSeconds OUTPUT,
+                @DefaultLoadDays = @DefaultLoadDays OUTPUT,
+                @DefaultLoadDate = @DefaultLoadDate OUTPUT,
+                @UseFullHistory = @UseFullHistory OUTPUT,
+                @DefaultLoadYears = @DefaultLoadYears OUTPUT,
+                @Exists = @Exists OUTPUT;
+            
+            -- Use override if specified, otherwise use configured
+            IF @OverrideLoadType IS NOT NULL
+            BEGIN
+                SET @LoadTypeActual = @OverrideLoadType;
+                SET @OverrideFullLoad = CASE WHEN @OverrideLoadType = 'F' AND @ConfiguredLoadType = 'I' THEN 1 ELSE 0 END;
+                
+                IF @DebugMode = 1 AND @LoadTypeActual != @ConfiguredLoadType
+                    PRINT CONCAT('  Overriding Load Type from ', @ConfiguredLoadType, ' to ', @LoadTypeActual);
+            END
+            ELSE
+            BEGIN
+                SET @LoadTypeActual = @ConfiguredLoadType;
+                SET @OverrideFullLoad = 0;
+            END
+            
+            -- Validate table (02)
+            EXEC [exe].[02_Validate_Table]
+                @TableName = @TableName,
+                @System = @TableSystem,
+                @LoadType = @LoadTypeActual,  -- Use actual (possibly overridden) type
+                @IsValid = @IsValid OUTPUT,
+                @ValidationMessage = @ValidationMessage OUTPUT;
+            
+            IF @IsValid = 0
+            BEGIN
+                IF @DebugMode = 1
+                    PRINT CONCAT('  Validation failed: ', @ValidationMessage);
+                
+                SET @SkippedCount = @SkippedCount + 1;
+                GOTO NextTable;
+            END
+            
+            -- Check for in-progress loads (14)
+            EXEC [exe].[14_Check_InProgress_Loads]
+                @TableName = @TableName,
+                @System = @TableSystem,
+                @HasInProgress = @HasInProgress OUTPUT,
+                @InProgressMinutes = @InProgressMinutes OUTPUT,
+                @InProgressLineageKey = @InProgressLineageKey OUTPUT;
+            
+            IF @HasInProgress = 1 AND @ForceStart = 0
+            BEGIN
+                IF @DebugMode = 1
+                    PRINT CONCAT('  In-progress load found (', @InProgressMinutes, ' minutes)');
+                
+                SET @SkippedCount = @SkippedCount + 1;
+                GOTO NextTable;
+            END
+            
+            -- Check dependencies (04)
+            EXEC [exe].[04_Check_Dependencies]
+                @TableName = @TableName,
+                @System = @TableSystem,
+                @Dependencies = @Dependencies,
+                @DependenciesMet = @DependenciesMet OUTPUT,
+                @UnmetDependencies = @UnmetDependencies OUTPUT;
+            
+            IF @DependenciesMet = 0 AND @ForceStart = 0
+            BEGIN
+                IF @DebugMode = 1
+                    PRINT CONCAT('  Unmet dependencies: ', @UnmetDependencies);
+                
+                SET @SkippedCount = @SkippedCount + 1;
+                GOTO NextTable;
+            END
+            
+            -- Calculate load date (03) with override support
+            EXEC [exe].[03_Calculate_Load_Date]
+                @TableName = @TableName,
+                @System = @TableSystem,
+                @LoadType = @LoadTypeActual,
+                @OverrideFullLoad = @OverrideFullLoad,  -- Pass override flag
+                @LastLoadDate = @LastLoadDate OUTPUT,
+                @LoadDateSource = @LoadDateSource OUTPUT;
+            
+            BEGIN TRY
+                -- Create lineage entry (06)
+                EXEC [exe].[06_Create_Lineage_Entry]
+                    @System = @TableSystem,
+                    @TableName = @TableName,
+                    @LoadType = @LoadTypeActual,
+                    @LastLoadDate = @LastLoadDate,
+                    @LoadDateSource = @LoadDateSource,
+                    @ForceStart = @ForceStart,
+                    @RetryCount = @RetryCount,
+                    @MaxRetries = @MaxRetries,
+                    @LineageKey = @LineageKey OUTPUT;
+                
+                -- Update table status to in-progress (09)
+                DECLARE @StatusMessage NVARCHAR(MAX) = CONCAT('Processing with LineageKey: ', @LineageKey,
+                    CASE WHEN @OverrideFullLoad = 1 THEN ' [FULL LOAD OVERRIDE]' ELSE '' END);
+                
+                EXEC [exe].[09_Update_Table_Status]
+                    @TableName = @TableName,
+                    @System = @TableSystem,
+                    @Status = 'P',
+                    @OutputMessage = @StatusMessage;
+                
+                -- Execute the ETL procedure (12)
+                EXEC [exe].[12_Execute_ETL_Procedure]
+                    @StoredProcedureName = @StoredProcedureName,
+                    @LineageKey = @LineageKey,
+                    @LoadType = @LoadTypeActual,
+                    @LastLoadDate = @LastLoadDate,
+                    @ExecutionResult = @ExecutionResult OUTPUT,
+                    @ExecutionMessage = @ExecutionMessage OUTPUT;
+                
+                IF @ExecutionResult = 0
+                BEGIN
+                    -- Update lineage to success (07)
+                    EXEC [exe].[07_Update_Lineage_Status]
+                        @LineageKey = @LineageKey,
+                        @Status = 'S',
+                        @OutputMessage = 'Load completed successfully';
+                    
+                    -- Update table status to success (09)
+                    EXEC [exe].[09_Update_Table_Status]
+                        @TableName = @TableName,
+                        @System = @TableSystem,
+                        @Status = 'S',
+                        @OutputMessage = 'Load completed successfully',
+                        @UpdateLastLoadedDate = 1;
+                    
+                    -- Reset retry count on success (10)
+                    EXEC [exe].[10_Reset_Retry_Count]
+                        @TableName = @TableName,
+                        @System = @TableSystem;
+                    
+                    SET @SuccessCount = @SuccessCount + 1;
+                    
+                    IF @DebugMode = 1
+                        PRINT CONCAT('  Success: ', @TableName);
+                END
+                ELSE
+                BEGIN
+                    RAISERROR(@ExecutionMessage, 16, 1);
+                END
+            END TRY
+            BEGIN CATCH
+                DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+                DECLARE @ErrorNumber INT = ERROR_NUMBER();
+                DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+                DECLARE @ErrorState INT = ERROR_STATE();
+                
+                -- Update lineage with error (07 & 08)
+                IF @LineageKey IS NOT NULL
+                BEGIN
+                    EXEC [exe].[07_Update_Lineage_Status]
+                        @LineageKey = @LineageKey,
+                        @Status = 'E',
+                        @OutputMessage = @ErrorMessage;
+                    
+                    EXEC [exe].[08_Record_Lineage_Metrics]
+                        @LineageKey = @LineageKey,
+                        @ErrorNumber = @ErrorNumber,
+                        @ErrorSeverity = @ErrorSeverity,
+                        @ErrorState = @ErrorState;
+                END
+                
+                -- Update table status to error (09)
+                EXEC [exe].[09_Update_Table_Status]
+                    @TableName = @TableName,
+                    @System = @TableSystem,
+                    @Status = 'E',
+                    @OutputMessage = @ErrorMessage;
+                
+                -- Increment retry count (11)
+                EXEC [exe].[11_Increment_Retry_Count]
+                    @TableName = @TableName,
+                    @System = @TableSystem,
+                    @NewRetryCount = @NewRetryCount OUTPUT,
+                    @MaxRetriesReached = @MaxRetriesReached OUTPUT;
+                
+                SET @ErrorCount = @ErrorCount + 1;
+                
+                IF @DebugMode = 1
+                    PRINT CONCAT('  Error: ', @ErrorMessage);
+            END CATCH
+            
+            NextTable:
+            -- Reset variables and get next table
+            SET @TableName = NULL;
+            SET @LineageKey = NULL;
+            
+            EXEC [exe].[13_Get_Next_Table]
+                @System = @System,
+                @RunGroup = @RunGroup,
+                @LoadType = @OverrideLoadType,  -- Pass override
+                @ExecutionOrder = @CurrentExecutionOrder,
+                @TableName = @TableName OUTPUT,
+                @TableSystem = @TableSystem OUTPUT,
+                @StoredProcedureName = @StoredProcedureName OUTPUT,
+                @TableLoadType = @LoadTypeActual OUTPUT,
+                @Dependencies = @Dependencies OUTPUT;
+        END
+        
+        SET @CurrentExecutionOrder = @CurrentExecutionOrder + 1;
+    END
+    
+    -- Final summary
+    SET @OutputMessage = CONCAT(
+        'ETL Controller completed. ',
+        'Processed: ', @ProcessedCount,
+        ', Success: ', @SuccessCount,
+        ', Errors: ', @ErrorCount,
+        ', Skipped: ', @SkippedCount,
+        ', Duration: ', DATEDIFF(SECOND, @StartTime, SYSDATETIME()), ' seconds'
+    );
+    
+    IF @DebugMode = 1
+    BEGIN
+        PRINT '';
+        PRINT '========================================';
+        PRINT @OutputMessage;
+        PRINT '========================================';
+    END
+    
+    -- Return summary
+    SELECT 
+        @ProcessedCount AS TablesProcessed,
+        @SuccessCount AS TablesSucceeded,
+        @ErrorCount AS TablesFailed,
+        @SkippedCount AS TablesSkipped,
+        DATEDIFF(SECOND, @StartTime, SYSDATETIME()) AS TotalDurationSeconds,
+        @OutputMessage AS Summary;
+    
+    -- Return execution metrics if debug mode
+    IF @DebugMode = 1
+    BEGIN
+        EXEC [exe].[16_Get_Execution_Metrics]
+            @System = @System,
+            @RunGroup = @RunGroup,
+            @DaysBack = 1;
+    END
+    
+    -- Return appropriate exit code
+    IF @ErrorCount > 0
+        RETURN 1;  -- Indicates errors occurred
+    ELSE
+        RETURN 0;  -- Success
+END;
 GO
